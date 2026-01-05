@@ -91,3 +91,7 @@ frontend/node_modules/.cache/default-development/8.pack
 .env.development.local
 .env.test.local
 .env.production.local
+-e 
+# Environment files
+*.env
+*.env.*
