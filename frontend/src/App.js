@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { FinanceProvider } from './contexts/FinanceContext';
+import { ToastProvider, useToast, setGlobalToast } from './components/ui/toast-provider';
 import { Layout } from './components/layout/Layout';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
@@ -12,7 +14,15 @@ import { Investimentos } from './pages/Investimentos';
 import { Relatorios } from './pages/Relatorios';
 import { Ajustes } from './pages/Ajustes';
 import { Admin } from './pages/Admin';
-import { Toaster } from './components/ui/sonner';
+
+// Component to setup global toast
+function ToastSetup() {
+  const toast = useToast();
+  useEffect(() => {
+    setGlobalToast(toast);
+  }, [toast]);
+  return null;
+}
 
 // Protected Route Component
 function ProtectedRoute({ children, adminOnly = false }) {
@@ -116,10 +126,12 @@ function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
-        <AuthProvider>
-          <AppRoutes />
-          <Toaster position="top-right" />
-        </AuthProvider>
+        <ToastProvider>
+          <ToastSetup />
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </ToastProvider>
       </ThemeProvider>
     </BrowserRouter>
   );
