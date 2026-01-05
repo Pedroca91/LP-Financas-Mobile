@@ -220,7 +220,7 @@ export function Beneficios() {
       });
       
       if (response.ok) {
-        toast({ title: editingExpense ? 'Gasto atualizado!' : 'Gasto adicionado!' });
+        toast.success(editingExpense ? 'Gasto atualizado!' : 'Gasto adicionado!');
         setExpenseDialogOpen(false);
         setEditingExpense(null);
         resetExpenseForm();
