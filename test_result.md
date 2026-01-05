@@ -111,119 +111,173 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "API respondendo corretamente em /api/health"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTADO - Endpoints /api/ e /api/health funcionando perfeitamente. Status 200 OK."
 
   - task: "Autenticação - Login"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoint /api/auth/login - precisa testar"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTADO - Login do admin funcionando perfeitamente. Token JWT gerado corretamente. Validação de credenciais funcionando."
 
   - task: "Autenticação - Registro"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoint /api/auth/register - precisa testar"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTADO - Registro de usuário funcionando. Validação de email, criação de categorias padrão, fluxo de aprovação admin funcionando."
 
   - task: "CRUD de Entradas (Receitas)"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoints /api/incomes - precisa testar"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTADO - CRUD completo de receitas funcionando. GET, POST, PUT, DELETE testados. Filtros por mês/ano funcionando."
 
   - task: "CRUD de Saídas (Despesas)"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoints /api/expenses - precisa testar"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTADO - CRUD completo de despesas funcionando. GET, POST, PUT, DELETE testados. Filtros por mês/ano funcionando."
 
   - task: "CRUD de Investimentos"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoints /api/investments - precisa testar"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTADO - CRUD completo de investimentos funcionando. GET, POST, PUT, DELETE testados. Filtros por mês/ano funcionando."
 
   - task: "CRUD de Categorias"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoints /api/categories - precisa testar"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTADO - CRUD completo de categorias funcionando. GET, POST, PUT, DELETE testados. Categorias padrão criadas automaticamente."
 
   - task: "CRUD de Cartões de Crédito"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoints /api/credit-cards - precisa testar"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTADO - CRUD completo de cartões de crédito funcionando. GET, POST, PUT, DELETE testados."
 
   - task: "Dashboard Summary"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoint /api/dashboard/summary - precisa testar"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTADO - Dashboard funcionando perfeitamente. Cálculos de balanço corretos. Endpoints /api/dashboard/summary e /api/dashboard/yearly testados."
 
   - task: "Admin - Gerenciamento de Usuários"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoints /api/admin/* - precisa testar"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTADO - Funcionalidades admin funcionando. Listar usuários, aprovar, bloquear e deletar usuários testados."
+
+  - task: "CRUD de Orçamentos (Budgets)"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTADO - CRUD completo de orçamentos funcionando. GET, POST, DELETE testados. Lógica de atualização de orçamento existente funcionando."
+
+  - task: "Relatórios por Categoria"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTADO - Endpoint /api/reports/by-category funcionando para receitas e despesas. Cálculos de percentual corretos."
 
 frontend:
   - task: "Página de Login"
