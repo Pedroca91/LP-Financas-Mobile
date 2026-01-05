@@ -80,7 +80,7 @@ const CATEGORY_LABELS = {
 
 export function Beneficios() {
   const { selectedMonth, selectedYear } = useFinance();
-  const { toast } = useToast();
+  const toast = useToast();
   
   // State
   const [credits, setCredits] = useState([]);
