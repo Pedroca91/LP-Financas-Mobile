@@ -748,6 +748,513 @@ async def get_benefits_yearly(year: int, user: dict = Depends(get_current_user))
     
     return monthly_data
 
+# ==================== RECURRING TRANSACTIONS ROUTES ====================
+
+@api_router.get("/recurring", response_model=List[RecurringTransaction])
+async def get_recurring_transactions(user: dict = Depends(get_current_user)):
+    transactions = await db.recurring_transactions.find({"user_id": user["id"]}, {"_id": 0}).to_list(100)
+    return transactions
+
+@api_router.post("/recurring", response_model=RecurringTransaction)
+async def create_recurring_transaction(data: RecurringTransactionBase, user: dict = Depends(get_current_user)):
+    transaction = RecurringTransaction(**data.model_dump(), user_id=user["id"])
+    await db.recurring_transactions.insert_one(transaction.model_dump())
+    return transaction
+
+@api_router.put("/recurring/{transaction_id}", response_model=RecurringTransaction)
+async def update_recurring_transaction(transaction_id: str, data: RecurringTransactionBase, user: dict = Depends(get_current_user)):
+    result = await db.recurring_transactions.update_one(
+        {"id": transaction_id, "user_id": user["id"]},
+        {"$set": data.model_dump()}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Recurring transaction not found")
+    return await db.recurring_transactions.find_one({"id": transaction_id}, {"_id": 0})
+
+@api_router.delete("/recurring/{transaction_id}")
+async def delete_recurring_transaction(transaction_id: str, user: dict = Depends(get_current_user)):
+    result = await db.recurring_transactions.delete_one({"id": transaction_id, "user_id": user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Recurring transaction not found")
+    return {"message": "Recurring transaction deleted"}
+
+@api_router.post("/recurring/generate")
+async def generate_recurring_transactions(month: int, year: int, user: dict = Depends(get_current_user)):
+    """Gera lançamentos do mês baseado nas transações recorrentes"""
+    recurring = await db.recurring_transactions.find(
+        {"user_id": user["id"], "is_active": True}, {"_id": 0}
+    ).to_list(100)
+    
+    generated = []
+    for rec in recurring:
+        # Verificar se já foi gerado para este mês
+        if rec["type"] == "expense":
+            existing = await db.expenses.find_one({
+                "user_id": user["id"],
+                "month": month,
+                "year": year,
+                "description": rec["description"],
+                "category_id": rec["category_id"]
+            })
+        else:
+            existing = await db.incomes.find_one({
+                "user_id": user["id"],
+                "month": month,
+                "year": year,
+                "description": rec["description"],
+                "category_id": rec["category_id"]
+            })
+        
+        if existing:
+            continue
+        
+        day = rec.get("day_of_month") or 1
+        date_str = f"{year}-{month:02d}-{day:02d}"
+        
+        if rec["type"] == "expense":
+            expense = Expense(
+                category_id=rec["category_id"],
+                description=rec["description"],
+                value=rec["value"],
+                date=date_str,
+                payment_method=rec.get("payment_method", "cash"),
+                credit_card_id=rec.get("credit_card_id"),
+                installments=1,
+                current_installment=1,
+                due_date=date_str,
+                status="pending",
+                month=month,
+                year=year,
+                user_id=user["id"]
+            )
+            await db.expenses.insert_one(expense.model_dump())
+            generated.append({"type": "expense", "description": rec["description"], "value": rec["value"]})
+        else:
+            income = Income(
+                category_id=rec["category_id"],
+                description=rec["description"],
+                value=rec["value"],
+                date=date_str,
+                status="pending",
+                month=month,
+                year=year,
+                user_id=user["id"]
+            )
+            await db.incomes.insert_one(income.model_dump())
+            generated.append({"type": "income", "description": rec["description"], "value": rec["value"]})
+    
+    return {"generated": generated, "count": len(generated)}
+
+# ==================== ALERTS & BUDGET ANALYSIS ====================
+
+@api_router.get("/alerts/budget")
+async def get_budget_alerts(month: int, year: int, user: dict = Depends(get_current_user)):
+    """Retorna alertas de orçamento (80% e 100%)"""
+    budgets = await db.budgets.find(
+        {"user_id": user["id"], "month": month, "year": year}, {"_id": 0}
+    ).to_list(100)
+    
+    categories = await db.categories.find({"user_id": user["id"]}, {"_id": 0}).to_list(100)
+    cat_map = {c["id"]: c for c in categories}
+    
+    expenses = await db.expenses.find(
+        {"user_id": user["id"], "month": month, "year": year}, {"_id": 0}
+    ).to_list(1000)
+    
+    incomes = await db.incomes.find(
+        {"user_id": user["id"], "month": month, "year": year}, {"_id": 0}
+    ).to_list(1000)
+    
+    alerts = []
+    
+    for budget in budgets:
+        cat = cat_map.get(budget["category_id"], {})
+        cat_name = cat.get("name", "Categoria")
+        
+        if budget["type"] == "expense":
+            spent = sum(e["value"] for e in expenses if e["category_id"] == budget["category_id"])
+        else:
+            spent = sum(i["value"] for i in incomes if i["category_id"] == budget["category_id"])
+        
+        planned = budget["planned_value"]
+        if planned > 0:
+            percentage = (spent / planned) * 100
+            
+            if percentage >= 100:
+                alerts.append({
+                    "type": "exceeded",
+                    "level": "danger",
+                    "category_id": budget["category_id"],
+                    "category_name": cat_name,
+                    "budget_type": budget["type"],
+                    "planned": planned,
+                    "spent": spent,
+                    "percentage": percentage,
+                    "message": f"Orçamento de {cat_name} foi ultrapassado! ({percentage:.0f}%)"
+                })
+            elif percentage >= 80:
+                alerts.append({
+                    "type": "warning",
+                    "level": "warning",
+                    "category_id": budget["category_id"],
+                    "category_name": cat_name,
+                    "budget_type": budget["type"],
+                    "planned": planned,
+                    "spent": spent,
+                    "percentage": percentage,
+                    "message": f"Orçamento de {cat_name} atingiu {percentage:.0f}%"
+                })
+    
+    return alerts
+
+@api_router.get("/alerts/due-dates")
+async def get_due_date_alerts(user: dict = Depends(get_current_user)):
+    """Retorna contas próximas do vencimento (próximos 7 dias)"""
+    today = datetime.now(timezone.utc).date()
+    week_from_now = today + timedelta(days=7)
+    
+    # Buscar despesas pendentes
+    expenses = await db.expenses.find(
+        {"user_id": user["id"], "status": "pending"}, {"_id": 0}
+    ).to_list(1000)
+    
+    alerts = []
+    categories = await db.categories.find({"user_id": user["id"]}, {"_id": 0}).to_list(100)
+    cat_map = {c["id"]: c for c in categories}
+    
+    for expense in expenses:
+        due_date_str = expense.get("due_date") or expense.get("date")
+        if not due_date_str:
+            continue
+        
+        try:
+            due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
+        except:
+            continue
+        
+        if due_date < today:
+            # Vencido
+            days_overdue = (today - due_date).days
+            cat = cat_map.get(expense["category_id"], {})
+            alerts.append({
+                "type": "overdue",
+                "level": "danger",
+                "expense_id": expense["id"],
+                "description": expense["description"],
+                "category_name": cat.get("name", ""),
+                "value": expense["value"],
+                "due_date": due_date_str,
+                "days": days_overdue,
+                "message": f"{expense['description']} venceu há {days_overdue} dias!"
+            })
+        elif due_date <= week_from_now:
+            # Próximo do vencimento
+            days_until = (due_date - today).days
+            cat = cat_map.get(expense["category_id"], {})
+            alerts.append({
+                "type": "upcoming",
+                "level": "warning" if days_until <= 3 else "info",
+                "expense_id": expense["id"],
+                "description": expense["description"],
+                "category_name": cat.get("name", ""),
+                "value": expense["value"],
+                "due_date": due_date_str,
+                "days": days_until,
+                "message": f"{expense['description']} vence em {days_until} dias"
+            })
+    
+    # Ordenar por urgência
+    alerts.sort(key=lambda x: (0 if x["type"] == "overdue" else 1, x["days"] if x["type"] == "upcoming" else -x["days"]))
+    
+    return alerts
+
+# ==================== TRENDS & ANALYSIS ====================
+
+@api_router.get("/analysis/trends")
+async def get_trends_analysis(month: int, year: int, user: dict = Depends(get_current_user)):
+    """Comparativo do mês atual vs meses anteriores"""
+    
+    # Dados dos últimos 6 meses
+    months_data = []
+    for i in range(5, -1, -1):
+        m = month - i
+        y = year
+        while m <= 0:
+            m += 12
+            y -= 1
+        
+        incomes = await db.incomes.find(
+            {"user_id": user["id"], "month": m, "year": y}, {"_id": 0}
+        ).to_list(1000)
+        expenses = await db.expenses.find(
+            {"user_id": user["id"], "month": m, "year": y}, {"_id": 0}
+        ).to_list(1000)
+        
+        total_income = sum(i["value"] for i in incomes if i["status"] == "received")
+        total_expense = sum(e["value"] for e in expenses if e["status"] == "paid")
+        
+        months_data.append({
+            "month": m,
+            "year": y,
+            "income": total_income,
+            "expense": total_expense,
+            "balance": total_income - total_expense
+        })
+    
+    # Calcular médias
+    avg_income = sum(d["income"] for d in months_data[:-1]) / max(len(months_data) - 1, 1)
+    avg_expense = sum(d["expense"] for d in months_data[:-1]) / max(len(months_data) - 1, 1)
+    
+    current = months_data[-1]
+    
+    # Variação percentual
+    income_variation = ((current["income"] - avg_income) / avg_income * 100) if avg_income > 0 else 0
+    expense_variation = ((current["expense"] - avg_expense) / avg_expense * 100) if avg_expense > 0 else 0
+    
+    # Gastos por categoria no mês atual vs média
+    categories = await db.categories.find({"user_id": user["id"], "type": "expense"}, {"_id": 0}).to_list(100)
+    current_expenses = await db.expenses.find(
+        {"user_id": user["id"], "month": month, "year": year}, {"_id": 0}
+    ).to_list(1000)
+    
+    category_trends = []
+    for cat in categories:
+        current_total = sum(e["value"] for e in current_expenses if e["category_id"] == cat["id"])
+        
+        # Média dos últimos 5 meses
+        cat_totals = []
+        for i in range(5, 0, -1):
+            m = month - i
+            y = year
+            while m <= 0:
+                m += 12
+                y -= 1
+            prev_expenses = await db.expenses.find(
+                {"user_id": user["id"], "month": m, "year": y, "category_id": cat["id"]}, {"_id": 0}
+            ).to_list(100)
+            cat_totals.append(sum(e["value"] for e in prev_expenses))
+        
+        avg_cat = sum(cat_totals) / max(len(cat_totals), 1)
+        variation = ((current_total - avg_cat) / avg_cat * 100) if avg_cat > 0 else 0
+        
+        if current_total > 0 or avg_cat > 0:
+            category_trends.append({
+                "category_id": cat["id"],
+                "category_name": cat["name"],
+                "current": current_total,
+                "average": avg_cat,
+                "variation": variation,
+                "trend": "up" if variation > 10 else "down" if variation < -10 else "stable"
+            })
+    
+    return {
+        "monthly_data": months_data,
+        "current_month": {
+            "month": month,
+            "year": year,
+            "income": current["income"],
+            "expense": current["expense"],
+            "balance": current["balance"]
+        },
+        "averages": {
+            "income": avg_income,
+            "expense": avg_expense
+        },
+        "variations": {
+            "income_percentage": income_variation,
+            "expense_percentage": expense_variation,
+            "income_trend": "up" if income_variation > 5 else "down" if income_variation < -5 else "stable",
+            "expense_trend": "up" if expense_variation > 5 else "down" if expense_variation < -5 else "stable"
+        },
+        "category_trends": category_trends
+    }
+
+# ==================== CREDIT CARD ADVANCED ====================
+
+@api_router.get("/credit-cards/{card_id}/statement")
+async def get_card_statement(card_id: str, month: int, year: int, user: dict = Depends(get_current_user)):
+    """Fatura detalhada do cartão"""
+    card = await db.credit_cards.find_one({"id": card_id, "user_id": user["id"]}, {"_id": 0})
+    if not card:
+        raise HTTPException(status_code=404, detail="Credit card not found")
+    
+    # Buscar todas as despesas do cartão no mês
+    expenses = await db.expenses.find({
+        "user_id": user["id"],
+        "credit_card_id": card_id,
+        "month": month,
+        "year": year
+    }, {"_id": 0}).to_list(1000)
+    
+    categories = await db.categories.find({"user_id": user["id"]}, {"_id": 0}).to_list(100)
+    cat_map = {c["id"]: c for c in categories}
+    
+    # Organizar por categoria
+    by_category = {}
+    total = 0
+    for exp in expenses:
+        cat = cat_map.get(exp["category_id"], {})
+        cat_name = cat.get("name", "Outros")
+        if cat_name not in by_category:
+            by_category[cat_name] = {"items": [], "subtotal": 0}
+        by_category[cat_name]["items"].append({
+            "id": exp["id"],
+            "description": exp["description"],
+            "value": exp["value"],
+            "date": exp["date"],
+            "installment": f"{exp.get('current_installment', 1)}/{exp.get('installments', 1)}" if exp.get('installments', 1) > 1 else None
+        })
+        by_category[cat_name]["subtotal"] += exp["value"]
+        total += exp["value"]
+    
+    return {
+        "card": card,
+        "month": month,
+        "year": year,
+        "total": total,
+        "by_category": by_category,
+        "expenses": expenses
+    }
+
+@api_router.get("/credit-cards/{card_id}/installments")
+async def get_card_installments(card_id: str, user: dict = Depends(get_current_user)):
+    """Parcelas futuras do cartão"""
+    card = await db.credit_cards.find_one({"id": card_id, "user_id": user["id"]}, {"_id": 0})
+    if not card:
+        raise HTTPException(status_code=404, detail="Credit card not found")
+    
+    # Buscar todas as despesas parceladas do cartão
+    expenses = await db.expenses.find({
+        "user_id": user["id"],
+        "credit_card_id": card_id,
+        "installments": {"$gt": 1}
+    }, {"_id": 0}).to_list(1000)
+    
+    # Calcular parcelas futuras
+    today = datetime.now(timezone.utc)
+    current_month = today.month
+    current_year = today.year
+    
+    future_installments = []
+    monthly_totals = {}
+    
+    for exp in expenses:
+        total_installments = exp.get("installments", 1)
+        current_installment = exp.get("current_installment", 1)
+        value_per_installment = exp["value"]
+        
+        # Data inicial
+        try:
+            start_date = datetime.strptime(exp["date"], "%Y-%m-%d")
+        except:
+            continue
+        
+        # Calcular parcelas restantes
+        for i in range(current_installment, total_installments + 1):
+            inst_month = start_date.month + (i - 1)
+            inst_year = start_date.year
+            while inst_month > 12:
+                inst_month -= 12
+                inst_year += 1
+            
+            # Só mostrar parcelas futuras ou do mês atual
+            if (inst_year > current_year) or (inst_year == current_year and inst_month >= current_month):
+                key = f"{inst_year}-{inst_month:02d}"
+                if key not in monthly_totals:
+                    monthly_totals[key] = 0
+                monthly_totals[key] += value_per_installment
+                
+                future_installments.append({
+                    "expense_id": exp["id"],
+                    "description": exp["description"],
+                    "installment": i,
+                    "total_installments": total_installments,
+                    "value": value_per_installment,
+                    "month": inst_month,
+                    "year": inst_year
+                })
+    
+    # Ordenar por data
+    future_installments.sort(key=lambda x: (x["year"], x["month"]))
+    
+    return {
+        "card": card,
+        "installments": future_installments,
+        "monthly_totals": monthly_totals,
+        "total_committed": sum(monthly_totals.values())
+    }
+
+@api_router.get("/credit-cards/{card_id}/available")
+async def get_card_available_limit(card_id: str, month: int, year: int, user: dict = Depends(get_current_user)):
+    """Limite disponível do cartão"""
+    card = await db.credit_cards.find_one({"id": card_id, "user_id": user["id"]}, {"_id": 0})
+    if not card:
+        raise HTTPException(status_code=404, detail="Credit card not found")
+    
+    # Calcular gastos do mês atual
+    expenses = await db.expenses.find({
+        "user_id": user["id"],
+        "credit_card_id": card_id,
+        "month": month,
+        "year": year
+    }, {"_id": 0}).to_list(1000)
+    
+    total_spent = sum(e["value"] for e in expenses)
+    limit = card.get("limit", 0)
+    available = limit - total_spent
+    usage_percentage = (total_spent / limit * 100) if limit > 0 else 0
+    
+    return {
+        "card": card,
+        "limit": limit,
+        "spent": total_spent,
+        "available": available,
+        "usage_percentage": usage_percentage,
+        "month": month,
+        "year": year
+    }
+
+@api_router.get("/credit-cards/summary")
+async def get_all_cards_summary(month: int, year: int, user: dict = Depends(get_current_user)):
+    """Resumo de todos os cartões"""
+    cards = await db.credit_cards.find({"user_id": user["id"]}, {"_id": 0}).to_list(50)
+    
+    summary = []
+    for card in cards:
+        expenses = await db.expenses.find({
+            "user_id": user["id"],
+            "credit_card_id": card["id"],
+            "month": month,
+            "year": year
+        }, {"_id": 0}).to_list(1000)
+        
+        total_spent = sum(e["value"] for e in expenses)
+        limit = card.get("limit", 0)
+        available = limit - total_spent
+        
+        # Contar parcelas futuras
+        installment_expenses = await db.expenses.find({
+            "user_id": user["id"],
+            "credit_card_id": card["id"],
+            "installments": {"$gt": 1}
+        }, {"_id": 0}).to_list(100)
+        
+        future_committed = 0
+        for exp in installment_expenses:
+            remaining = exp.get("installments", 1) - exp.get("current_installment", 1)
+            future_committed += exp["value"] * remaining
+        
+        summary.append({
+            "card": card,
+            "spent": total_spent,
+            "available": available,
+            "limit": limit,
+            "usage_percentage": (total_spent / limit * 100) if limit > 0 else 0,
+            "future_committed": future_committed
+        })
+    
+    return summary
+
 # ==================== DASHBOARD/REPORTS ====================
 
 @api_router.get("/dashboard/summary")
