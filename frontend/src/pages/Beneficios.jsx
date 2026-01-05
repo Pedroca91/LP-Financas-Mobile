@@ -244,7 +244,7 @@ export function Beneficios() {
       });
       
       if (response.ok) {
-        toast({ title: 'Gasto excluído!' });
+        toast.success('Gasto excluído!');
         fetchData();
       }
     } catch (error) {
