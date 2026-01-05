@@ -173,7 +173,7 @@ export function Beneficios() {
         throw new Error('Erro ao salvar');
       }
     } catch (error) {
-      toast({ title: 'Erro ao salvar crédito', variant: 'destructive' });
+      toast.error('Erro ao salvar crédito');
     }
   };
 
