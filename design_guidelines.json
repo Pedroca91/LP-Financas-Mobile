@@ -1,0 +1,155 @@
+{
+  "identity": {
+    "name": "CarFinanças",
+    "persona": "The Modern Ledger",
+    "vibe": "Organized, Trustworthy, Objective, Modern",
+    "principles": [
+      "Data Density with Breathability: High information density (spreadsheet style) but with generous padding inside cells.",
+      "Color as Function: Teal for structure/growth, Orange for action/alerts. No decorative gradients.",
+      "The Grid is King: Everything aligns perfectly. Use visible borders to mimic spreadsheets.",
+      "Tabs over Sidebar: Top-level navigation to mimic physical file folders or browser tabs."
+    ]
+  },
+  "typography": {
+    "fonts": {
+      "heading": "Manrope, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "weights": {
+      "heading": "600",
+      "body": "400",
+      "bold": "600"
+    },
+    "usage": {
+      "h1": "text-3xl md:text-4xl font-heading font-semibold tracking-tight text-foreground",
+      "h2": "text-2xl font-heading font-semibold tracking-tight text-foreground/90",
+      "h3": "text-xl font-heading font-medium text-foreground/90",
+      "body": "text-base font-body text-muted-foreground leading-relaxed",
+      "caption": "text-xs font-body text-muted-foreground uppercase tracking-wider",
+      "currency": "font-mono font-medium tracking-tight"
+    }
+  },
+  "colors": {
+    "palette_description": "A sophisticated Teal and Orange theme. Teal represents stability and wealth (Primary). Orange represents activity and alerts (Accent).",
+    "css_variables": {
+      "light": {
+        "--background": "210 40% 98%",
+        "--foreground": "222 47% 11%",
+        "--card": "0 0% 100%",
+        "--card-foreground": "222 47% 11%",
+        "--popover": "0 0% 100%",
+        "--popover-foreground": "222 47% 11%",
+        "--primary": "176 61% 19%",
+        "--primary-foreground": "0 0% 100%",
+        "--secondary": "210 40% 96.1%",
+        "--secondary-foreground": "222 47% 11%",
+        "--muted": "210 40% 96.1%",
+        "--muted-foreground": "215 16% 47%",
+        "--accent": "24 95% 53%",
+        "--accent-foreground": "0 0% 100%",
+        "--destructive": "0 84.2% 60.2%",
+        "--destructive-foreground": "210 40% 98%",
+        "--border": "214.3 31.8% 91.4%",
+        "--input": "214.3 31.8% 91.4%",
+        "--ring": "176 61% 19%",
+        "--radius": "0.25rem"
+      },
+      "dark": {
+        "--background": "222 47% 11%",
+        "--foreground": "210 40% 98%",
+        "--card": "222 47% 13%",
+        "--card-foreground": "210 40% 98%",
+        "--popover": "222 47% 11%",
+        "--popover-foreground": "210 40% 98%",
+        "--primary": "176 61% 50%",
+        "--primary-foreground": "222 47% 11%",
+        "--secondary": "217.2 32.6% 17.5%",
+        "--secondary-foreground": "210 40% 98%",
+        "--muted": "217.2 32.6% 17.5%",
+        "--muted-foreground": "215 20.2% 65.1%",
+        "--accent": "24 95% 60%",
+        "--accent-foreground": "222 47% 11%",
+        "--destructive": "0 62.8% 30.6%",
+        "--destructive-foreground": "210 40% 98%",
+        "--border": "217.2 32.6% 17.5%",
+        "--input": "217.2 32.6% 17.5%",
+        "--ring": "176 61% 50%",
+        "--radius": "0.25rem"
+      }
+    }
+  },
+  "layout": {
+    "grid_system": {
+      "dashboard": "grid grid-cols-1 md:grid-cols-4 gap-4 p-4 md:p-6",
+      "form": "grid grid-cols-1 md:grid-cols-2 gap-6"
+    },
+    "spacing": {
+      "container_padding": "p-4 md:p-8",
+      "section_gap": "gap-8",
+      "component_gap": "gap-4"
+    },
+    "navigation": {
+      "style": "Top Tabs",
+      "classes": "border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50"
+    }
+  },
+  "components": {
+    "buttons": {
+      "default": "rounded-sm font-medium transition-all active:scale-95",
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      "outline": "border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+    },
+    "cards": {
+      "style": "rounded-sm border border-border bg-card text-card-foreground shadow-sm",
+      "header": "p-6 flex flex-row items-center justify-between space-y-0 pb-2",
+      "content": "p-6 pt-0"
+    },
+    "tables": {
+      "style": "w-full caption-bottom text-sm border-collapse",
+      "header": "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+      "row": "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+      "cell": "p-4 align-middle [&:has([role=checkbox])]:pr-0 font-mono"
+    },
+    "inputs": {
+      "style": "flex h-10 w-full rounded-sm border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "bg-white/10 backdrop-blur-md border border-white/20 shadow-xl",
+    "gradients": {
+      "subtle_overlay": "bg-gradient-to-b from-transparent to-background/10"
+    },
+    "borders": "border border-border/50"
+  },
+  "images": {
+    "login_background": {
+      "url": "https://images.unsplash.com/photo-1766483341148-80ff81681ecd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBvZmZpY2UlMjBmaW5hbmNlJTIwYWJzdHJhY3R8ZW58MHx8fHwxNzY3NjI5MzA1fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Modern city architecture with fog",
+      "usage": "Full screen background for login/register pages with overlay"
+    },
+    "dashboard_empty_state": {
+      "url": "https://images.unsplash.com/photo-1758630737403-1bda34e3f98e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHw0fHxtb2Rlcm4lMjBvZmZpY2UlMjBmaW5hbmNlJTIwYWJzdHJhY3R8ZW58MHx8fHwxNzY3NjI5MzA1fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Clean office desk",
+      "usage": "Use when no data is available, with grayscale filter"
+    }
+  },
+  "instructions_to_main_agent": [
+    "1. UPDATE CSS VARIABLES: Replace the content of /app/frontend/src/index.css with the variables defined in 'colors.css_variables'.",
+    "2. INSTALL FONTS: Add imports for Manrope, Inter, and JetBrains Mono in index.css or index.html.",
+    "3. CUSTOMIZE SHADCN: When using Shadcn components, override default 'rounded-md' or 'rounded-xl' with 'rounded-sm' to match the spreadsheet aesthetic.",
+    "4. LAYOUT: Implement the 'Top Tabs' navigation structure using a sticky header.",
+    "5. DATA DISPLAY: Use the 'tables.style' guidelines for all financial records. Ensure currency columns use the monospace font.",
+    "6. CHARTS: Use Recharts. Style the tooltips to match the 'cards.style'. Use the primary (Teal) and accent (Orange) colors for data series.",
+    "7. THEME TOGGLE: Ensure the theme toggle works and switches the CSS variables correctly.",
+    "8. TESTING: Add data-testid to all interactive elements (buttons, inputs, tabs)."
+  ],
+  "universal_guidelines": [
+    "Do not use generic centered layouts.",
+    "Create depth through layered design elements.",
+    "Use 2-3x more spacing than feels comfortable.",
+    "Every interaction needs micro-animations.",
+    "Use 'sonner' for toasts."
+  ]
+}
