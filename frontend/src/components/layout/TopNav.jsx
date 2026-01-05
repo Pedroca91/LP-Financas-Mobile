@@ -24,13 +24,15 @@ import {
   User,
   Wallet,
   Menu,
-  X
+  X,
+  CreditCard
 } from 'lucide-react';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/entradas', label: 'Entradas', icon: ArrowDownCircle },
   { path: '/saidas', label: 'Saídas', icon: ArrowUpCircle },
+  { path: '/beneficios', label: 'VR/VA', icon: CreditCard },
   { path: '/investimentos', label: 'Investimentos', icon: TrendingUp },
   { path: '/relatorios', label: 'Relatórios', icon: FileText },
   { path: '/ajustes', label: 'Ajustes', icon: Settings },
