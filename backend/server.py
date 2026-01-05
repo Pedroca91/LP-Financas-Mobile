@@ -177,6 +177,28 @@ class BenefitExpense(BenefitExpenseBase):
     user_id: str
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
+# ==================== RECURRING TRANSACTIONS MODELS ====================
+
+class RecurringTransactionBase(BaseModel):
+    type: str  # income, expense
+    category_id: str
+    description: str
+    value: float
+    frequency: str  # monthly, weekly, yearly
+    start_date: str
+    end_date: Optional[str] = None
+    day_of_month: Optional[int] = None  # dia do mês para lançamento
+    is_active: bool = True
+    payment_method: Optional[str] = None  # para despesas
+    credit_card_id: Optional[str] = None
+
+class RecurringTransaction(RecurringTransactionBase):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    last_generated: Optional[str] = None
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
