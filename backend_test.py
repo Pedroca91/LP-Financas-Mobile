@@ -29,6 +29,7 @@ class CarFinancasAPITester:
         print(f"   URL: {url}")
         
         try:
+            response = None
             if method == 'GET':
                 response = requests.get(url, headers=test_headers, timeout=10)
             elif method == 'POST':
@@ -37,6 +38,8 @@ class CarFinancasAPITester:
                 response = requests.put(url, json=data, headers=test_headers, timeout=10)
             elif method == 'DELETE':
                 response = requests.delete(url, headers=test_headers, timeout=10)
+            elif method == 'PATCH':
+                response = requests.patch(url, json=data, headers=test_headers, timeout=10)
 
             success = response.status_code == expected_status
             if success:
