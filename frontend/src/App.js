@@ -104,6 +104,7 @@ function AppRoutes() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/entradas" element={<Entradas />} />
         <Route path="/saidas" element={<Saidas />} />
+        <Route path="/beneficios" element={<Beneficios />} />
         <Route path="/investimentos" element={<Investimentos />} />
         <Route path="/relatorios" element={<Relatorios />} />
         <Route path="/ajustes" element={<Ajustes />} />
