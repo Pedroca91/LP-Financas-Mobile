@@ -245,7 +245,8 @@ async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(sec
 @app.on_event("startup")
 async def startup():
     # Create default admin if not exists
-    admin_email = "Pedrohcarvalho1997@gmail.com"
+    admin_email = os.environ.get('ADMIN_EMAIL', 'admin@lpfinancas.com')
+    admin_password = os.environ.get('ADMIN_PASSWORD', 'AdminLP@2024')
     existing_admin = await db.users.find_one({"email": admin_email})
     if not existing_admin:
         admin_user = User(
@@ -255,9 +256,9 @@ async def startup():
             status="approved"
         )
         admin_dict = admin_user.model_dump()
-        admin_dict["password"] = hash_password("S@muka91")
+        admin_dict["password"] = hash_password(admin_password)
         await db.users.insert_one(admin_dict)
-        logging.info("Admin user created")
+        logging.info(f"Admin user created: {admin_email}")
         
         # Create default categories for admin
         await create_default_categories(admin_user.id)
