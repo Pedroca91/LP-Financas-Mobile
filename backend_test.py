@@ -234,6 +234,130 @@ class CarFinancasAPITester:
         
         return success1 and success2
 
+    def test_investments(self):
+        """Test investment endpoints"""
+        print("\n=== INVESTMENTS TESTS ===")
+        
+        # Get categories first
+        _, categories = self.run_test("Get Categories for Investment", "GET", "categories", 200)
+        investment_categories = [c for c in categories if c.get('type') == 'investment']
+        
+        if not investment_categories:
+            print("❌ No investment categories found, skipping investment tests")
+            return False
+            
+        category_id = investment_categories[0]['id']
+        
+        # Get investments
+        success1, _ = self.run_test("Get Investments", "GET", "investments", 200)
+        
+        # Create investment
+        test_investment = {
+            "category_id": category_id,
+            "description": "Test Investment",
+            "initial_balance": 1000.0,
+            "contribution": 200.0,
+            "dividends": 50.0,
+            "withdrawal": 0.0,
+            "month": 1,
+            "year": 2024
+        }
+        success2, created_investment = self.run_test("Create Investment", "POST", "investments", 200, test_investment)
+        
+        investment_id = None
+        if success2 and 'id' in created_investment:
+            investment_id = created_investment['id']
+            
+            # Update investment
+            updated_data = {**test_investment, "contribution": 300.0, "dividends": 75.0}
+            success3, _ = self.run_test("Update Investment", "PUT", f"investments/{investment_id}", 200, updated_data)
+            
+            # Delete investment
+            success4, _ = self.run_test("Delete Investment", "DELETE", f"investments/{investment_id}", 200)
+            
+            return success1 and success2 and success3 and success4
+        
+        return success1 and success2
+
+    def test_credit_cards(self):
+        """Test credit card endpoints"""
+        print("\n=== CREDIT CARDS TESTS ===")
+        
+        # Get credit cards
+        success1, _ = self.run_test("Get Credit Cards", "GET", "credit-cards", 200)
+        
+        # Create credit card
+        test_card = {
+            "name": "Test Credit Card",
+            "limit": 5000.0,
+            "closing_day": 15,
+            "due_day": 10
+        }
+        success2, created_card = self.run_test("Create Credit Card", "POST", "credit-cards", 200, test_card)
+        
+        card_id = None
+        if success2 and 'id' in created_card:
+            card_id = created_card['id']
+            
+            # Update credit card
+            updated_data = {**test_card, "limit": 7500.0, "name": "Updated Test Card"}
+            success3, _ = self.run_test("Update Credit Card", "PUT", f"credit-cards/{card_id}", 200, updated_data)
+            
+            # Delete credit card
+            success4, _ = self.run_test("Delete Credit Card", "DELETE", f"credit-cards/{card_id}", 200)
+            
+            return success1 and success2 and success3 and success4
+        
+        return success1 and success2
+
+    def test_user_registration(self):
+        """Test user registration"""
+        print("\n=== USER REGISTRATION TESTS ===")
+        
+        # Test user registration
+        test_user = {
+            "email": "testuser@example.com",
+            "name": "Test User",
+            "password": "TestPassword123!"
+        }
+        success1, response = self.run_test("User Registration", "POST", "auth/register", 200, test_user)
+        
+        if success1 and 'user_id' in response:
+            user_id = response['user_id']
+            print(f"   New user created with ID: {user_id}")
+            
+            # Try to login with new user (should fail - pending approval)
+            success2, _ = self.run_test("Login Pending User", "POST", "auth/login", 403, 
+                                      {"email": test_user["email"], "password": test_user["password"]})
+            
+            # Admin approve the user
+            success3, _ = self.run_test("Approve User", "PATCH", f"admin/users/{user_id}/approve", 200)
+            
+            # Now login should work
+            success4, login_response = self.run_test("Login Approved User", "POST", "auth/login", 200,
+                                                   {"email": test_user["email"], "password": test_user["password"]})
+            
+            # Clean up - delete the test user
+            success5, _ = self.run_test("Delete Test User", "DELETE", f"admin/users/{user_id}", 200)
+            
+            return success1 and success2 and success3 and success4 and success5
+        
+        return success1
+
+    def test_reports(self):
+        """Test report endpoints"""
+        print("\n=== REPORTS TESTS ===")
+        
+        # Test income report by category
+        success1, _ = self.run_test("Income Report by Category", "GET", 
+                                  "reports/by-category?month=1&year=2024&type=income", 200)
+        
+        # Test expense report by category
+        success2, _ = self.run_test("Expense Report by Category", "GET", 
+                                  "reports/by-category?month=1&year=2024&type=expense", 200)
+        
+        return success1 and success2
+
     def test_admin_endpoints(self):
         """Test admin-specific endpoints"""
         print("\n=== ADMIN TESTS ===")
