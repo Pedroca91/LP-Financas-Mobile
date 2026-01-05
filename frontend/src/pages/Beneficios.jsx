@@ -164,7 +164,7 @@ export function Beneficios() {
       });
       
       if (response.ok) {
-        toast({ title: editingCredit ? 'Crédito atualizado!' : 'Crédito adicionado!' });
+        toast.success(editingCredit ? 'Crédito atualizado!' : 'Crédito adicionado!');
         setCreditDialogOpen(false);
         setEditingCredit(null);
         resetCreditForm();
