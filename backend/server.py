@@ -145,6 +145,38 @@ class Budget(BudgetBase):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
 
+# ==================== BENEFIT (VR/VA) MODELS ====================
+
+class BenefitCreditBase(BaseModel):
+    benefit_type: str  # vr, va
+    value: float
+    date: str
+    description: Optional[str] = ""
+    month: int
+    year: int
+
+class BenefitCredit(BenefitCreditBase):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class BenefitExpenseBase(BaseModel):
+    benefit_type: str  # vr, va
+    category: str  # restaurante, mercado, padaria, acougue, lanchonete, outros
+    description: str
+    value: float
+    date: str
+    establishment: Optional[str] = ""  # nome do estabelecimento
+    month: int
+    year: int
+
+class BenefitExpense(BenefitExpenseBase):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
