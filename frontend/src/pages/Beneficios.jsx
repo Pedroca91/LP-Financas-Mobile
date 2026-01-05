@@ -192,7 +192,7 @@ export function Beneficios() {
         fetchData();
       }
     } catch (error) {
-      toast({ title: 'Erro ao excluir', variant: 'destructive' });
+      toast.error('Erro ao excluir');
     }
   };
 
@@ -248,7 +248,7 @@ export function Beneficios() {
         fetchData();
       }
     } catch (error) {
-      toast({ title: 'Erro ao excluir', variant: 'destructive' });
+      toast.error('Erro ao excluir');
     }
   };
 
