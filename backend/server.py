@@ -1021,22 +1021,35 @@ async def get_trends_analysis(month: int, year: int, user: dict = Depends(get_cu
         {"user_id": user["id"], "month": month, "year": year}, {"_id": 0}
     ).to_list(1000)
     
+    # Otimização: Buscar todas as despesas dos últimos 5 meses de uma vez
+    months_to_fetch = []
+    for i in range(5, 0, -1):
+        m = month - i
+        y = year
+        while m <= 0:
+            m += 12
+            y -= 1
+        months_to_fetch.append({"month": m, "year": y})
+    
+    # Busca única para todos os meses anteriores
+    prev_expenses_query = {
+        "user_id": user["id"],
+        "$or": months_to_fetch
+    }
+    all_prev_expenses = await db.expenses.find(prev_expenses_query, {"_id": 0}).to_list(10000)
+    
     category_trends = []
     for cat in categories:
         current_total = sum(e["value"] for e in current_expenses if e["category_id"] == cat["id"])
         
-        # Média dos últimos 5 meses
+        # Calcular média dos últimos 5 meses usando dados já carregados
         cat_totals = []
-        for i in range(5, 0, -1):
-            m = month - i
-            y = year
-            while m <= 0:
-                m += 12
-                y -= 1
-            prev_expenses = await db.expenses.find(
-                {"user_id": user["id"], "month": m, "year": y, "category_id": cat["id"]}, {"_id": 0}
-            ).to_list(100)
-            cat_totals.append(sum(e["value"] for e in prev_expenses))
+        for month_info in months_to_fetch:
+            m_total = sum(
+                e["value"] for e in all_prev_expenses 
+                if e["category_id"] == cat["id"] and e["month"] == month_info["month"] and e["year"] == month_info["year"]
+            )
+            cat_totals.append(m_total)
         
         avg_cat = sum(cat_totals) / max(len(cat_totals), 1)
         variation = ((current_total - avg_cat) / avg_cat * 100) if avg_cat > 0 else 0
