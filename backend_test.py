@@ -372,6 +372,260 @@ class CarFinancasAPITester:
         
         return success1
 
+    def test_recurring_transactions(self):
+        """Test recurring transactions endpoints"""
+        print("\n=== RECURRING TRANSACTIONS TESTS ===")
+        
+        # Get categories first
+        _, categories = self.run_test("Get Categories for Recurring", "GET", "categories", 200)
+        expense_categories = [c for c in categories if c.get('type') == 'expense']
+        
+        if not expense_categories:
+            print("❌ No expense categories found, skipping recurring tests")
+            return False
+            
+        category_id = expense_categories[0]['id']
+        
+        # Get recurring transactions
+        success1, _ = self.run_test("Get Recurring Transactions", "GET", "recurring", 200)
+        
+        # Create recurring transaction
+        test_recurring = {
+            "type": "expense",
+            "category_id": category_id,
+            "description": "Aluguel Mensal",
+            "value": 1200.0,
+            "frequency": "monthly",
+            "start_date": "2024-01-01",
+            "day_of_month": 5,
+            "is_active": True,
+            "payment_method": "debit"
+        }
+        success2, created_recurring = self.run_test("Create Recurring Transaction", "POST", "recurring", 200, test_recurring)
+        
+        recurring_id = None
+        if success2 and 'id' in created_recurring:
+            recurring_id = created_recurring['id']
+            
+            # Update recurring transaction
+            updated_data = {**test_recurring, "value": 1300.0, "description": "Aluguel Mensal Atualizado"}
+            success3, _ = self.run_test("Update Recurring Transaction", "PUT", f"recurring/{recurring_id}", 200, updated_data)
+            
+            # Generate transactions for a month
+            success4, generated = self.run_test("Generate Recurring Transactions", "POST", "recurring/generate?month=1&year=2026", 200)
+            if success4:
+                print(f"   Generated {generated.get('count', 0)} transactions")
+            
+            # Delete recurring transaction
+            success5, _ = self.run_test("Delete Recurring Transaction", "DELETE", f"recurring/{recurring_id}", 200)
+            
+            return success1 and success2 and success3 and success4 and success5
+        
+        return success1 and success2
+
+    def test_budget_alerts(self):
+        """Test budget alerts endpoints"""
+        print("\n=== BUDGET ALERTS TESTS ===")
+        
+        # Get categories first
+        _, categories = self.run_test("Get Categories for Budget", "GET", "categories", 200)
+        expense_categories = [c for c in categories if c.get('type') == 'expense']
+        
+        if not expense_categories:
+            print("❌ No expense categories found, skipping budget alerts tests")
+            return False
+            
+        category_id = expense_categories[0]['id']
+        
+        # Create a budget first
+        test_budget = {
+            "category_id": category_id,
+            "planned_value": 1000.0,
+            "month": 1,
+            "year": 2026,
+            "type": "expense"
+        }
+        budget_success, _ = self.run_test("Create Budget for Alert Test", "POST", "budgets", 200, test_budget)
+        
+        # Create an expense to trigger alert
+        test_expense = {
+            "category_id": category_id,
+            "description": "Gasto para Teste de Alerta",
+            "value": 850.0,  # 85% of budget
+            "date": "2026-01-15",
+            "payment_method": "cash",
+            "installments": 1,
+            "current_installment": 1,
+            "status": "paid",
+            "month": 1,
+            "year": 2026
+        }
+        expense_success, created_expense = self.run_test("Create Expense for Alert Test", "POST", "expenses", 200, test_expense)
+        
+        # Test budget alerts
+        success1, alerts = self.run_test("Get Budget Alerts", "GET", "alerts/budget?month=1&year=2026", 200)
+        if success1:
+            print(f"   Found {len(alerts)} budget alerts")
+            for alert in alerts:
+                print(f"   - {alert.get('type', 'unknown')}: {alert.get('message', 'no message')}")
+        
+        # Clean up
+        if expense_success and 'id' in created_expense:
+            self.run_test("Delete Test Expense", "DELETE", f"expenses/{created_expense['id']}", 200)
+        
+        return success1
+
+    def test_due_date_alerts(self):
+        """Test due date alerts endpoints"""
+        print("\n=== DUE DATE ALERTS TESTS ===")
+        
+        # Get categories first
+        _, categories = self.run_test("Get Categories for Due Date", "GET", "categories", 200)
+        expense_categories = [c for c in categories if c.get('type') == 'expense']
+        
+        if not expense_categories:
+            print("❌ No expense categories found, skipping due date alerts tests")
+            return False
+            
+        category_id = expense_categories[0]['id']
+        
+        # Create an expense with due date in the future
+        from datetime import datetime, timedelta
+        future_date = (datetime.now() + timedelta(days=3)).strftime("%Y-%m-%d")
+        
+        test_expense = {
+            "category_id": category_id,
+            "description": "Conta com Vencimento Próximo",
+            "value": 300.0,
+            "date": future_date,
+            "due_date": future_date,
+            "payment_method": "cash",
+            "installments": 1,
+            "current_installment": 1,
+            "status": "pending",
+            "month": datetime.now().month,
+            "year": datetime.now().year
+        }
+        expense_success, created_expense = self.run_test("Create Expense with Due Date", "POST", "expenses", 200, test_expense)
+        
+        # Test due date alerts
+        success1, alerts = self.run_test("Get Due Date Alerts", "GET", "alerts/due-dates", 200)
+        if success1:
+            print(f"   Found {len(alerts)} due date alerts")
+            for alert in alerts:
+                print(f"   - {alert.get('type', 'unknown')}: {alert.get('message', 'no message')}")
+        
+        # Clean up
+        if expense_success and 'id' in created_expense:
+            self.run_test("Delete Test Expense", "DELETE", f"expenses/{created_expense['id']}", 200)
+        
+        return success1
+
+    def test_trends_analysis(self):
+        """Test trends analysis endpoints"""
+        print("\n=== TRENDS ANALYSIS TESTS ===")
+        
+        # Test trends analysis
+        success1, trends = self.run_test("Get Trends Analysis", "GET", "analysis/trends?month=1&year=2026", 200)
+        if success1:
+            print(f"   Monthly data points: {len(trends.get('monthly_data', []))}")
+            current = trends.get('current_month', {})
+            print(f"   Current month income: {current.get('income', 0)}")
+            print(f"   Current month expense: {current.get('expense', 0)}")
+            print(f"   Current month balance: {current.get('balance', 0)}")
+            
+            variations = trends.get('variations', {})
+            print(f"   Income trend: {variations.get('income_trend', 'unknown')}")
+            print(f"   Expense trend: {variations.get('expense_trend', 'unknown')}")
+            
+            category_trends = trends.get('category_trends', [])
+            print(f"   Category trends: {len(category_trends)} categories analyzed")
+        
+        return success1
+
+    def test_advanced_credit_cards(self):
+        """Test advanced credit card endpoints"""
+        print("\n=== ADVANCED CREDIT CARDS TESTS ===")
+        
+        # Get categories first
+        _, categories = self.run_test("Get Categories for Credit Card", "GET", "categories", 200)
+        expense_categories = [c for c in categories if c.get('type') == 'expense']
+        
+        if not expense_categories:
+            print("❌ No expense categories found, skipping credit card tests")
+            return False
+            
+        category_id = expense_categories[0]['id']
+        
+        # Create a credit card first
+        test_card = {
+            "name": "Cartão Teste Avançado",
+            "limit": 5000.0,
+            "closing_day": 15,
+            "due_day": 10
+        }
+        card_success, created_card = self.run_test("Create Credit Card for Advanced Tests", "POST", "credit-cards", 200, test_card)
+        
+        if not card_success or 'id' not in created_card:
+            print("❌ Failed to create credit card, skipping advanced tests")
+            return False
+        
+        card_id = created_card['id']
+        
+        # Create some expenses for the card
+        test_expense = {
+            "category_id": category_id,
+            "description": "Compra no Cartão",
+            "value": 500.0,
+            "date": "2026-01-15",
+            "payment_method": "credit",
+            "credit_card_id": card_id,
+            "installments": 3,
+            "current_installment": 1,
+            "status": "pending",
+            "month": 1,
+            "year": 2026
+        }
+        expense_success, created_expense = self.run_test("Create Credit Card Expense", "POST", "expenses", 200, test_expense)
+        
+        # Test credit card summary
+        success1, summary = self.run_test("Get Credit Cards Summary", "GET", "credit-cards/summary?month=1&year=2026", 200)
+        if success1:
+            print(f"   Found {len(summary)} cards in summary")
+            for card_summary in summary:
+                card_info = card_summary.get('card', {})
+                print(f"   - {card_info.get('name', 'Unknown')}: Spent {card_summary.get('spent', 0)}, Available {card_summary.get('available', 0)}")
+        
+        # Test card statement
+        success2, statement = self.run_test("Get Card Statement", "GET", f"credit-cards/{card_id}/statement?month=1&year=2026", 200)
+        if success2:
+            print(f"   Statement total: {statement.get('total', 0)}")
+            by_category = statement.get('by_category', {})
+            print(f"   Categories in statement: {len(by_category)}")
+        
+        # Test card installments
+        success3, installments = self.run_test("Get Card Installments", "GET", f"credit-cards/{card_id}/installments", 200)
+        if success3:
+            future_installments = installments.get('installments', [])
+            print(f"   Future installments: {len(future_installments)}")
+            print(f"   Total committed: {installments.get('total_committed', 0)}")
+        
+        # Test card available limit
+        success4, available = self.run_test("Get Card Available Limit", "GET", f"credit-cards/{card_id}/available?month=1&year=2026", 200)
+        if success4:
+            print(f"   Limit: {available.get('limit', 0)}")
+            print(f"   Spent: {available.get('spent', 0)}")
+            print(f"   Available: {available.get('available', 0)}")
+            print(f"   Usage: {available.get('usage_percentage', 0):.1f}%")
+        
+        # Clean up
+        if expense_success and 'id' in created_expense:
+            self.run_test("Delete Test Credit Card Expense", "DELETE", f"expenses/{created_expense['id']}", 200)
+        
+        self.run_test("Delete Test Credit Card", "DELETE", f"credit-cards/{card_id}", 200)
+        
+        return success1 and success2 and success3 and success4
+
     def run_all_tests(self):
         """Run all tests"""
         print("🚀 Starting CarFinanças API Tests")
