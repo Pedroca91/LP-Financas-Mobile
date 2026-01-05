@@ -25,14 +25,17 @@ import {
   Wallet,
   Menu,
   X,
-  CreditCard
+  CreditCard,
+  RefreshCw
 } from 'lucide-react';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/entradas', label: 'Entradas', icon: ArrowDownCircle },
   { path: '/saidas', label: 'Saídas', icon: ArrowUpCircle },
-  { path: '/beneficios', label: 'VR/VA', icon: CreditCard },
+  { path: '/beneficios', label: 'VR/VA', icon: Wallet },
+  { path: '/recorrentes', label: 'Recorrentes', icon: RefreshCw },
+  { path: '/cartoes', label: 'Cartões', icon: CreditCard },
   { path: '/investimentos', label: 'Investimentos', icon: TrendingUp },
   { path: '/relatorios', label: 'Relatórios', icon: FileText },
   { path: '/ajustes', label: 'Ajustes', icon: Settings },
