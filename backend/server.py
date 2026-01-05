@@ -350,6 +350,8 @@ async def delete_user(user_id: str, admin: dict = Depends(get_admin_user)):
     await db.investments.delete_many({"user_id": user_id})
     await db.budgets.delete_many({"user_id": user_id})
     await db.credit_cards.delete_many({"user_id": user_id})
+    await db.benefit_credits.delete_many({"user_id": user_id})
+    await db.benefit_expenses.delete_many({"user_id": user_id})
     return {"message": "User and all data deleted"}
 
 # ==================== CATEGORIES ROUTES ====================
