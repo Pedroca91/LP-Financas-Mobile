@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -21,7 +22,9 @@ import {
   Moon,
   LogOut,
   User,
-  Wallet
+  Wallet,
+  Menu,
+  X
 } from 'lucide-react';
 
 const navItems = [
