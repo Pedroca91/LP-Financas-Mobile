@@ -1,5 +1,8 @@
 # CarFinanças - PRD (Product Requirements Document)
 
+## Histórico de Correções
+- **05/01/2026**: Corrigido erro de Toaster duplicado que causava crash no DOM
+
 ## Problema Original
 Sistema completo de gerenciamento financeiro chamado CarFinanças, baseado em planilhas financeiras organizadas por abas. Sistema web responsivo com Dashboard, Registros (Entradas e Saídas), Investimentos, Relatórios e Configurações. Sistema de usuários com aprovação de admin. Modo claro e escuro.
 
