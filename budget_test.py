@@ -4,7 +4,7 @@ import sys
 
 def test_budget_endpoints():
     """Test budget endpoints specifically"""
-    base_url = "https://check-sistema.preview.emergentagent.com/api"
+    base_url = "https://visualizador-dados.preview.emergentagent.com/api"
     admin_email = "Pedrohcarvalho1997@gmail.com"
     admin_password = "S@muka91"
     
