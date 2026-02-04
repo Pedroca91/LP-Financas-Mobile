@@ -167,6 +167,14 @@ export function LoginModerno() {
         </div>
       </div>
 
+      {/* Desenvolvido por - Canto inferior esquerdo */}
+      <div className="fixed bottom-6 left-6 z-20">
+        <p className="text-sm text-gray-600 font-medium flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
+          <span className="text-cyan-600">💻</span>
+          Desenvolvido por <span className="font-semibold text-cyan-700">Pedro Carvalho</span>
+        </p>
+      </div>
+
       <style jsx>{`
         @keyframes float {
           0%, 100% {
