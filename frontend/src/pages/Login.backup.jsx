@@ -30,49 +30,46 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
       {/* Elementos decorativos flutuantes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Moedas flutuantes - Modo Claro */}
-        <div className="absolute top-20 left-[10%] w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 opacity-20 dark:from-yellow-500 dark:to-amber-600 dark:opacity-30 animate-float" style={{animationDelay: '0s'}}></div>
-        <div className="absolute top-40 right-[15%] w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 opacity-15 dark:from-yellow-500 dark:to-amber-600 dark:opacity-25 animate-float" style={{animationDelay: '1s'}}></div>
-        <div className="absolute bottom-32 left-[20%] w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 opacity-25 dark:from-yellow-500 dark:to-amber-600 dark:opacity-35 animate-float" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-[60%] right-[25%] w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 opacity-20 dark:from-yellow-500 dark:to-amber-600 dark:opacity-30 animate-float" style={{animationDelay: '1.5s'}}></div>
+        {/* Moedas flutuantes */}
+        <div className="absolute top-20 left-[10%] w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 opacity-20 animate-float" style={{animationDelay: '0s'}}></div>
+        <div className="absolute top-40 right-[15%] w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 opacity-15 animate-float" style={{animationDelay: '1s'}}></div>
+        <div className="absolute bottom-32 left-[20%] w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 opacity-25 animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-[60%] right-[25%] w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 opacity-20 animate-float" style={{animationDelay: '1.5s'}}></div>
         
         {/* Moedas menores */}
-        <div className="absolute top-[30%] left-[30%] w-8 h-8 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 opacity-30 dark:from-slate-600 dark:to-slate-700 dark:opacity-40 animate-float-slow" style={{animationDelay: '0.5s'}}></div>
-        <div className="absolute bottom-[20%] right-[35%] w-10 h-10 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 opacity-25 dark:from-slate-600 dark:to-slate-700 dark:opacity-35 animate-float-slow" style={{animationDelay: '2.5s'}}></div>
+        <div className="absolute top-[30%] left-[30%] w-8 h-8 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 opacity-30 animate-float-slow" style={{animationDelay: '0.5s'}}></div>
+        <div className="absolute bottom-[20%] right-[35%] w-10 h-10 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 opacity-25 animate-float-slow" style={{animationDelay: '2.5s'}}></div>
         
         {/* Gráficos decorativos */}
-        <div className="absolute bottom-0 left-0 w-64 h-48 opacity-10 dark:opacity-20">
+        <div className="absolute bottom-0 left-0 w-64 h-48 opacity-10">
           <svg viewBox="0 0 200 150" className="w-full h-full">
-            <path d="M 0 120 Q 50 80 100 100 T 200 60" stroke="#06b6d4" strokeWidth="3" fill="none" opacity="0.5" className="dark:stroke-cyan-400"/>
-            <path d="M 0 140 L 40 110 L 80 120 L 120 90 L 160 100 L 200 70" stroke="#14b8a6" strokeWidth="2" fill="none" opacity="0.6" className="dark:stroke-teal-400"/>
+            <path d="M 0 120 Q 50 80 100 100 T 200 60" stroke="#06b6d4" strokeWidth="3" fill="none" opacity="0.5"/>
+            <path d="M 0 140 L 40 110 L 80 120 L 120 90 L 160 100 L 200 70" stroke="#14b8a6" strokeWidth="2" fill="none" opacity="0.6"/>
           </svg>
         </div>
         
-        <div className="absolute top-0 right-0 w-72 h-56 opacity-10 dark:opacity-20">
+        <div className="absolute top-0 right-0 w-72 h-56 opacity-10">
           <svg viewBox="0 0 200 150" className="w-full h-full">
-            <path d="M 0 80 Q 50 60 100 70 T 200 40" stroke="#0891b2" strokeWidth="3" fill="none" opacity="0.5" className="dark:stroke-cyan-400"/>
-            <path d="M 0 100 L 40 80 L 80 85 L 120 65 L 160 70 L 200 50" stroke="#14b8a6" strokeWidth="2" fill="none" opacity="0.6" className="dark:stroke-teal-400"/>
+            <path d="M 0 80 Q 50 60 100 70 T 200 40" stroke="#0891b2" strokeWidth="3" fill="none" opacity="0.5"/>
+            <path d="M 0 100 L 40 80 L 80 85 L 120 65 L 160 70 L 200 50" stroke="#14b8a6" strokeWidth="2" fill="none" opacity="0.6"/>
           </svg>
         </div>
-
-        {/* Efeito de brilho no modo escuro */}
-        <div className="hidden dark:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-cyan-500/10 to-teal-500/10 rounded-full blur-3xl"></div>
       </div>
 
       {/* Container principal */}
       <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
         <div className="w-full max-w-md">
           {/* Card de Login */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl dark:shadow-cyan-500/10 overflow-hidden transform transition-all hover:scale-[1.01] duration-300 border border-transparent dark:border-slate-700">
+          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all hover:scale-[1.01] duration-300">
             {/* Header com logo */}
             <div className="p-8 pb-6 text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-600 dark:from-cyan-400 dark:to-teal-500 mb-4 shadow-lg dark:shadow-cyan-500/30">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-600 mb-4 shadow-lg">
                 <Wallet className="w-10 h-10 text-white" />
               </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 dark:from-cyan-400 dark:to-teal-400 bg-clip-text text-transparent mb-2">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 bg-clip-text text-transparent mb-2">
                 LP Finanças
               </h1>
             </div>
@@ -80,15 +77,15 @@ export function Login() {
             {/* Formulário */}
             <div className="px-8 pb-8">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-2">Entrar</h2>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">Digite suas credenciais</p>
+                <h2 className="text-2xl font-semibold text-gray-800 mb-2">Entrar</h2>
+                <p className="text-gray-500 text-sm">Digite suas credenciais</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Campo E-mail */}
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-700 dark:text-gray-300 font-medium flex items-center gap-2">
-                    <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <Label htmlFor="email" className="text-gray-700 font-medium flex items-center gap-2">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     E-mail
@@ -100,14 +97,14 @@ export function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="seu@email.com"
                     required
-                    className="h-12 px-4 bg-gray-50 dark:bg-slate-700 border-gray-200 dark:border-slate-600 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 focus:border-transparent transition-all"
+                    className="h-12 px-4 bg-gray-50 border-gray-200 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
                   />
                 </div>
 
                 {/* Campo Senha */}
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-700 dark:text-gray-300 font-medium flex items-center gap-2">
-                    <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <Label htmlFor="password" className="text-gray-700 font-medium flex items-center gap-2">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                     Senha
@@ -119,7 +116,7 @@ export function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="h-12 px-4 bg-gray-50 dark:bg-slate-700 border-gray-200 dark:border-slate-600 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 focus:border-transparent transition-all"
+                    className="h-12 px-4 bg-gray-50 border-gray-200 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
                   />
                 </div>
 
@@ -127,7 +124,7 @@ export function Login() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 dark:from-cyan-400 dark:to-teal-500 dark:hover:from-cyan-500 dark:hover:to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl dark:shadow-cyan-500/20 dark:hover:shadow-cyan-500/30 transform transition-all duration-200 hover:scale-[1.02] flex items-center justify-center gap-2"
+                  className="w-full h-12 bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform transition-all duration-200 hover:scale-[1.02] flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
@@ -147,11 +144,11 @@ export function Login() {
 
                 {/* Link de cadastro */}
                 <div className="text-center pt-2">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-gray-500">
                     Não tem uma conta?{' '}
                     <Link 
                       to="/register" 
-                      className="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-semibold hover:underline transition-colors"
+                      className="text-cyan-600 hover:text-cyan-700 font-semibold hover:underline transition-colors"
                     >
                       Cadastre-se
                     </Link>
@@ -163,7 +160,7 @@ export function Login() {
 
           {/* Footer */}
           <div className="text-center mt-6">
-            <p className="text-xs text-gray-400 dark:text-gray-500">
+            <p className="text-xs text-gray-400">
               Made with Emergent
             </p>
           </div>
@@ -172,9 +169,9 @@ export function Login() {
 
       {/* Desenvolvido por - Canto inferior esquerdo */}
       <div className="fixed bottom-6 left-6 z-20">
-        <p className="text-sm text-gray-600 dark:text-gray-300 font-medium flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md dark:shadow-cyan-500/10 border border-gray-200 dark:border-slate-700">
-          <span className="text-cyan-600 dark:text-cyan-400">💻</span>
-          Desenvolvido por <span className="font-semibold text-cyan-700 dark:text-cyan-400">Pedro Carvalho</span>
+        <p className="text-sm text-gray-600 font-medium flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
+          <span className="text-cyan-600">💻</span>
+          Desenvolvido por <span className="font-semibold text-cyan-700">Pedro Carvalho</span>
         </p>
       </div>
 
