@@ -29,7 +29,10 @@ JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
 # Create the main app
-app = FastAPI(title="CarFinanças API")
+app = FastAPI(
+    title="CarFinanças API",
+    redirect_slashes=False  # Disable automatic slash redirects
+)
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer()
 
