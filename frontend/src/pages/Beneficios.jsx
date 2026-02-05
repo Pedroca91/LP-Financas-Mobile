@@ -39,7 +39,7 @@ import {
 import { useToast } from '../components/ui/toast-provider';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const BENEFIT_TYPES = [
   { value: 'vr', label: 'Vale Refeição (VR)', icon: Utensils, color: 'text-orange-500' },
