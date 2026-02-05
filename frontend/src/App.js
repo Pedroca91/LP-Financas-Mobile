@@ -7,6 +7,7 @@ import { ToastProvider, useToast, setGlobalToast } from './components/ui/toast-p
 import { Layout } from './components/layout/Layout';
 import { Login } from './pages/Login';
 import { LoginDarkMode } from './pages/LoginDarkMode';
+import { LoginPreview } from './pages/LoginPreview';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { Entradas } from './pages/Entradas';
@@ -90,6 +91,14 @@ function AppRoutes() {
         element={
           <PublicRoute>
             <LoginDarkMode />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/login-preview"
+        element={
+          <PublicRoute>
+            <LoginPreview />
           </PublicRoute>
         }
       />
