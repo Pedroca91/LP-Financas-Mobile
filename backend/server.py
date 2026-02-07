@@ -1618,21 +1618,6 @@ async def analytics_highlights(
         "largest_income": largest_income_data
     }
 
-        incomes = await db.incomes.find({"user_id": user["id"], "month": month, "year": year}, {"_id": 0}).to_list(1000)
-        expenses = await db.expenses.find({"user_id": user["id"], "month": month, "year": year}, {"_id": 0}).to_list(1000)
-        
-        total_income = sum(i["value"] for i in incomes if i["status"] == "received")
-        total_expense = sum(e["value"] for e in expenses if e["status"] == "paid")
-        
-        monthly_data.append({
-            "month": month,
-            "income": total_income,
-            "expense": total_expense,
-            "balance": total_income - total_expense
-        })
-    
-    return monthly_data
-
 @api_router.get("/reports/by-category")
 async def get_report_by_category(month: int, year: int, type: str, user: dict = Depends(get_current_user)):
     categories = await db.categories.find({"user_id": user["id"], "type": type}, {"_id": 0}).to_list(100)
