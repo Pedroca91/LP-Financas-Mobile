@@ -1327,6 +1327,20 @@ async def get_dashboard_summary(month: int, year: int, user: dict = Depends(get_
 async def get_yearly_summary(year: int, user: dict = Depends(get_current_user)):
     monthly_data = []
     for month in range(1, 13):
+        incomes = await db.incomes.find({"user_id": user["id"], "month": month, "year": year}, {"_id": 0}).to_list(1000)
+        expenses = await db.expenses.find({"user_id": user["id"], "month": month, "year": year}, {"_id": 0}).to_list(1000)
+        
+        total_income = sum(i["value"] for i in incomes if i["status"] == "received")
+        total_expense = sum(e["value"] for e in expenses if e["status"] == "paid")
+        
+        monthly_data.append({
+            "month": month,
+            "income": total_income,
+            "expense": total_expense,
+            "balance": total_income - total_expense
+        })
+    
+    return monthly_data
 
 # ==================== ADVANCED ANALYTICS ====================
 
