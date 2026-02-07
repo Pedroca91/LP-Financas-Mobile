@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useFinance } from '../contexts/FinanceContext';
 import { MonthSelector } from '../components/layout/MonthSelector';
+import { AdvancedFilters, filterTransactions } from '../components/AdvancedFilters';
 import { formatCurrency, formatDate, getMonthName } from '../lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -122,6 +123,8 @@ export function Entradas() {
 
   const totalReceived = incomes.filter(i => i.status === 'received').reduce((sum, i) => sum + i.value, 0);
   const totalPending = incomes.filter(i => i.status === 'pending').reduce((sum, i) => sum + i.value, 0);
+  const filteredReceived = filteredIncomes.filter(i => i.status === 'received').reduce((sum, i) => sum + i.value, 0);
+  const filteredPending = filteredIncomes.filter(i => i.status === 'pending').reduce((sum, i) => sum + i.value, 0);
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="entradas-page">
@@ -289,7 +292,7 @@ export function Entradas() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {incomes.length === 0 ? (
+              {filteredIncomes.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                     Nenhuma entrada registrada para este período
