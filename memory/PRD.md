@@ -1,6 +1,7 @@
-# CarFinanças - PRD (Product Requirements Document)
+# LP Finanças - PRD (Product Requirements Document)
 
 ## Histórico de Correções
+- **10/02/2026**: 🚀 **App Mobile** criado com Expo/React Native - pronto para publicação nas lojas
 - **10/02/2026**: Implementado Análise Avançada no Dashboard + Filtros Avançados nas páginas de Entradas e Saídas
 - **10/02/2026**: Redesign completo da tela de Login + Dark mode + Crédito "Desenvolvido por Pedro Carvalho"
 - **10/02/2026**: Dados restaurados do backup (categorias, receitas, despesas)
