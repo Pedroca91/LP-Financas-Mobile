@@ -283,6 +283,13 @@ export function Entradas() {
         </Card>
       </div>
 
+      {/* Advanced Filters */}
+      <AdvancedFilters 
+        categories={incomeCategories}
+        onFilterChange={setFilters}
+        type="income"
+      />
+
       {/* Table */}
       <Card>
         <CardContent className="p-0">
