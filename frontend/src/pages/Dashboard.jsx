@@ -228,9 +228,22 @@ export function Dashboard() {
         </Card>
       </div>
 
+      {/* Advanced Analytics Section */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-heading font-semibold text-foreground">Analise Avancada</h2>
+        
+        {/* Highlights - Maior Receita e Despesa do Mes */}
+        <HighlightsCards month={selectedMonth} year={selectedYear} />
+        
+        {/* Forecast and Comparison Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ForecastCard month={selectedMonth} year={selectedYear} />
+          <ComparisonCard month={selectedMonth} year={selectedYear} />
+        </div>
+      </div>
+
       {/* Alerts and Trends */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <AlertsPanel month={selectedMonth} year={selectedYear} />
         <TrendsPanel month={selectedMonth} year={selectedYear} />
       </div>
     </div>
