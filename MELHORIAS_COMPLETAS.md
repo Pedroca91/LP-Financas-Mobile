@@ -269,7 +269,7 @@ Página de Entradas > Topo (antes dos cards)
 
 ## 🚀 COMO ACESSAR
 
-**URL**: https://carfinancas-restore.preview.emergentagent.com
+**URL**: https://mobile-migration-11.preview.emergentagent.com
 
 **Login**:
 - Email: Pedrohcarvalho1997@gmail.com

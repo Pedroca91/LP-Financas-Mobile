@@ -98,5 +98,5 @@ mongoimport --db test_database --collection [nome_da_collection] --file backup_c
 
 **Sistema**: CarFinanças v2.0  
 **Banco de Dados**: MongoDB (test_database)  
-**URL**: https://carfinancas-restore.preview.emergentagent.com  
+**URL**: https://mobile-migration-11.preview.emergentagent.com  
 **Última Atualização**: 28/01/2026 às 15:41
