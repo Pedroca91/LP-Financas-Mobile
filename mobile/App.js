@@ -1,20 +1,41 @@
+import React from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
+import { AuthProvider } from './src/contexts/AuthContext';
+import { FinanceProvider } from './src/contexts/FinanceContext';
+import AppNavigator from './src/navigation/AppNavigator';
+
+function AppContent() {
+  const { isLoading, colors } = useTheme();
+
+  if (isLoading) {
+    return (
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  return <AppNavigator />;
+}
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <ThemeProvider>
+      <AuthProvider>
+        <FinanceProvider>
+          <AppContent />
+        </FinanceProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  loadingContainer: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
   },
 });
