@@ -168,8 +168,8 @@ export function Saidas() {
     return labels[method] || method;
   };
 
-  const totalPaid = expenses.filter(e => e.status === 'paid').reduce((sum, e) => sum + e.value, 0);
-  const totalPending = expenses.filter(e => e.status === 'pending').reduce((sum, e) => sum + e.value, 0);
+  const totalPaid = filteredExpenses.filter(e => e.status === 'paid').reduce((sum, e) => sum + e.value, 0);
+  const totalPending = filteredExpenses.filter(e => e.status === 'pending').reduce((sum, e) => sum + e.value, 0);
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="saidas-page">
