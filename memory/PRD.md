@@ -100,6 +100,7 @@ Sistema completo de gerenciamento financeiro chamado CarFinanças, baseado em pl
 - [x] Navegação por abas no topo
 - [x] Toasts de feedback
 - [x] Tabelas editáveis
+- [x] **NOVO**: Ícones do calendário visíveis no modo escuro
 
 ---
 
