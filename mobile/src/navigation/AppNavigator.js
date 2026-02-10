@@ -97,26 +97,44 @@ function MainTabs() {
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   if (loading) {
     return null;
   }
 
+  const navigationTheme = {
+    dark: isDark,
+    colors: {
+      primary: colors.primary,
+      background: colors.background,
+      card: colors.surface,
+      text: colors.text,
+      border: colors.border,
+      notification: colors.primary,
+    },
+    fonts: {
+      regular: {
+        fontFamily: 'System',
+        fontWeight: '400',
+      },
+      medium: {
+        fontFamily: 'System',
+        fontWeight: '500',
+      },
+      bold: {
+        fontFamily: 'System',
+        fontWeight: '700',
+      },
+      heavy: {
+        fontFamily: 'System',
+        fontWeight: '900',
+      },
+    },
+  };
+
   return (
-    <NavigationContainer
-      theme={{
-        dark: false,
-        colors: {
-          primary: colors.primary,
-          background: colors.background,
-          card: colors.surface,
-          text: colors.text,
-          border: colors.border,
-          notification: colors.primary,
-        },
-      }}
-    >
+    <NavigationContainer theme={navigationTheme}>
       {user ? <MainTabs /> : <AuthStack />}
     </NavigationContainer>
   );
