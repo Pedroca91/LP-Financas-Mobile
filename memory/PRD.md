@@ -8,15 +8,47 @@
 - **05/01/2026**: Corrigido erro de Toaster duplicado que causava crash no DOM
 
 ## Problema Original
-Sistema completo de gerenciamento financeiro chamado CarFinanças, baseado em planilhas financeiras organizadas por abas. Sistema web responsivo com Dashboard, Registros (Entradas e Saídas), Investimentos, Relatórios e Configurações. Sistema de usuários com aprovação de admin. Modo claro e escuro.
+Sistema completo de gerenciamento financeiro chamado LP Finanças, baseado em planilhas financeiras organizadas por abas. Sistema web responsivo com Dashboard, Registros (Entradas e Saídas), Investimentos, Relatórios e Configurações. Sistema de usuários com aprovação de admin. Modo claro e escuro.
 
 ## Data de Criação
 05/01/2026
 
 ## Stack Tecnológica
 - **Backend**: FastAPI (Python) + MongoDB
-- **Frontend**: React + Tailwind CSS + Shadcn UI + Recharts
+- **Frontend Web**: React + Tailwind CSS + Shadcn UI + Recharts
+- **Frontend Mobile**: Expo/React Native (iOS & Android)
 - **Autenticação**: JWT com aprovação de admin
+
+## 📱 App Mobile (NOVO)
+
+### Localização
+`/app/mobile/`
+
+### Tecnologias
+- Expo SDK 54
+- React Native
+- React Navigation (Bottom Tabs + Stack)
+- AsyncStorage para persistência
+- Axios para API
+
+### Funcionalidades Mobile
+- [x] Login e Registro
+- [x] Dashboard com gráficos
+- [x] Gestão de Receitas (CRUD)
+- [x] Gestão de Despesas (CRUD com parcelas)
+- [x] Modo claro/escuro
+- [x] Navegação por abas
+
+### Como Rodar
+```bash
+cd /app/mobile
+npm install
+npx expo start
+```
+
+### Para Publicar nas Lojas
+1. Google Play: `npx eas-cli build --platform android`
+2. App Store: `npx eas-cli build --platform ios` (requer Mac)
 
 ## User Personas
 1. **Administrador**: Acesso total, aprova/bloqueia usuários, visualiza todos os dados
