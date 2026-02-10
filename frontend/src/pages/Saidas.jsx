@@ -491,9 +491,25 @@ export function Saidas() {
                     </TableCell>
                     <TableCell>{formatDate(expense.due_date)}</TableCell>
                     <TableCell>
-                      <Badge className={expense.status === 'paid' ? 'status-paid' : 'status-pending'}>
-                        {expense.status === 'paid' ? 'Pago' : 'Pendente'}
-                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 gap-1.5"
+                        onClick={() => handleToggleStatus(expense)}
+                        title={expense.status === 'paid' ? 'Clique para marcar como pendente' : 'Clique para marcar como pago'}
+                      >
+                        {expense.status === 'paid' ? (
+                          <>
+                            <Check className="h-3.5 w-3.5 text-emerald-500" />
+                            <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Pago</span>
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="h-3.5 w-3.5 text-yellow-500" />
+                            <span className="text-yellow-600 dark:text-yellow-400 text-xs font-medium">Pendente</span>
+                          </>
+                        )}
+                      </Button>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
