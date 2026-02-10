@@ -31,7 +31,7 @@ import {
 } from '../components/ui/dialog';
 import { Badge } from '../components/ui/badge';
 import { toast } from '../components/ui/toast-provider';
-import { Plus, Pencil, Trash2, ArrowDownCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowDownCircle, Check, Clock } from 'lucide-react';
 
 export function Entradas() {
   const {
