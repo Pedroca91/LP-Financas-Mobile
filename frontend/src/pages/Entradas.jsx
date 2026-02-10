@@ -313,7 +313,7 @@ export function Entradas() {
                   </TableCell>
                 </TableRow>
               ) : (
-                incomes.map((income) => (
+                filteredIncomes.map((income) => (
                   <TableRow key={income.id} data-testid={`income-row-${income.id}`}>
                     <TableCell className="font-medium">{getCategoryName(income.category_id)}</TableCell>
                     <TableCell className="text-muted-foreground">{income.description || '-'}</TableCell>
