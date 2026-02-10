@@ -1,6 +1,9 @@
 # CarFinanças - PRD (Product Requirements Document)
 
 ## Histórico de Correções
+- **10/02/2026**: Implementado Análise Avançada no Dashboard + Filtros Avançados nas páginas de Entradas e Saídas
+- **10/02/2026**: Redesign completo da tela de Login + Dark mode + Crédito "Desenvolvido por Pedro Carvalho"
+- **10/02/2026**: Dados restaurados do backup (categorias, receitas, despesas)
 - **05/01/2026**: Corrigido erro de Toaster duplicado que causava crash no DOM
 
 ## Problema Original
@@ -24,7 +27,7 @@ Sistema completo de gerenciamento financeiro chamado CarFinanças, baseado em pl
 
 ---
 
-## O que foi implementado ✅
+## O que foi implementado
 
 ### Autenticação e Usuários
 - [x] Login com email e senha (JWT)
@@ -32,12 +35,18 @@ Sistema completo de gerenciamento financeiro chamado CarFinanças, baseado em pl
 - [x] Admin padrão criado automaticamente
 - [x] Aprovação/bloqueio de usuários pelo admin
 - [x] Isolamento de dados por usuário
+- [x] **NOVO**: Tela de Login redesenhada com dark mode e crédito personalizado
 
 ### Dashboard
 - [x] Cards de resumo: Saldo, Receitas, Despesas, Investimentos
 - [x] Gráfico de evolução anual (Receitas vs Despesas)
 - [x] Gráfico Meta vs Realizado
 - [x] Seletor de mês/ano
+- [x] **NOVO**: Seção "Análise Avançada" com:
+  - Card Maior Receita do Mês
+  - Card Maior Despesa do Mês
+  - Card Previsão de Saldo (atual + pendentes + próximos 3 meses)
+  - Card Comparativo (vs mês anterior, vs mesmo mês ano anterior)
 
 ### Módulo de Entradas (Receitas)
 - [x] Tabela com lançamentos de receitas
@@ -45,6 +54,7 @@ Sistema completo de gerenciamento financeiro chamado CarFinanças, baseado em pl
 - [x] Categorização de receitas
 - [x] Status: Pendente/Recebido
 - [x] Totais automáticos
+- [x] **NOVO**: Filtros Avançados (busca, categoria, status, valor mín/máx)
 
 ### Módulo de Saídas (Despesas)
 - [x] Tabela com lançamentos de despesas
@@ -54,6 +64,7 @@ Sistema completo de gerenciamento financeiro chamado CarFinanças, baseado em pl
 - [x] Suporte a cartão de crédito com parcelas
 - [x] Status: Pendente/Pago
 - [x] Totais automáticos
+- [x] **NOVO**: Filtros Avançados (busca, categoria, status, valor mín/máx)
 
 ### Módulo de Investimentos
 - [x] Tabela por investimento/período
@@ -96,19 +107,40 @@ Sistema completo de gerenciamento financeiro chamado CarFinanças, baseado em pl
 
 ### P1 (Prioridade Média)
 - [ ] Notificações de contas a vencer
-- [ ] Gráficos comparativos entre meses
 - [ ] Importação de dados (CSV/planilha)
 
 ### P2 (Prioridade Baixa)
 - [ ] Recorrência automática de lançamentos
-- [ ] Dashboard com mais indicadores
-- [ ] Filtros avançados nas tabelas
 - [ ] Anexar comprovantes
 
 ---
 
+## Endpoints de API
+
+### Autenticação
+- POST /api/auth/login
+- POST /api/auth/register
+- GET /api/auth/me
+
+### Dashboard
+- GET /api/dashboard/summary
+- GET /api/dashboard/yearly
+
+### Analytics (NOVO)
+- GET /api/analytics/highlights - Maior receita/despesa do mês
+- GET /api/analytics/forecast - Previsão de saldo
+- GET /api/analytics/comparison - Comparativo mensal/anual
+
+### CRUD
+- GET/POST/PUT/DELETE /api/incomes
+- GET/POST/PUT/DELETE /api/expenses
+- GET/POST/PUT/DELETE /api/categories
+- GET/POST/PUT/DELETE /api/investments
+- GET/POST/PUT/DELETE /api/credit-cards
+
+---
+
 ## Próximos Passos
-1. Adicionar dados de exemplo para demonstração
-2. Implementar exportação de relatórios
-3. Criar metas de orçamento por categoria
-4. Adicionar notificações de vencimento
+1. Implementar exportação de relatórios (PDF/Excel)
+2. Criar metas de orçamento por categoria
+3. Adicionar notificações de vencimento
