@@ -153,6 +153,25 @@ export function Saidas() {
     }
   };
 
+  const handleToggleStatus = async (expense) => {
+    try {
+      const newStatus = expense.status === 'paid' ? 'pending' : 'paid';
+      const today = new Date().toISOString().split('T')[0];
+      
+      const data = {
+        ...expense,
+        status: newStatus,
+        // Se marcou como pago, atualiza a data de pagamento para hoje
+        payment_date: newStatus === 'paid' ? today : expense.payment_date
+      };
+      
+      await updateExpense(expense.id, data);
+      toast.success(newStatus === 'paid' ? 'Marcado como pago!' : 'Marcado como pendente!');
+    } catch (error) {
+      toast.error('Erro ao atualizar status');
+    }
+  };
+
   const getCategoryName = (categoryId) => {
     const category = expenseCategories.find(c => c.id === categoryId);
     return category?.name || 'Sem categoria';
