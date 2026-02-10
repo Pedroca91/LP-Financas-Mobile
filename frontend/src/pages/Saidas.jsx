@@ -31,7 +31,7 @@ import {
 } from '../components/ui/dialog';
 import { Badge } from '../components/ui/badge';
 import { toast } from '../components/ui/toast-provider';
-import { Plus, Pencil, Trash2, ArrowUpCircle, CreditCard } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowUpCircle, CreditCard, Check, Clock } from 'lucide-react';
 
 export function Saidas() {
   const {
