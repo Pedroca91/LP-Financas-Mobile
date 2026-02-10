@@ -342,9 +342,25 @@ export function Entradas() {
                     <TableCell>{formatDate(income.date)}</TableCell>
                     <TableCell>{formatDate(income.payment_date)}</TableCell>
                     <TableCell>
-                      <Badge className={income.status === 'received' ? 'status-received' : 'status-pending'}>
-                        {income.status === 'received' ? 'Recebido' : 'Pendente'}
-                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 gap-1.5"
+                        onClick={() => handleToggleStatus(income)}
+                        title={income.status === 'received' ? 'Clique para marcar como pendente' : 'Clique para marcar como recebido'}
+                      >
+                        {income.status === 'received' ? (
+                          <>
+                            <Check className="h-3.5 w-3.5 text-emerald-500" />
+                            <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Recebido</span>
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="h-3.5 w-3.5 text-yellow-500" />
+                            <span className="text-yellow-600 dark:text-yellow-400 text-xs font-medium">Pendente</span>
+                          </>
+                        )}
+                      </Button>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
