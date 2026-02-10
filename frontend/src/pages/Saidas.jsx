@@ -419,6 +419,13 @@ export function Saidas() {
         </Card>
       </div>
 
+      {/* Advanced Filters */}
+      <AdvancedFilters 
+        categories={expenseCategories}
+        onFilterChange={setFilters}
+        type="expense"
+      />
+
       {/* Table */}
       <Card>
         <CardContent className="p-0 overflow-x-auto">
