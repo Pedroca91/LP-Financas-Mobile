@@ -158,11 +158,22 @@ export function Saidas() {
       const newStatus = expense.status === 'paid' ? 'pending' : 'paid';
       const today = new Date().toISOString().split('T')[0];
       
+      // Apenas atualiza o status e a data de pagamento, mantendo todos os outros campos inalterados
       const data = {
-        ...expense,
+        category_id: expense.category_id,
+        description: expense.description,
+        value: expense.value,
+        date: expense.date,
+        payment_method: expense.payment_method,
+        credit_card_id: expense.credit_card_id || '',
+        installments: expense.installments,
+        current_installment: expense.current_installment,
+        due_date: expense.due_date,
+        month: expense.month,
+        year: expense.year,
         status: newStatus,
         // Se marcou como pago, atualiza a data de pagamento para hoje
-        payment_date: newStatus === 'paid' ? today : expense.payment_date
+        payment_date: newStatus === 'paid' ? today : (expense.payment_date || '')
       };
       
       await updateExpense(expense.id, data);
