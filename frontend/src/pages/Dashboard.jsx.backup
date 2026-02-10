@@ -137,6 +137,20 @@ export function Dashboard() {
         ))}
       </div>
 
+      {/* Advanced Analytics - NEW */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-heading font-semibold">Advanced Analytics</h2>
+        
+        {/* Highlights */}
+        <HighlightsCards month={selectedMonth} year={selectedYear} />
+        
+        {/* Forecast and Comparison */}
+        <div className=\"grid grid-cols-1 lg:grid-cols-2 gap-4\">
+          <ForecastCard month={selectedMonth} year={selectedYear} />
+          <ComparisonCard month={selectedMonth} year={selectedYear} />
+        </div>
+      </div>
+
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Yearly Evolution */}
