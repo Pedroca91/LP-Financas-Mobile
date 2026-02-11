@@ -490,7 +490,7 @@ export default function DashboardScreen() {
               <Text style={styles.statLabel}>Receitas Recebidas</Text>
             </View>
             <Text style={[styles.statValue, { color: colors.income }]}>
-              {formatCurrency(summary?.received_income || 0)}
+              {formatCurrency((summary?.total_income || 0) - (summary?.total_income_pending || 0))}
             </Text>
           </View>
 
@@ -500,7 +500,7 @@ export default function DashboardScreen() {
               <Text style={styles.statLabel}>Receitas Pendentes</Text>
             </View>
             <Text style={[styles.statValue, { color: colors.warning }]}>
-              {formatCurrency(summary?.pending_income || 0)}
+              {formatCurrency(summary?.total_income_pending || 0)}
             </Text>
           </View>
 
@@ -510,7 +510,7 @@ export default function DashboardScreen() {
               <Text style={styles.statLabel}>Despesas Pagas</Text>
             </View>
             <Text style={[styles.statValue, { color: colors.expense }]}>
-              {formatCurrency(summary?.paid_expenses || 0)}
+              {formatCurrency(summary?.total_expense || 0)}
             </Text>
           </View>
 
@@ -520,7 +520,7 @@ export default function DashboardScreen() {
               <Text style={styles.statLabel}>Despesas Pendentes</Text>
             </View>
             <Text style={[styles.statValue, { color: colors.warning }]}>
-              {formatCurrency(summary?.pending_expenses || 0)}
+              {formatCurrency(summary?.total_expense_pending || 0)}
             </Text>
           </View>
         </View>
