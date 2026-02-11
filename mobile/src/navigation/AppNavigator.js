@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -66,18 +67,24 @@ function MainTabs() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarActiveTintColor: colors.gold,
+        tabBarInactiveTintColor: colors.tabBarInactive || colors.textSecondary,
         tabBarStyle: {
-          backgroundColor: colors.surface,
+          backgroundColor: colors.tabBarBackground || colors.primary,
           borderTopColor: colors.border,
+          borderTopWidth: 0,
           paddingTop: 8,
           paddingBottom: 8,
           height: 70,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 8,
+          elevation: 10,
         },
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: '500',
+          fontWeight: '600',
           marginTop: 2,
         },
       })}
@@ -138,11 +145,11 @@ function MoreMenuScreen({ navigation }) {
   
   const menuItems = [
     { id: 'Investimentos', label: 'Investimentos', icon: 'bar-chart', color: colors.investment },
-    { id: 'Beneficios', label: 'VR/VA', icon: 'card', color: colors.warning },
-    { id: 'Recorrentes', label: 'Recorrentes', icon: 'repeat', color: colors.primary },
-    { id: 'Relatorios', label: 'Relatórios', icon: 'pie-chart', color: colors.secondary },
-    { id: 'Categorias', label: 'Categorias', icon: 'folder', color: colors.textSecondary },
-    { id: 'Perfil', label: 'Perfil', icon: 'person', color: colors.text },
+    { id: 'Beneficios', label: 'VR/VA', icon: 'card', color: colors.gold },
+    { id: 'Recorrentes', label: 'Recorrentes', icon: 'repeat', color: colors.gold },
+    { id: 'Relatorios', label: 'Relatórios', icon: 'pie-chart', color: colors.gold },
+    { id: 'Categorias', label: 'Categorias', icon: 'folder', color: colors.gold },
+    { id: 'Perfil', label: 'Perfil', icon: 'person', color: colors.gold },
   ];
 
   if (isAdmin) {
@@ -151,8 +158,15 @@ function MoreMenuScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={{ paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16, backgroundColor: colors.surface }}>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.text }}>Mais</Text>
+      <View style={{ 
+        paddingHorizontal: 20, 
+        paddingTop: 60, 
+        paddingBottom: 16, 
+        backgroundColor: colors.primary,
+        borderBottomLeftRadius: 24,
+        borderBottomRightRadius: 24,
+      }}>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.textLight }}>Mais</Text>
       </View>
       <ScrollView style={{ flex: 1, padding: 20 }}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
@@ -165,6 +179,13 @@ function MoreMenuScreen({ navigation }) {
                 borderRadius: 16,
                 padding: 20,
                 alignItems: 'center',
+                borderWidth: 1,
+                borderColor: colors.border,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 4,
+                elevation: 3,
               }}
               onPress={() => navigation.navigate(item.id)}
             >
@@ -176,6 +197,8 @@ function MoreMenuScreen({ navigation }) {
                 justifyContent: 'center',
                 alignItems: 'center',
                 marginBottom: 12,
+                borderWidth: 1,
+                borderColor: `${item.color}40`,
               }}>
                 <Ionicons name={item.icon} size={28} color={item.color} />
               </View>
@@ -191,8 +214,6 @@ function MoreMenuScreen({ navigation }) {
   );
 }
 
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-
 export default function AppNavigator() {
   const { user, loading } = useAuth();
   const { colors, isDark } = useTheme();
@@ -204,12 +225,12 @@ export default function AppNavigator() {
   const navigationTheme = {
     dark: isDark,
     colors: {
-      primary: colors.primary,
+      primary: colors.gold,
       background: colors.background,
       card: colors.surface,
       text: colors.text,
       border: colors.border,
-      notification: colors.primary,
+      notification: colors.gold,
     },
     fonts: {
       regular: {
