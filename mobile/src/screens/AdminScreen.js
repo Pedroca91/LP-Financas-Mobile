@@ -114,65 +114,95 @@ export default function AdminScreen() {
 
   const styles = createStyles(colors, isDark);
 
-  const renderUser = ({ item }) => (
-    <View style={styles.userCard}>
-      <LinearGradient
-        colors={[colors.surface, colors.surface]}
-        style={styles.userCardGradient}
-      >
-        <View style={styles.userHeader}>
-          <View style={styles.avatarContainer}>
-            <LinearGradient
-              colors={item.role === 'admin' ? [colors.gold, colors.copper] : [colors.primary, colors.primaryLight]}
-              style={styles.avatar}
-            >
-              <Text style={styles.avatarText}>{item.name?.charAt(0).toUpperCase()}</Text>
-            </LinearGradient>
-          </View>
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>{item.name}</Text>
-            <Text style={styles.userEmail}>{item.email}</Text>
-            <View style={styles.userBadges}>
-              <View style={[styles.badge, { backgroundColor: item.role === 'admin' ? `${colors.gold}20` : `${colors.primary}20` }]}>
-                <Text style={[styles.badgeText, { color: item.role === 'admin' ? colors.gold : colors.primary }]}>
-                  {item.role === 'admin' ? 'Admin' : 'Usuário'}
-                </Text>
-              </View>
-              <View style={[styles.badge, { backgroundColor: item.is_active ? `${colors.income}20` : `${colors.expense}20` }]}>
-                <Text style={[styles.badgeText, { color: item.is_active ? colors.income : colors.expense }]}>
-                  {item.is_active ? 'Ativo' : 'Inativo'}
-                </Text>
+  const renderUser = ({ item }) => {
+    // Determinar o status de aprovação
+    const isApproved = item.status === 'approved';
+    const isPending = item.status === 'pending';
+    const isBlocked = item.status === 'blocked';
+    
+    const getStatusLabel = () => {
+      if (isPending) return 'Pendente';
+      if (isBlocked) return 'Bloqueado';
+      return 'Aprovado';
+    };
+    
+    const getStatusColor = () => {
+      if (isPending) return colors.warning;
+      if (isBlocked) return colors.expense;
+      return colors.income;
+    };
+    
+    return (
+      <View style={styles.userCard}>
+        <LinearGradient
+          colors={[colors.surface, colors.surface]}
+          style={styles.userCardGradient}
+        >
+          <View style={styles.userHeader}>
+            <View style={styles.avatarContainer}>
+              <LinearGradient
+                colors={item.role === 'admin' ? [colors.gold, colors.copper] : [colors.primary, colors.primaryLight]}
+                style={styles.avatar}
+              >
+                <Text style={styles.avatarText}>{item.name?.charAt(0).toUpperCase()}</Text>
+              </LinearGradient>
+            </View>
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>{item.name}</Text>
+              <Text style={styles.userEmail}>{item.email}</Text>
+              <View style={styles.userBadges}>
+                <View style={[styles.badge, { backgroundColor: item.role === 'admin' ? `${colors.gold}20` : `${colors.primary}20` }]}>
+                  <Text style={[styles.badgeText, { color: item.role === 'admin' ? colors.gold : colors.primary }]}>
+                    {item.role === 'admin' ? 'Admin' : 'Usuário'}
+                  </Text>
+                </View>
+                <View style={[styles.badge, { backgroundColor: `${getStatusColor()}20` }]}>
+                  <Text style={[styles.badgeText, { color: getStatusColor() }]}>
+                    {getStatusLabel()}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.userActions}>
-          <View style={styles.actionRow}>
-            <Text style={styles.actionLabel}>Ativo</Text>
-            <Switch
-              value={item.is_active}
-              onValueChange={() => toggleActive(item)}
-              trackColor={{ false: colors.border, true: colors.income }}
-              thumbColor="#fff"
-            />
+          <View style={styles.userActions}>
+            {isPending && (
+              <TouchableOpacity 
+                style={[styles.approveButton, { backgroundColor: colors.income }]} 
+                onPress={() => approveUser(item)}
+              >
+                <Ionicons name="checkmark-circle" size={16} color="#fff" />
+                <Text style={styles.approveButtonText}>Aprovar</Text>
+              </TouchableOpacity>
+            )}
+            {!isPending && (
+              <View style={styles.actionRow}>
+                <Text style={styles.actionLabel}>Bloquear</Text>
+                <Switch
+                  value={isBlocked}
+                  onValueChange={() => toggleBlock(item)}
+                  trackColor={{ false: colors.border, true: colors.expense }}
+                  thumbColor="#fff"
+                />
+              </View>
+            )}
+            <View style={styles.actionRow}>
+              <Text style={styles.actionLabel}>Admin</Text>
+              <Switch
+                value={item.role === 'admin'}
+                onValueChange={() => toggleAdmin(item)}
+                trackColor={{ false: colors.border, true: colors.gold }}
+                thumbColor="#fff"
+              />
+            </View>
+            <TouchableOpacity style={styles.deleteButton} onPress={() => deleteUser(item)}>
+              <Ionicons name="trash-outline" size={20} color={colors.expense} />
+            </TouchableOpacity>
           </View>
-          <View style={styles.actionRow}>
-            <Text style={styles.actionLabel}>Admin</Text>
-            <Switch
-              value={item.role === 'admin'}
-              onValueChange={() => toggleAdmin(item)}
-              trackColor={{ false: colors.border, true: colors.gold }}
-              thumbColor="#fff"
-            />
-          </View>
-          <TouchableOpacity style={styles.deleteButton} onPress={() => deleteUser(item)}>
-            <Ionicons name="trash-outline" size={20} color={colors.expense} />
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
-    </View>
-  );
+        </LinearGradient>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
