@@ -27,6 +27,7 @@ export default function DashboardScreen() {
   const { colors, isDark, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const { month, year, changeMonth, refreshAll } = useFinance();
+  const navigation = useNavigation();
   
   const [refreshing, setRefreshing] = useState(false);
   const [summary, setSummary] = useState(null);
@@ -36,6 +37,60 @@ export default function DashboardScreen() {
   const [forecast, setForecast] = useState(null);
   const [comparison, setComparison] = useState(null);
   const [showAlerts, setShowAlerts] = useState(true);
+
+  // Animation for the floating button
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Pulse animation
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.1,
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    // Glow animation
+    const glowAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, {
+          toValue: 1,
+          duration: 1500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(glowAnim, {
+          toValue: 0,
+          duration: 1500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    pulseAnimation.start();
+    glowAnimation.start();
+
+    return () => {
+      pulseAnimation.stop();
+      glowAnimation.stop();
+    };
+  }, []);
+
+  const navigateToChat = () => {
+    navigation.navigate('Mais', { screen: 'Assistente' });
+  };
 
   const fetchData = useCallback(async () => {
     try {
