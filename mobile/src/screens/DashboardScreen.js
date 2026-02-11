@@ -394,106 +394,143 @@ export default function DashboardScreen() {
         </View>
 
         {/* Highlights - Maior Receita e Despesa */}
-        {highlights && (
-          <View style={styles.cardsRow}>
-            <View style={[styles.highlightCard, { borderLeftColor: colors.income }]}>
-              <View style={styles.highlightHeader}>
-                <Ionicons name="arrow-down" size={14} color={colors.income} />
-                <Text style={styles.highlightLabel}>Maior Receita</Text>
-              </View>
-              <Text style={[styles.highlightValue, { color: colors.income }]}>
-                {formatCurrency(highlights.largest_income?.value || 0)}
-              </Text>
-              <Text style={styles.highlightDesc}>
-                {highlights.largest_income?.description || 'N/A'}
-              </Text>
-              <Text style={[styles.highlightDesc, { fontSize: 11, opacity: 0.7 }]}>
-                {highlights.largest_income?.category || ''}
-              </Text>
+        <View style={styles.cardsRow}>
+          <View style={[styles.highlightCard, { borderLeftColor: colors.income }]}>
+            <View style={styles.highlightHeader}>
+              <Ionicons name="arrow-down" size={14} color={colors.income} />
+              <Text style={styles.highlightLabel}>Maior Receita do Mês</Text>
             </View>
-
-            <View style={[styles.highlightCard, { borderLeftColor: colors.expense }]}>
-              <View style={styles.highlightHeader}>
-                <Ionicons name="arrow-up" size={14} color={colors.expense} />
-                <Text style={styles.highlightLabel}>Maior Despesa</Text>
-              </View>
-              <Text style={[styles.highlightValue, { color: colors.expense }]}>
-                {formatCurrency(highlights.largest_expense?.value || 0)}
-              </Text>
-              <Text style={styles.highlightDesc}>
-                {highlights.largest_expense?.description || 'N/A'}
-              </Text>
-              <Text style={[styles.highlightDesc, { fontSize: 11, opacity: 0.7 }]}>
-                {highlights.largest_expense?.category || ''}
-              </Text>
-            </View>
+            <Text style={[styles.highlightValue, { color: colors.income }]}>
+              {formatCurrency(highlights?.largest_income?.value || 0)}
+            </Text>
+            <Text style={styles.highlightDesc}>
+              {highlights?.largest_income?.description || 'Nenhuma receita'}
+            </Text>
+            <Text style={[styles.highlightDesc, { fontSize: 11, opacity: 0.7 }]}>
+              {highlights?.largest_income?.category || ''}
+            </Text>
           </View>
-        )}
+
+          <View style={[styles.highlightCard, { borderLeftColor: colors.expense }]}>
+            <View style={styles.highlightHeader}>
+              <Ionicons name="arrow-up" size={14} color={colors.expense} />
+              <Text style={styles.highlightLabel}>Maior Despesa do Mês</Text>
+            </View>
+            <Text style={[styles.highlightValue, { color: colors.expense }]}>
+              {formatCurrency(highlights?.largest_expense?.value || 0)}
+            </Text>
+            <Text style={styles.highlightDesc}>
+              {highlights?.largest_expense?.description || 'Nenhuma despesa'}
+            </Text>
+            <Text style={[styles.highlightDesc, { fontSize: 11, opacity: 0.7 }]}>
+              {highlights?.largest_expense?.category || ''}
+            </Text>
+          </View>
+        </View>
 
         {/* Previsão de Saldo */}
-        {forecast && (
-          <View style={styles.forecastCard}>
-            <LinearGradient
-              colors={[colors.cardDark, colors.primaryLight]}
-              style={styles.forecastGradient}
-            >
-              <View style={styles.forecastHeader}>
-                <Ionicons name="eye" size={18} color={colors.gold} />
-                <Text style={styles.forecastTitle}>Previsão de Saldo</Text>
-              </View>
-              
-              <Text style={styles.forecastSubtitle}>Saldo previsto fim do mês</Text>
-              <Text style={[styles.forecastValue, { color: (forecast.predicted_balance || 0) >= 0 ? colors.income : colors.expense }]}>
-                {formatCurrency(forecast.predicted_balance || 0)}
-              </Text>
+        <View style={styles.forecastCard}>
+          <LinearGradient
+            colors={[colors.cardDark, colors.primaryLight]}
+            style={styles.forecastGradient}
+          >
+            <View style={styles.forecastHeader}>
+              <Ionicons name="eye" size={18} color={colors.gold} />
+              <Text style={styles.forecastTitle}>Previsão de Saldo</Text>
+            </View>
+            
+            <Text style={styles.forecastSubtitle}>Saldo previsto fim do mês</Text>
+            <Text style={[styles.forecastValue, { color: (forecast?.predicted_balance || forecast?.forecast_current_month || 0) >= 0 ? colors.income : colors.expense }]}>
+              {formatCurrency(forecast?.predicted_balance || forecast?.forecast_current_month || 0)}
+            </Text>
 
-              <View style={styles.forecastDetails}>
-                <View style={styles.forecastRow}>
-                  <Text style={styles.forecastLabel}>Saldo atual:</Text>
-                  <Text style={styles.forecastAmount}>{formatCurrency(forecast.current_balance || 0)}</Text>
-                </View>
-                <View style={styles.forecastRow}>
-                  <Text style={styles.forecastLabel}>Receitas pendentes:</Text>
-                  <Text style={[styles.forecastAmount, { color: colors.income }]}>+{formatCurrency(forecast.pending_income || 0)}</Text>
-                </View>
-                <View style={styles.forecastRow}>
-                  <Text style={styles.forecastLabel}>Despesas pendentes:</Text>
-                  <Text style={[styles.forecastAmount, { color: colors.expense }]}>-{formatCurrency(forecast.pending_expenses || 0)}</Text>
-                </View>
+            <View style={styles.forecastDetails}>
+              <View style={styles.forecastRow}>
+                <Text style={styles.forecastLabel}>Saldo atual:</Text>
+                <Text style={styles.forecastAmount}>{formatCurrency(forecast?.current_balance || 0)}</Text>
               </View>
-            </LinearGradient>
-          </View>
-        )}
+              <View style={styles.forecastRow}>
+                <Text style={styles.forecastLabel}>Receitas pendentes:</Text>
+                <Text style={[styles.forecastAmount, { color: colors.income }]}>+{formatCurrency(forecast?.pending_income || 0)}</Text>
+              </View>
+              <View style={styles.forecastRow}>
+                <Text style={styles.forecastLabel}>Despesas pendentes:</Text>
+                <Text style={[styles.forecastAmount, { color: colors.expense }]}>-{formatCurrency(forecast?.pending_expenses || forecast?.pending_expense || 0)}</Text>
+              </View>
+            </View>
+
+            {/* Previsão próximos meses */}
+            {forecast?.forecast_next_months && forecast.forecast_next_months.length > 0 && (
+              <View style={styles.forecastNextMonths}>
+                <Text style={styles.forecastNextTitle}>Próximos 3 meses (baseado em média)</Text>
+                {forecast.forecast_next_months.map((item, index) => (
+                  <View key={index} style={styles.forecastRow}>
+                    <Text style={styles.forecastLabel}>{String(item.month).padStart(2, '0')}/{item.year}:</Text>
+                    <Text style={[styles.forecastAmount, { color: colors.gold }]}>{formatCurrency(item.forecasted_balance)}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </LinearGradient>
+        </View>
 
         {/* Comparativo */}
-        {comparison && (
-          <View style={styles.comparisonCard}>
-            <View style={styles.comparisonHeader}>
-              <Ionicons name="swap-horizontal" size={18} color={colors.gold} />
-              <Text style={styles.comparisonTitle}>Comparativo</Text>
-            </View>
+        <View style={styles.comparisonCard}>
+          <View style={styles.comparisonHeader}>
+            <Ionicons name="cash" size={18} color={colors.gold} />
+            <Text style={styles.comparisonTitle}>Comparativo</Text>
+          </View>
 
-            <Text style={styles.comparisonSubtitle}>vs Mês Anterior</Text>
-            <View style={styles.comparisonRow}>
-              <Text style={styles.comparisonLabel}>Receitas</Text>
-              <Text style={[styles.comparisonPercent, { color: (comparison.vs_last_month?.income_change || 0) >= 0 ? colors.income : colors.expense }]}>
-                {(comparison.vs_last_month?.income_change || 0) >= 0 ? '↗' : '↘'} {formatPercentage(comparison.vs_last_month?.income_change)}
-              </Text>
+          <Text style={styles.comparisonSubtitle}>vs Mês Anterior</Text>
+          <View style={styles.comparisonRow}>
+            <Text style={styles.comparisonLabel}>Receitas</Text>
+            <Text style={[styles.comparisonPercent, { color: (comparison?.vs_last_month?.income_change || comparison?.variations?.income_vs_previous || 0) >= 0 ? colors.income : colors.expense }]}>
+              {(comparison?.vs_last_month?.income_change || comparison?.variations?.income_vs_previous || 0) >= 0 ? '↗' : '↘'} {formatPercentage(comparison?.vs_last_month?.income_change || comparison?.variations?.income_vs_previous)}
+            </Text>
+          </View>
+          <View style={styles.comparisonRow}>
+            <Text style={styles.comparisonLabel}>Despesas</Text>
+            <Text style={[styles.comparisonPercent, { color: (comparison?.vs_last_month?.expense_change || comparison?.variations?.expense_vs_previous || 0) <= 0 ? colors.income : colors.expense }]}>
+              {(comparison?.vs_last_month?.expense_change || comparison?.variations?.expense_vs_previous || 0) >= 0 ? '↗' : '↘'} {formatPercentage(comparison?.vs_last_month?.expense_change || comparison?.variations?.expense_vs_previous)}
+            </Text>
+          </View>
+          <View style={styles.comparisonRow}>
+            <Text style={styles.comparisonLabel}>Saldo</Text>
+            <Text style={[styles.comparisonPercent, { color: (comparison?.vs_last_month?.balance_change || comparison?.variations?.balance_vs_previous || 0) >= 0 ? colors.income : colors.expense }]}>
+              {(comparison?.vs_last_month?.balance_change || comparison?.variations?.balance_vs_previous || 0) >= 0 ? '↗' : '↘'} {formatPercentage(comparison?.vs_last_month?.balance_change || comparison?.variations?.balance_vs_previous)}
+            </Text>
+          </View>
+
+          <Text style={[styles.comparisonSubtitle, { marginTop: 16 }]}>vs Mesmo Mês Ano Anterior</Text>
+          <View style={styles.comparisonRow}>
+            <Text style={styles.comparisonLabel}>Receitas</Text>
+            <Text style={[styles.comparisonPercent, { color: (comparison?.variations?.income_vs_last_year || 0) >= 0 ? colors.income : colors.expense }]}>
+              {(comparison?.variations?.income_vs_last_year || 0) >= 0 ? '↗' : '↘'} {formatPercentage(comparison?.variations?.income_vs_last_year)}
+            </Text>
+          </View>
+          <View style={styles.comparisonRow}>
+            <Text style={styles.comparisonLabel}>Despesas</Text>
+            <Text style={[styles.comparisonPercent, { color: (comparison?.variations?.expense_vs_last_year || 0) <= 0 ? colors.income : colors.expense }]}>
+              {(comparison?.variations?.expense_vs_last_year || 0) >= 0 ? '↗' : '↘'} {formatPercentage(comparison?.variations?.expense_vs_last_year)}
+            </Text>
+          </View>
+
+          {/* Valores absolutos */}
+          <View style={styles.comparisonAbsolute}>
+            <View style={styles.comparisonAbsoluteItem}>
+              <Text style={styles.comparisonAbsoluteLabel}>Atual</Text>
+              <Text style={[styles.comparisonAbsoluteValue, { color: colors.gold }]}>{formatCurrency(comparison?.current?.balance || balance)}</Text>
             </View>
-            <View style={styles.comparisonRow}>
-              <Text style={styles.comparisonLabel}>Despesas</Text>
-              <Text style={[styles.comparisonPercent, { color: (comparison.vs_last_month?.expense_change || 0) <= 0 ? colors.income : colors.expense }]}>
-                {(comparison.vs_last_month?.expense_change || 0) >= 0 ? '↗' : '↘'} {formatPercentage(comparison.vs_last_month?.expense_change)}
-              </Text>
+            <View style={styles.comparisonAbsoluteItem}>
+              <Text style={styles.comparisonAbsoluteLabel}>Mês Ant.</Text>
+              <Text style={styles.comparisonAbsoluteValue}>{formatCurrency(comparison?.previous_month?.balance || 0)}</Text>
             </View>
-            <View style={styles.comparisonRow}>
-              <Text style={styles.comparisonLabel}>Saldo</Text>
-              <Text style={[styles.comparisonPercent, { color: (comparison.vs_last_month?.balance_change || 0) >= 0 ? colors.income : colors.expense }]}>
-                {(comparison.vs_last_month?.balance_change || 0) >= 0 ? '↗' : '↘'} {formatPercentage(comparison.vs_last_month?.balance_change)}
-              </Text>
+            <View style={styles.comparisonAbsoluteItem}>
+              <Text style={styles.comparisonAbsoluteLabel}>Ano Ant.</Text>
+              <Text style={styles.comparisonAbsoluteValue}>{formatCurrency(comparison?.last_year?.balance || 0)}</Text>
             </View>
           </View>
-        )}
+        </View>
 
         {/* Quick Stats */}
         <View style={styles.statsContainer}>
