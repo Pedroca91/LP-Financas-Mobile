@@ -309,19 +309,17 @@ frontend:
 metadata:
   created_by: "main_agent"
   version: "2.0"
-  test_sequence: 2
+  test_sequence: 3
   run_ui: false
 
 test_plan:
   current_focus:
-    - "API Recurring Transactions"
-    - "API Alerts"
-    - "API Analysis - Trends"
-    - "API Credit Cards Advanced"
+    - "API Push Notifications"
+    - "API Import Bank Statement"
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
-    message: "Implementei todas as funcionalidades das Fases 1 e 2. Testar os novos endpoints de: Lançamentos Recorrentes, Alertas de Orçamento, Alertas de Vencimento, Análise de Tendências, e todos os endpoints avançados de Cartões de Crédito."
+    message: "Implementei todas as funcionalidades pendentes: 1) Firebase Push Notifications com hooks e service worker, 2) PWA com modo offline, instalação e atualização, 3) Importação de Extrato Bancário CSV. Testar os novos endpoints de: /api/notifications/token e /api/import/bank-statement, /api/import/parse-csv"
