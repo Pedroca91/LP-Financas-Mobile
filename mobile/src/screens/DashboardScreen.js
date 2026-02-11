@@ -578,14 +578,14 @@ export default function DashboardScreen() {
         </View>
 
         {/* Dicas Personalizadas */}
-        {tips && tips.length > 0 && (
-          <View style={styles.tipsContainer}>
-            <View style={styles.tipsHeader}>
-              <Ionicons name="bulb" size={20} color={colors.gold} />
-              <Text style={styles.tipsTitle}>Dicas Personalizadas</Text>
-            </View>
-            
-            {tips.map((tip, index) => {
+        <View style={styles.tipsContainer}>
+          <View style={styles.tipsHeader}>
+            <Ionicons name="bulb" size={20} color={colors.gold} />
+            <Text style={styles.tipsTitle}>Dicas Personalizadas</Text>
+          </View>
+          
+          {tips && tips.length > 0 ? (
+            tips.map((tip, index) => {
               const getTipStyle = (type) => {
                 switch(type) {
                   case 'warning': return { bg: colors.expense + '20', border: colors.expense, icon: 'alert-circle' };
