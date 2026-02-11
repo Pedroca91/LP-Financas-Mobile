@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Implementar Fase 1 (Metas de Orçamento, Recorrentes, Alertas, Tendências) e Fase 2 (Cartão de Crédito Avançado)"
+user_problem_statement: "Implementar Fase 1 (Metas de Orçamento, Recorrentes, Alertas, Tendências) e Fase 2 (Cartão de Crédito Avançado) - Continuação: Firebase Push Notifications, PWA Offline, Importar Extrato Bancário"
 
 backend:
   - task: "API Recurring Transactions"
@@ -201,6 +201,30 @@ backend:
         agent: "main"
         comment: "Endpoint /api/credit-cards/summary - resumo todos cartões"
 
+  - task: "API Push Notifications"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Endpoints /api/notifications/token - salvar e remover FCM token"
+
+  - task: "API Import Bank Statement"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Endpoints /api/import/bank-statement e /api/import/parse-csv - importar CSV"
+
 frontend:
   - task: "Página de Recorrentes"
     implemented: true
@@ -233,6 +257,54 @@ frontend:
     stuck_count: 0
     priority: "high"
     needs_retesting: true
+
+  - task: "PWA - Service Worker e Offline"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/public/sw.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Service Worker com cache offline, manifest.json, e ícones PNG criados"
+
+  - task: "Push Notifications - Firebase"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/lib/firebase.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Firebase configurado com messaging service worker e hooks"
+
+  - task: "Importar Extrato Bancário"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/ImportExtrato.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Componente de importação CSV com mapeamento de colunas"
+
+  - task: "Página de Ajustes com Notificações e PWA"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Ajustes.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Abas de Notificações e App adicionadas com controles de PWA"
 
 metadata:
   created_by: "main_agent"
