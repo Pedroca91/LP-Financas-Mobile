@@ -41,22 +41,41 @@ export function AuthProvider({ children }) {
     return userData;
   };
 
+  // Login via Google OAuth - called from AuthCallback
+  const loginWithGoogle = async (sessionId) => {
+    const response = await axios.post(`${API}/auth/google/session`, { session_id: sessionId });
+    const { token: newToken, user: userData } = response.data;
+    localStorage.setItem('token', newToken);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+    setToken(newToken);
+    setUser(userData);
+    return userData;
+  };
+
   const register = async (name, email, password) => {
     const response = await axios.post(`${API}/auth/register`, { name, email, password });
     return response.data;
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
-    setToken(null);
-    setUser(null);
+  const logout = async () => {
+    try {
+      if (token) {
+        await axios.post(`${API}/auth/logout`);
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      localStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
+      setToken(null);
+      setUser(null);
+    }
   };
 
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, isAdmin }}>
+    <AuthContext.Provider value={{ user, token, loading, login, loginWithGoogle, register, logout, isAdmin, setUser, setToken }}>
       {children}
     </AuthContext.Provider>
   );
