@@ -14,6 +14,7 @@ import {
   Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFinance } from '../contexts/FinanceContext';
@@ -184,7 +185,7 @@ export default function ExpensesScreen() {
   const totalPending = expenses.filter(e => e.status === 'pending').reduce((sum, e) => sum + e.value, 0);
   const total = expenses.reduce((sum, e) => sum + e.value, 0);
 
-  const styles = createStyles(colors);
+  const styles = createStyles(colors, isDark);
 
   const renderExpenseItem = ({ item }) => (
     <TouchableOpacity
@@ -196,14 +197,14 @@ export default function ExpensesScreen() {
         <TouchableOpacity
           style={[
             styles.statusBadge,
-            { backgroundColor: item.status === 'paid' ? `${colors.expense}20` : `${colors.warning}20` },
+            { backgroundColor: item.status === 'paid' ? `${colors.expense}20` : `${colors.gold}20` },
           ]}
           onPress={() => toggleStatus(item)}
         >
           <Ionicons
             name={item.status === 'paid' ? 'checkmark-circle' : 'time'}
             size={20}
-            color={item.status === 'paid' ? colors.expense : colors.warning}
+            color={item.status === 'paid' ? colors.expense : colors.gold}
           />
         </TouchableOpacity>
         <View style={styles.listItemInfo}>
@@ -236,42 +237,60 @@ export default function ExpensesScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style="light" />
       
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Despesas</Text>
-        <TouchableOpacity onPress={openAddModal} style={styles.addButton}>
-          <Ionicons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
+      <LinearGradient
+        colors={[colors.primary, colors.primaryLight]}
+        style={styles.header}
+      >
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Despesas</Text>
+          <TouchableOpacity onPress={openAddModal} style={styles.addButton}>
+            <Ionicons name="add" size={24} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
 
       {/* Month Selector */}
       <View style={styles.monthSelector}>
         <TouchableOpacity onPress={() => navigateMonth(-1)} style={styles.monthButton}>
-          <Ionicons name="chevron-back" size={24} color={colors.primary} />
+          <Ionicons name="chevron-back" size={24} color={colors.gold} />
         </TouchableOpacity>
         <Text style={styles.monthText}>{formatMonth(month, year)}</Text>
         <TouchableOpacity onPress={() => navigateMonth(1)} style={styles.monthButton}>
-          <Ionicons name="chevron-forward" size={24} color={colors.primary} />
+          <Ionicons name="chevron-forward" size={24} color={colors.gold} />
         </TouchableOpacity>
       </View>
 
       {/* Summary */}
       <View style={styles.summaryContainer}>
         <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Pago</Text>
-          <Text style={[styles.summaryValue, { color: colors.expense }]}>{formatCurrency(totalPaid)}</Text>
+          <LinearGradient
+            colors={[colors.gold, colors.copper]}
+            style={styles.summaryGradient}
+          >
+            <Text style={styles.summaryLabel}>Pago</Text>
+            <Text style={styles.summaryValue}>{formatCurrency(totalPaid)}</Text>
+          </LinearGradient>
         </View>
-        <View style={styles.summaryDivider} />
         <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Pendente</Text>
-          <Text style={[styles.summaryValue, { color: colors.warning }]}>{formatCurrency(totalPending)}</Text>
+          <LinearGradient
+            colors={[colors.primary, colors.primaryLight]}
+            style={styles.summaryGradient}
+          >
+            <Text style={styles.summaryLabel}>Pendente</Text>
+            <Text style={styles.summaryValue}>{formatCurrency(totalPending)}</Text>
+          </LinearGradient>
         </View>
-        <View style={styles.summaryDivider} />
         <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Total</Text>
-          <Text style={[styles.summaryValue, { color: colors.text }]}>{formatCurrency(total)}</Text>
+          <LinearGradient
+            colors={[colors.cardDark, colors.primaryLight]}
+            style={styles.summaryGradient}
+          >
+            <Text style={styles.summaryLabel}>Total</Text>
+            <Text style={styles.summaryValue}>{formatCurrency(total)}</Text>
+          </LinearGradient>
         </View>
       </View>
 
@@ -282,11 +301,11 @@ export default function ExpensesScreen() {
         renderItem={renderExpenseItem}
         contentContainerStyle={styles.listContainer}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.gold} />
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="receipt-outline" size={64} color={colors.textSecondary} />
+            <Ionicons name="receipt-outline" size={64} color={colors.gold} />
             <Text style={styles.emptyText}>Nenhuma despesa cadastrada</Text>
           </View>
         }
@@ -299,14 +318,17 @@ export default function ExpensesScreen() {
           style={styles.modalOverlay}
         >
           <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
+            <LinearGradient
+              colors={[colors.primary, colors.primaryLight]}
+              style={styles.modalHeader}
+            >
               <Text style={styles.modalTitle}>
                 {editingExpense ? 'Editar Despesa' : 'Nova Despesa'}
               </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
+                <Ionicons name="close" size={24} color="#ffffff" />
               </TouchableOpacity>
-            </View>
+            </LinearGradient>
 
             <ScrollView style={styles.modalBody} keyboardShouldPersistTaps="handled">
               <Text style={styles.inputLabel}>Categoria *</Text>
@@ -470,7 +492,12 @@ export default function ExpensesScreen() {
                 <Text style={styles.cancelButtonText}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                <Text style={styles.saveButtonText}>Salvar</Text>
+                <LinearGradient
+                  colors={[colors.gold, colors.copper]}
+                  style={styles.saveButtonGradient}
+                >
+                  <Text style={styles.saveButtonText}>Salvar</Text>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           </View>
@@ -480,27 +507,30 @@ export default function ExpensesScreen() {
   );
 }
 
-const createStyles = (colors) => StyleSheet.create({
+const createStyles = (colors, isDark) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
   },
   header: {
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 16,
-    backgroundColor: colors.surface,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text,
+    color: '#ffffff',
   },
   addButton: {
-    backgroundColor: colors.expense,
+    backgroundColor: colors.gold,
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -512,11 +542,14 @@ const createStyles = (colors) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: colors.surface,
+    paddingVertical: 16,
   },
   monthButton: {
-    padding: 8,
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.borderGold,
   },
   monthText: {
     fontSize: 16,
@@ -525,28 +558,28 @@ const createStyles = (colors) => StyleSheet.create({
   },
   summaryContainer: {
     flexDirection: 'row',
-    backgroundColor: colors.surface,
-    marginHorizontal: 20,
-    marginTop: 16,
-    borderRadius: 12,
-    padding: 16,
+    paddingHorizontal: 20,
+    marginBottom: 16,
+    gap: 8,
   },
   summaryItem: {
     flex: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  summaryGradient: {
+    padding: 12,
     alignItems: 'center',
   },
-  summaryDivider: {
-    width: 1,
-    backgroundColor: colors.border,
-  },
   summaryLabel: {
-    fontSize: 12,
-    color: colors.textSecondary,
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.8)',
     marginBottom: 4,
   },
   summaryValue: {
     fontSize: 14,
     fontWeight: '700',
+    color: '#ffffff',
   },
   listContainer: {
     padding: 20,
@@ -560,6 +593,8 @@ const createStyles = (colors) => StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   listItemLeft: {
     flexDirection: 'row',
@@ -610,9 +645,9 @@ const createStyles = (colors) => StyleSheet.create({
   },
   installmentBadge: {
     fontSize: 11,
-    color: colors.primary,
+    color: colors.gold,
     fontWeight: '600',
-    backgroundColor: `${colors.primary}20`,
+    backgroundColor: `${colors.gold}20`,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -647,13 +682,13 @@ const createStyles = (colors) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: colors.text,
+    color: '#ffffff',
   },
   modalBody: {
     padding: 20,
@@ -684,18 +719,18 @@ const createStyles = (colors) => StyleSheet.create({
     backgroundColor: colors.background,
     marginRight: 8,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderGold,
   },
   categoryChipSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: colors.gold,
+    borderColor: colors.gold,
   },
   categoryChipText: {
     fontSize: 14,
     color: colors.text,
   },
   categoryChipTextSelected: {
-    color: '#fff',
+    color: '#ffffff',
   },
   paymentMethods: {
     flexDirection: 'row',
@@ -714,8 +749,8 @@ const createStyles = (colors) => StyleSheet.create({
     borderColor: colors.border,
   },
   paymentMethodSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: colors.gold,
+    borderColor: colors.gold,
   },
   paymentMethodText: {
     fontSize: 12,
@@ -723,7 +758,7 @@ const createStyles = (colors) => StyleSheet.create({
     color: colors.text,
   },
   paymentMethodTextSelected: {
-    color: '#fff',
+    color: '#ffffff',
   },
   statusToggle: {
     flexDirection: 'row',
@@ -739,8 +774,8 @@ const createStyles = (colors) => StyleSheet.create({
     borderColor: colors.border,
   },
   statusOptionSelected: {
-    backgroundColor: colors.warning,
-    borderColor: colors.warning,
+    backgroundColor: colors.gold,
+    borderColor: colors.gold,
   },
   statusOptionSelectedRed: {
     backgroundColor: colors.expense,
@@ -752,7 +787,7 @@ const createStyles = (colors) => StyleSheet.create({
     color: colors.text,
   },
   statusOptionTextSelected: {
-    color: '#fff',
+    color: '#ffffff',
   },
   modalFooter: {
     flexDirection: 'row',
@@ -767,6 +802,8 @@ const createStyles = (colors) => StyleSheet.create({
     borderRadius: 12,
     backgroundColor: colors.background,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   cancelButtonText: {
     fontSize: 16,
@@ -775,14 +812,16 @@ const createStyles = (colors) => StyleSheet.create({
   },
   saveButton: {
     flex: 1,
-    paddingVertical: 16,
     borderRadius: 12,
-    backgroundColor: colors.primary,
+    overflow: 'hidden',
+  },
+  saveButtonGradient: {
+    paddingVertical: 16,
     alignItems: 'center',
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
+    color: '#ffffff',
   },
 });
