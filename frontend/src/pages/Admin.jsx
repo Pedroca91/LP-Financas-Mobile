@@ -191,14 +191,20 @@ export function Admin() {
   return (
     <div className="space-y-6 animate-fade-in" data-testid="admin-page">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-heading font-semibold text-foreground flex items-center gap-3">
-          <Shield className="h-8 w-8 text-accent" />
-          Painel Administrativo
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Gerencie usuários e aprovações do sistema
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-heading font-semibold text-foreground flex items-center gap-3">
+            <Shield className="h-8 w-8 text-accent" />
+            Painel Administrativo
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Gerencie usuários e aprovações do sistema
+          </p>
+        </div>
+        <Button onClick={handleCreate} className="rounded-sm">
+          <UserPlus className="h-4 w-4 mr-2" />
+          Novo Usuário
+        </Button>
       </div>
 
       {/* Stats */}
