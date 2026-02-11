@@ -68,6 +68,7 @@ export function Saidas() {
     minValue: '',
     maxValue: ''
   });
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   const filteredExpenses = filterTransactions(expenses, filters);
 
