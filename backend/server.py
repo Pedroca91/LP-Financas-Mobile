@@ -2052,6 +2052,12 @@ Contexto Financeiro do Usuário ({user['name']}):
         {"user_id": user["id"], "session_id": session_id}
     ).sort("created_at", 1).to_list(20)
     
+    # Build conversation history as text
+    conversation_history = ""
+    for msg in previous_messages[-10:]:
+        role_label = "Usuário" if msg["role"] == "user" else "Assistente"
+        conversation_history += f"{role_label}: {msg['content']}\n\n"
+    
     system_message = f"""Você é um assistente financeiro inteligente chamado 'LP Finanças AI'. 
 Você ajuda os usuários a gerenciar suas finanças pessoais, responder dúvidas sobre gastos, 
 dar dicas de economia e planejamento financeiro.
@@ -2065,6 +2071,8 @@ Regras:
 4. Se não souber algo específico, seja honesto
 5. Formate valores monetários como R$ X.XXX,XX
 6. Mantenha respostas concisas mas úteis
+
+{f"Histórico da conversa:{chr(10)}{conversation_history}" if conversation_history else ""}
 """
     
     try:
@@ -2078,13 +2086,6 @@ Regras:
             session_id=f"{user['id']}_{session_id}",
             system_message=system_message
         ).with_model("openai", "gpt-4.1")
-        
-        # Build conversation history
-        for msg in previous_messages[-10:]:  # Last 10 messages
-            if msg["role"] == "user":
-                chat.add_user_message(msg["content"])
-            else:
-                chat.add_assistant_message(msg["content"])
         
         # Send new message
         user_message = UserMessage(text=data.message)
