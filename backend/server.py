@@ -1916,6 +1916,365 @@ async def get_report_by_category(month: int, year: int, type: str, user: dict = 
     
     return result
 
+# ==================== GOALS (METAS) ROUTES ====================
+
+@api_router.get("/goals")
+async def get_goals(user: dict = Depends(get_current_user)):
+    """Get all goals for current user"""
+    goals = await db.goals.find({"user_id": user["id"]}, {"_id": 0}).to_list(100)
+    return goals
+
+@api_router.post("/goals")
+async def create_goal(data: GoalBase, user: dict = Depends(get_current_user)):
+    """Create a new financial goal"""
+    goal = Goal(
+        **data.model_dump(),
+        user_id=user["id"]
+    )
+    await db.goals.insert_one(goal.model_dump())
+    return goal.model_dump()
+
+@api_router.get("/goals/{goal_id}")
+async def get_goal(goal_id: str, user: dict = Depends(get_current_user)):
+    """Get a specific goal"""
+    goal = await db.goals.find_one({"id": goal_id, "user_id": user["id"]}, {"_id": 0})
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    return goal
+
+@api_router.put("/goals/{goal_id}")
+async def update_goal(goal_id: str, data: GoalBase, user: dict = Depends(get_current_user)):
+    """Update a goal"""
+    result = await db.goals.update_one(
+        {"id": goal_id, "user_id": user["id"]},
+        {"$set": data.model_dump()}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    
+    updated = await db.goals.find_one({"id": goal_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/goals/{goal_id}")
+async def delete_goal(goal_id: str, user: dict = Depends(get_current_user)):
+    """Delete a goal"""
+    result = await db.goals.delete_one({"id": goal_id, "user_id": user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    
+    # Also delete contributions
+    await db.goal_contributions.delete_many({"goal_id": goal_id})
+    return {"message": "Goal deleted successfully"}
+
+@api_router.post("/goals/{goal_id}/contribute")
+async def add_goal_contribution(goal_id: str, value: float, note: Optional[str] = None, user: dict = Depends(get_current_user)):
+    """Add a contribution to a goal"""
+    goal = await db.goals.find_one({"id": goal_id, "user_id": user["id"]})
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    
+    contribution = GoalContribution(
+        goal_id=goal_id,
+        user_id=user["id"],
+        value=value,
+        date=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        note=note
+    )
+    await db.goal_contributions.insert_one(contribution.model_dump())
+    
+    # Update goal current value
+    new_value = goal["current_value"] + value
+    is_completed = new_value >= goal["target_value"]
+    
+    update_data = {"current_value": new_value}
+    if is_completed and not goal.get("is_completed"):
+        update_data["is_completed"] = True
+        update_data["completed_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.goals.update_one({"id": goal_id}, {"$set": update_data})
+    
+    return {"message": "Contribution added", "new_value": new_value, "is_completed": is_completed}
+
+@api_router.get("/goals/{goal_id}/contributions")
+async def get_goal_contributions(goal_id: str, user: dict = Depends(get_current_user)):
+    """Get all contributions for a goal"""
+    goal = await db.goals.find_one({"id": goal_id, "user_id": user["id"]})
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    
+    contributions = await db.goal_contributions.find(
+        {"goal_id": goal_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    return contributions
+
+# ==================== CHAT ASSISTANT ROUTES ====================
+
+@api_router.post("/chat", response_model=ChatResponse)
+async def chat_with_assistant(data: ChatRequest, user: dict = Depends(get_current_user)):
+    """Chat with the AI financial assistant"""
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    
+    session_id = data.session_id or str(uuid.uuid4())
+    
+    # Get user's financial context
+    current_date = datetime.now(timezone.utc)
+    month = current_date.month
+    year = current_date.year
+    
+    # Get financial summary for context
+    incomes = await db.incomes.find({"user_id": user["id"], "month": month, "year": year}).to_list(100)
+    expenses = await db.expenses.find({"user_id": user["id"], "month": month, "year": year}).to_list(100)
+    goals = await db.goals.find({"user_id": user["id"], "is_completed": False}).to_list(10)
+    
+    total_income = sum(i.get("value", 0) for i in incomes)
+    total_expenses = sum(e.get("value", 0) for e in expenses)
+    balance = total_income - total_expenses
+    
+    # Build context
+    financial_context = f"""
+Contexto Financeiro do Usuário ({user['name']}):
+- Mês atual: {month}/{year}
+- Total de Receitas: R$ {total_income:.2f}
+- Total de Despesas: R$ {total_expenses:.2f}
+- Saldo: R$ {balance:.2f}
+- Metas ativas: {len(goals)}
+"""
+    
+    if goals:
+        financial_context += "\nMetas em andamento:\n"
+        for g in goals[:5]:
+            progress = (g.get("current_value", 0) / g.get("target_value", 1)) * 100
+            financial_context += f"  - {g['name']}: {progress:.1f}% (R$ {g.get('current_value', 0):.2f} / R$ {g.get('target_value', 0):.2f})\n"
+    
+    # Get previous messages for context
+    previous_messages = await db.chat_messages.find(
+        {"user_id": user["id"], "session_id": session_id}
+    ).sort("created_at", 1).to_list(20)
+    
+    system_message = f"""Você é um assistente financeiro inteligente chamado 'LP Finanças AI'. 
+Você ajuda os usuários a gerenciar suas finanças pessoais, responder dúvidas sobre gastos, 
+dar dicas de economia e planejamento financeiro.
+
+{financial_context}
+
+Regras:
+1. Seja sempre amigável e profissional
+2. Responda em português brasileiro
+3. Dê dicas práticas e personalizadas baseadas nos dados do usuário
+4. Se não souber algo específico, seja honesto
+5. Formate valores monetários como R$ X.XXX,XX
+6. Mantenha respostas concisas mas úteis
+"""
+    
+    try:
+        # Initialize chat
+        api_key = os.environ.get("EMERGENT_LLM_KEY")
+        if not api_key:
+            raise HTTPException(status_code=500, detail="AI service not configured")
+        
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"{user['id']}_{session_id}",
+            system_message=system_message
+        ).with_model("openai", "gpt-4.1")
+        
+        # Build conversation history
+        for msg in previous_messages[-10:]:  # Last 10 messages
+            if msg["role"] == "user":
+                chat.add_user_message(msg["content"])
+            else:
+                chat.add_assistant_message(msg["content"])
+        
+        # Send new message
+        user_message = UserMessage(text=data.message)
+        response = await chat.send_message(user_message)
+        
+        # Save messages to database
+        user_msg = ChatMessage(
+            user_id=user["id"],
+            session_id=session_id,
+            role="user",
+            content=data.message
+        )
+        assistant_msg = ChatMessage(
+            user_id=user["id"],
+            session_id=session_id,
+            role="assistant",
+            content=response
+        )
+        
+        await db.chat_messages.insert_many([user_msg.model_dump(), assistant_msg.model_dump()])
+        
+        return ChatResponse(response=response, session_id=session_id)
+        
+    except Exception as e:
+        logging.error(f"Chat error: {e}")
+        raise HTTPException(status_code=500, detail=f"Error processing chat: {str(e)}")
+
+@api_router.get("/chat/history")
+async def get_chat_history(session_id: Optional[str] = None, user: dict = Depends(get_current_user)):
+    """Get chat history for user"""
+    query = {"user_id": user["id"]}
+    if session_id:
+        query["session_id"] = session_id
+    
+    messages = await db.chat_messages.find(query, {"_id": 0}).sort("created_at", 1).to_list(100)
+    return messages
+
+@api_router.get("/chat/sessions")
+async def get_chat_sessions(user: dict = Depends(get_current_user)):
+    """Get list of chat sessions for user"""
+    pipeline = [
+        {"$match": {"user_id": user["id"]}},
+        {"$group": {
+            "_id": "$session_id",
+            "last_message": {"$last": "$content"},
+            "message_count": {"$sum": 1},
+            "created_at": {"$first": "$created_at"},
+            "updated_at": {"$last": "$created_at"}
+        }},
+        {"$sort": {"updated_at": -1}},
+        {"$limit": 20}
+    ]
+    sessions = await db.chat_messages.aggregate(pipeline).to_list(20)
+    return [{"session_id": s["_id"], **{k: v for k, v in s.items() if k != "_id"}} for s in sessions]
+
+@api_router.delete("/chat/sessions/{session_id}")
+async def delete_chat_session(session_id: str, user: dict = Depends(get_current_user)):
+    """Delete a chat session"""
+    result = await db.chat_messages.delete_many({"session_id": session_id, "user_id": user["id"]})
+    return {"deleted": result.deleted_count}
+
+# ==================== PERSONALIZED TIPS ROUTES ====================
+
+@api_router.get("/tips/personalized")
+async def get_personalized_tips(user: dict = Depends(get_current_user)):
+    """Get personalized financial tips based on user's data"""
+    current_date = datetime.now(timezone.utc)
+    month = current_date.month
+    year = current_date.year
+    
+    tips = []
+    
+    # Get current month data
+    expenses = await db.expenses.find({"user_id": user["id"], "month": month, "year": year}).to_list(500)
+    incomes = await db.incomes.find({"user_id": user["id"], "month": month, "year": year}).to_list(100)
+    
+    # Get last month data for comparison
+    last_month = month - 1 if month > 1 else 12
+    last_year = year if month > 1 else year - 1
+    last_month_expenses = await db.expenses.find({"user_id": user["id"], "month": last_month, "year": last_year}).to_list(500)
+    
+    total_income = sum(i.get("value", 0) for i in incomes if i.get("status") == "received")
+    total_expenses = sum(e.get("value", 0) for e in expenses if e.get("status") == "paid")
+    total_last_month = sum(e.get("value", 0) for e in last_month_expenses if e.get("status") == "paid")
+    
+    # Tip 1: Spending comparison
+    if total_last_month > 0:
+        change_percent = ((total_expenses - total_last_month) / total_last_month) * 100
+        if change_percent > 20:
+            tips.append({
+                "type": "warning",
+                "icon": "trending-up",
+                "title": "Gastos aumentaram",
+                "message": f"Seus gastos aumentaram {change_percent:.1f}% em relação ao mês passado. Considere revisar suas despesas.",
+                "priority": "high"
+            })
+        elif change_percent < -10:
+            tips.append({
+                "type": "success",
+                "icon": "trending-down",
+                "title": "Parabéns! Gastos reduziram",
+                "message": f"Você reduziu seus gastos em {abs(change_percent):.1f}% em relação ao mês passado. Continue assim!",
+                "priority": "low"
+            })
+    
+    # Tip 2: Savings rate
+    if total_income > 0:
+        savings_rate = ((total_income - total_expenses) / total_income) * 100
+        if savings_rate < 10:
+            tips.append({
+                "type": "warning",
+                "icon": "piggy-bank",
+                "title": "Taxa de poupança baixa",
+                "message": f"Você está economizando apenas {savings_rate:.1f}% da sua renda. Especialistas recomendam poupar pelo menos 20%.",
+                "priority": "high"
+            })
+        elif savings_rate >= 20:
+            tips.append({
+                "type": "success",
+                "icon": "piggy-bank",
+                "title": "Excelente taxa de poupança!",
+                "message": f"Você está economizando {savings_rate:.1f}% da sua renda. Parabéns pela disciplina financeira!",
+                "priority": "low"
+            })
+    
+    # Tip 3: Category analysis
+    category_totals = {}
+    for exp in expenses:
+        cat_id = exp.get("category_id", "other")
+        category_totals[cat_id] = category_totals.get(cat_id, 0) + exp.get("value", 0)
+    
+    if category_totals:
+        top_category_id = max(category_totals, key=category_totals.get)
+        top_category = await db.categories.find_one({"id": top_category_id})
+        top_category_name = top_category.get("name", "Outros") if top_category else "Outros"
+        top_category_value = category_totals[top_category_id]
+        top_category_percent = (top_category_value / total_expenses * 100) if total_expenses > 0 else 0
+        
+        if top_category_percent > 40:
+            tips.append({
+                "type": "info",
+                "icon": "pie-chart",
+                "title": f"Concentração em {top_category_name}",
+                "message": f"{top_category_percent:.1f}% dos seus gastos estão em '{top_category_name}'. Considere diversificar ou reduzir gastos nessa categoria.",
+                "priority": "medium"
+            })
+    
+    # Tip 4: Pending bills
+    pending_expenses = [e for e in expenses if e.get("status") == "pending"]
+    total_pending = sum(e.get("value", 0) for e in pending_expenses)
+    if total_pending > 0:
+        tips.append({
+            "type": "info",
+            "icon": "clock",
+            "title": "Contas pendentes",
+            "message": f"Você tem R$ {total_pending:.2f} em contas pendentes este mês. Não esqueça de pagá-las!",
+            "priority": "medium"
+        })
+    
+    # Tip 5: Goals progress
+    goals = await db.goals.find({"user_id": user["id"], "is_completed": False}).to_list(10)
+    for goal in goals:
+        progress = (goal.get("current_value", 0) / goal.get("target_value", 1)) * 100
+        if progress >= 90 and progress < 100:
+            tips.append({
+                "type": "success",
+                "icon": "target",
+                "title": f"Meta '{goal['name']}' quase lá!",
+                "message": f"Faltam apenas R$ {goal['target_value'] - goal['current_value']:.2f} para completar sua meta. Continue!",
+                "priority": "medium"
+            })
+    
+    # Tip 6: Credit card usage
+    credit_expenses = [e for e in expenses if e.get("payment_method") == "credit"]
+    credit_total = sum(e.get("value", 0) for e in credit_expenses)
+    if total_expenses > 0 and credit_total / total_expenses > 0.5:
+        tips.append({
+            "type": "warning",
+            "icon": "credit-card",
+            "title": "Alto uso de cartão de crédito",
+            "message": f"Mais de 50% dos seus gastos são no cartão de crédito. Cuidado com os juros!",
+            "priority": "high"
+        })
+    
+    # Sort by priority
+    priority_order = {"high": 0, "medium": 1, "low": 2}
+    tips.sort(key=lambda x: priority_order.get(x["priority"], 1))
+    
+    return tips[:6]  # Return max 6 tips
+
 # ==================== HEALTH CHECK ====================
 
 @api_router.get("/")
