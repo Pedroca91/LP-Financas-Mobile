@@ -525,6 +525,46 @@ export default function DashboardScreen() {
           </View>
         </View>
 
+        {/* Dicas Personalizadas */}
+        {tips && tips.length > 0 && (
+          <View style={styles.tipsContainer}>
+            <View style={styles.tipsHeader}>
+              <Ionicons name="bulb" size={20} color={colors.gold} />
+              <Text style={styles.tipsTitle}>Dicas Personalizadas</Text>
+            </View>
+            
+            {tips.map((tip, index) => {
+              const getTipStyle = (type) => {
+                switch(type) {
+                  case 'warning': return { bg: colors.expense + '20', border: colors.expense, icon: 'alert-circle' };
+                  case 'success': return { bg: colors.income + '20', border: colors.income, icon: 'checkmark-circle' };
+                  case 'info': return { bg: colors.primary + '30', border: colors.primary, icon: 'information-circle' };
+                  default: return { bg: colors.primary + '30', border: colors.primary, icon: 'information-circle' };
+                }
+              };
+              const tipStyle = getTipStyle(tip.type);
+              
+              return (
+                <View 
+                  key={index} 
+                  style={[
+                    styles.tipItem, 
+                    { backgroundColor: tipStyle.bg, borderLeftColor: tipStyle.border }
+                  ]}
+                >
+                  <View style={styles.tipIconContainer}>
+                    <Ionicons name={tipStyle.icon} size={24} color={tipStyle.border} />
+                  </View>
+                  <View style={styles.tipContent}>
+                    <Text style={styles.tipItemTitle}>{tip.title}</Text>
+                    <Text style={styles.tipItemMessage}>{tip.message}</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        )}
+
         <View style={{ height: 100 }} />
       </ScrollView>
 
