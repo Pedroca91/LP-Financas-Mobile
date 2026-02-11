@@ -362,7 +362,79 @@ async def get_me(user: dict = Depends(get_current_user)):
 @api_router.get("/admin/users", response_model=List[UserResponse])
 async def list_all_users(admin: dict = Depends(get_admin_user)):
     users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
+    # Garantir que is_active existe
+    for user in users:
+        if 'is_active' not in user:
+            user['is_active'] = True
     return users
+
+@api_router.post("/admin/users", response_model=UserResponse)
+async def admin_create_user(data: AdminCreateUser, admin: dict = Depends(get_admin_user)):
+    # Verificar se email já existe
+    existing = await db.users.find_one({"email": data.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email já cadastrado")
+    
+    # Hash da senha
+    hashed_password = bcrypt.hashpw(data.password.encode('utf-8'), bcrypt.gensalt())
+    
+    user_id = str(uuid.uuid4())
+    user = {
+        "id": user_id,
+        "email": data.email,
+        "name": data.name,
+        "password": hashed_password.decode('utf-8'),
+        "role": data.role,
+        "status": "approved",
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.users.insert_one(user)
+    
+    # Criar categorias padrão para o novo usuário
+    default_categories = [
+        {"name": "Salário", "type": "income", "user_id": user_id, "id": str(uuid.uuid4()), "is_default": True},
+        {"name": "Freelance", "type": "income", "user_id": user_id, "id": str(uuid.uuid4()), "is_default": True},
+        {"name": "Alimentação", "type": "expense", "user_id": user_id, "id": str(uuid.uuid4()), "is_default": True},
+        {"name": "Transporte", "type": "expense", "user_id": user_id, "id": str(uuid.uuid4()), "is_default": True},
+        {"name": "Moradia", "type": "expense", "user_id": user_id, "id": str(uuid.uuid4()), "is_default": True},
+        {"name": "Lazer", "type": "expense", "user_id": user_id, "id": str(uuid.uuid4()), "is_default": True},
+        {"name": "Saúde", "type": "expense", "user_id": user_id, "id": str(uuid.uuid4()), "is_default": True},
+        {"name": "Educação", "type": "expense", "user_id": user_id, "id": str(uuid.uuid4()), "is_default": True},
+        {"name": "Renda Fixa", "type": "investment", "user_id": user_id, "id": str(uuid.uuid4()), "is_default": True},
+        {"name": "Ações", "type": "investment", "user_id": user_id, "id": str(uuid.uuid4()), "is_default": True},
+    ]
+    if default_categories:
+        await db.categories.insert_many(default_categories)
+    
+    return {
+        "id": user_id,
+        "email": data.email,
+        "name": data.name,
+        "role": data.role,
+        "status": "approved",
+        "is_active": True,
+        "created_at": user["created_at"]
+    }
+
+@api_router.put("/admin/users/{user_id}", response_model=dict)
+async def admin_update_user(user_id: str, data: AdminUpdateUser, admin: dict = Depends(get_admin_user)):
+    update_data = {}
+    if data.is_active is not None:
+        update_data["is_active"] = data.is_active
+    if data.role is not None:
+        update_data["role"] = data.role
+    if data.status is not None:
+        update_data["status"] = data.status
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Nenhum dado para atualizar")
+    
+    result = await db.users.update_one({"id": user_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    return {"message": "Usuário atualizado com sucesso"}
 
 @api_router.patch("/admin/users/{user_id}/approve")
 async def approve_user(user_id: str, admin: dict = Depends(get_admin_user)):
