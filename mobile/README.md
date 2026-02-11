@@ -88,7 +88,7 @@ npx eas-cli submit --platform ios
 
 O app se conecta ao backend em:
 ```
-https://keyboard-modal-fix.preview.emergentagent.com/api
+https://finance-offline-4.preview.emergentagent.com/api
 ```
 
 Para mudar a URL do backend, edite o arquivo:

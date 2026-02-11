@@ -7,7 +7,7 @@
 - ✅ Nginx: RUNNING
 
 ## 🌐 URL de Acesso
-**https://keyboard-modal-fix.preview.emergentagent.com**
+**https://finance-offline-4.preview.emergentagent.com**
 
 ## 🔐 Credenciais
 - **Email**: Pedrohcarvalho1997@gmail.com

@@ -269,7 +269,7 @@ Página de Entradas > Topo (antes dos cards)
 
 ## 🚀 COMO ACESSAR
 
-**URL**: https://keyboard-modal-fix.preview.emergentagent.com
+**URL**: https://finance-offline-4.preview.emergentagent.com
 
 **Login**:
 - Email: Pedrohcarvalho1997@gmail.com

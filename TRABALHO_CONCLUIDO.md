@@ -98,7 +98,7 @@ A documentação inclui:
 
 ## 🌐 Acesso ao Sistema
 
-**URL**: https://keyboard-modal-fix.preview.emergentagent.com
+**URL**: https://finance-offline-4.preview.emergentagent.com
 
 **Credenciais:**
 - Email: Pedrohcarvalho1997@gmail.com
