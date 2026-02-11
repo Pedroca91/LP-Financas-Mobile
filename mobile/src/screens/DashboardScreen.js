@@ -110,14 +110,16 @@ export default function DashboardScreen() {
       }
 
       try {
-        const [highlightsRes, forecastRes, comparisonRes] = await Promise.all([
+        const [highlightsRes, forecastRes, comparisonRes, tipsRes] = await Promise.all([
           analyticsService.getHighlights(month, year),
           analyticsService.getForecast(month, year),
           analyticsService.getComparison(month, year),
+          analyticsService.getTips(month, year),
         ]);
         setHighlights(highlightsRes.data);
         setForecast(forecastRes.data);
         setComparison(comparisonRes.data);
+        setTips(tipsRes.data || []);
       } catch (e) {
         console.log('Analytics not available');
       }
