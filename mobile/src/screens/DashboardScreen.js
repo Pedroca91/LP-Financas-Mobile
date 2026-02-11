@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { LineChart } from 'react-native-chart-kit';
 import { useTheme } from '../contexts/ThemeContext';
@@ -42,7 +43,6 @@ export default function DashboardScreen() {
       setSummary(summaryRes.data);
       setYearlyData(yearlyRes.data);
 
-      // Fetch alerts
       try {
         const alertsRes = await alertService.getDueDateAlerts();
         setAlerts(alertsRes.data || []);
@@ -50,7 +50,6 @@ export default function DashboardScreen() {
         console.log('Alerts not available');
       }
 
-      // Fetch analytics
       try {
         const [highlightsRes, forecastRes, comparisonRes] = await Promise.all([
           analyticsService.getHighlights(month, year),
@@ -100,22 +99,22 @@ export default function DashboardScreen() {
 
   const balance = (summary?.total_income || 0) - (summary?.total_expenses || 0);
 
-  const styles = createStyles(colors);
+  const styles = createStyles(colors, isDark);
 
   const chartConfig = {
-    backgroundColor: colors.surface,
-    backgroundGradientFrom: colors.surface,
-    backgroundGradientTo: colors.surface,
+    backgroundColor: 'transparent',
+    backgroundGradientFrom: colors.cardDark,
+    backgroundGradientTo: colors.primary,
     decimalPlaces: 0,
-    color: (opacity = 1) => colors.primary,
-    labelColor: (opacity = 1) => colors.textSecondary,
+    color: (opacity = 1) => colors.gold,
+    labelColor: (opacity = 1) => '#94a3b8',
     style: {
       borderRadius: 16,
     },
     propsForDots: {
       r: '4',
       strokeWidth: '2',
-      stroke: colors.primary,
+      stroke: colors.gold,
     },
   };
 
@@ -136,13 +135,13 @@ export default function DashboardScreen() {
       datasets: [
         {
           data: incomeData.slice(-6).map(v => v || 0),
-          color: (opacity = 1) => colors.income,
-          strokeWidth: 2,
+          color: (opacity = 1) => '#3b82f6',
+          strokeWidth: 3,
         },
         {
           data: expenseData.slice(-6).map(v => v || 0),
-          color: (opacity = 1) => colors.expense,
-          strokeWidth: 2,
+          color: (opacity = 1) => colors.gold,
+          strokeWidth: 3,
         },
       ],
       legend: ['Receitas', 'Despesas'],
@@ -157,38 +156,43 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style="light" />
       
       {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Olá, {user?.name?.split(' ')[0]}!</Text>
-          <Text style={styles.headerSubtitle}>Bem-vindo ao LP Finanças</Text>
+      <LinearGradient
+        colors={[colors.primary, colors.primaryLight]}
+        style={styles.header}
+      >
+        <View style={styles.headerContent}>
+          <View>
+            <Text style={styles.greeting}>Olá, {user?.name?.split(' ')[0]}!</Text>
+            <Text style={styles.headerSubtitle}>Bem-vindo ao LP Finanças</Text>
+          </View>
+          <View style={styles.headerActions}>
+            <TouchableOpacity onPress={toggleTheme} style={styles.iconButton}>
+              <Ionicons name={isDark ? 'sunny' : 'moon'} size={22} color={colors.gold} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={logout} style={styles.iconButton}>
+              <Ionicons name="log-out-outline" size={22} color={colors.gold} />
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={styles.headerActions}>
-          <TouchableOpacity onPress={toggleTheme} style={styles.iconButton}>
-            <Ionicons name={isDark ? 'sunny' : 'moon'} size={22} color={colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={logout} style={styles.iconButton}>
-            <Ionicons name="log-out-outline" size={22} color={colors.text} />
-          </TouchableOpacity>
-        </View>
-      </View>
+      </LinearGradient>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.gold} />
         }
       >
         {/* Month Selector */}
         <View style={styles.monthSelector}>
           <TouchableOpacity onPress={() => navigateMonth(-1)} style={styles.monthButton}>
-            <Ionicons name="chevron-back" size={24} color={colors.primary} />
+            <Ionicons name="chevron-back" size={24} color={colors.gold} />
           </TouchableOpacity>
           <Text style={styles.monthText}>{formatMonth(month, year)}</Text>
           <TouchableOpacity onPress={() => navigateMonth(1)} style={styles.monthButton}>
-            <Ionicons name="chevron-forward" size={24} color={colors.primary} />
+            <Ionicons name="chevron-forward" size={24} color={colors.gold} />
           </TouchableOpacity>
         </View>
 
@@ -235,59 +239,91 @@ export default function DashboardScreen() {
         )}
 
         {/* Balance Card */}
-        <View style={[styles.balanceCard, { backgroundColor: colors.primary }]}>
-          <Text style={styles.balanceLabel}>Saldo do Mês</Text>
-          <Text style={styles.balanceValue}>{formatCurrency(balance)}</Text>
+        <View style={styles.balanceCardContainer}>
+          <LinearGradient
+            colors={[colors.cardDark, colors.primaryLight]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.balanceCard}
+          >
+            <Text style={styles.balanceLabel}>Saldo do Mês</Text>
+            <Text style={styles.balanceValue}>{formatCurrency(balance)}</Text>
+          </LinearGradient>
         </View>
 
         {/* Summary Cards */}
         <View style={styles.cardsRow}>
-          <View style={[styles.summaryCard, styles.cardHalf]}>
-            <View style={[styles.cardIcon, { backgroundColor: `${colors.income}20` }]}>
-              <Ionicons name="trending-up" size={24} color={colors.income} />
-            </View>
-            <Text style={styles.cardLabel}>Receitas</Text>
-            <Text style={[styles.cardValue, { color: colors.income }]}>
-              {formatCurrency(summary?.total_income || 0)}
-            </Text>
+          <View style={styles.summaryCard}>
+            <LinearGradient
+              colors={['rgba(201,166,107,0.15)', 'rgba(201,166,107,0.05)']}
+              style={styles.summaryCardGradient}
+            >
+              <Text style={styles.cardLabel}>Receitas</Text>
+              <Text style={[styles.cardValue, { color: colors.income }]}>
+                {formatCurrency(summary?.total_income || 0)}
+              </Text>
+            </LinearGradient>
           </View>
 
-          <View style={[styles.summaryCard, styles.cardHalf]}>
-            <View style={[styles.cardIcon, { backgroundColor: `${colors.expense}20` }]}>
-              <Ionicons name="trending-down" size={24} color={colors.expense} />
-            </View>
-            <Text style={styles.cardLabel}>Despesas</Text>
-            <Text style={[styles.cardValue, { color: colors.expense }]}>
-              {formatCurrency(summary?.total_expenses || 0)}
-            </Text>
+          <View style={styles.summaryCard}>
+            <LinearGradient
+              colors={['rgba(201,166,107,0.15)', 'rgba(201,166,107,0.05)']}
+              style={styles.summaryCardGradient}
+            >
+              <Text style={styles.cardLabel}>Despesas</Text>
+              <Text style={[styles.cardValue, { color: colors.expense }]}>
+                {formatCurrency(summary?.total_expenses || 0)}
+              </Text>
+            </LinearGradient>
           </View>
         </View>
 
         <View style={styles.cardsRow}>
-          <View style={[styles.summaryCard, styles.cardHalf]}>
-            <View style={[styles.cardIcon, { backgroundColor: `${colors.investment}20` }]}>
-              <Ionicons name="bar-chart" size={24} color={colors.investment} />
-            </View>
-            <Text style={styles.cardLabel}>Investimentos</Text>
-            <Text style={[styles.cardValue, { color: colors.investment }]}>
-              {formatCurrency(summary?.total_investments || 0)}
-            </Text>
+          <View style={styles.summaryCard}>
+            <LinearGradient
+              colors={['rgba(201,166,107,0.15)', 'rgba(201,166,107,0.05)']}
+              style={styles.summaryCardGradient}
+            >
+              <Text style={styles.cardLabel}>Investimentos</Text>
+              <Text style={[styles.cardValue, { color: colors.investment }]}>
+                {formatCurrency(summary?.total_investments || 0)}
+              </Text>
+            </LinearGradient>
           </View>
 
-          <View style={[styles.summaryCard, styles.cardHalf]}>
-            <View style={[styles.cardIcon, { backgroundColor: `${colors.warning}20` }]}>
-              <Ionicons name="card" size={24} color={colors.warning} />
-            </View>
-            <Text style={styles.cardLabel}>Cartões</Text>
-            <Text style={[styles.cardValue, { color: colors.warning }]}>
-              {formatCurrency(summary?.credit_card_total || 0)}
-            </Text>
+          <View style={styles.summaryCard}>
+            <LinearGradient
+              colors={['rgba(201,166,107,0.15)', 'rgba(201,166,107,0.05)']}
+              style={styles.summaryCardGradient}
+            >
+              <Text style={styles.cardLabel}>Cartões</Text>
+              <Text style={[styles.cardValue, { color: colors.gold }]}>
+                {formatCurrency(summary?.credit_card_total || 0)}
+              </Text>
+            </LinearGradient>
           </View>
         </View>
 
+        {/* Chart */}
+        {yearlyData && yearlyData.months && yearlyData.months.length > 0 && (
+          <View style={styles.chartContainer}>
+            <Text style={styles.chartTitle}>Evolução Anual</Text>
+            <LineChart
+              data={getChartData()}
+              width={screenWidth - 48}
+              height={220}
+              chartConfig={chartConfig}
+              bezier
+              style={styles.chart}
+              withInnerLines={false}
+              withOuterLines={false}
+            />
+          </View>
+        )}
+
         {/* Análise Avançada */}
         <View style={styles.sectionHeader}>
-          <Ionicons name="analytics" size={20} color={colors.primary} />
+          <Ionicons name="analytics" size={20} color={colors.gold} />
           <Text style={styles.sectionTitle}>Análise Avançada</Text>
         </View>
 
@@ -297,25 +333,23 @@ export default function DashboardScreen() {
             <View style={[styles.highlightCard, { borderLeftColor: colors.income }]}>
               <View style={styles.highlightHeader}>
                 <Ionicons name="arrow-down" size={14} color={colors.income} />
-                <Text style={styles.highlightLabel}>Maior Receita do Mês</Text>
+                <Text style={styles.highlightLabel}>Maior Receita</Text>
               </View>
               <Text style={[styles.highlightValue, { color: colors.income }]}>
                 {formatCurrency(highlights.highest_income?.value || 0)}
               </Text>
               <Text style={styles.highlightDesc}>{highlights.highest_income?.category || 'N/A'}</Text>
-              <Text style={styles.highlightSubDesc}>{highlights.highest_income?.description || 'Sem descrição'}</Text>
             </View>
 
             <View style={[styles.highlightCard, { borderLeftColor: colors.expense }]}>
               <View style={styles.highlightHeader}>
                 <Ionicons name="arrow-up" size={14} color={colors.expense} />
-                <Text style={styles.highlightLabel}>Maior Despesa do Mês</Text>
+                <Text style={styles.highlightLabel}>Maior Despesa</Text>
               </View>
               <Text style={[styles.highlightValue, { color: colors.expense }]}>
                 {formatCurrency(highlights.highest_expense?.value || 0)}
               </Text>
               <Text style={styles.highlightDesc}>{highlights.highest_expense?.category || 'N/A'}</Text>
-              <Text style={styles.highlightSubDesc}>{highlights.highest_expense?.description || 'Sem descrição'}</Text>
             </View>
           </View>
         )}
@@ -323,43 +357,35 @@ export default function DashboardScreen() {
         {/* Previsão de Saldo */}
         {forecast && (
           <View style={styles.forecastCard}>
-            <View style={styles.forecastHeader}>
-              <Ionicons name="eye" size={18} color={colors.primary} />
-              <Text style={styles.forecastTitle}>Previsão de Saldo</Text>
-            </View>
-            
-            <Text style={styles.forecastSubtitle}>Saldo previsto fim do mês</Text>
-            <Text style={[styles.forecastValue, { color: (forecast.predicted_balance || 0) >= 0 ? colors.income : colors.expense }]}>
-              {formatCurrency(forecast.predicted_balance || 0)}
-            </Text>
+            <LinearGradient
+              colors={[colors.cardDark, colors.primaryLight]}
+              style={styles.forecastGradient}
+            >
+              <View style={styles.forecastHeader}>
+                <Ionicons name="eye" size={18} color={colors.gold} />
+                <Text style={styles.forecastTitle}>Previsão de Saldo</Text>
+              </View>
+              
+              <Text style={styles.forecastSubtitle}>Saldo previsto fim do mês</Text>
+              <Text style={[styles.forecastValue, { color: (forecast.predicted_balance || 0) >= 0 ? colors.income : colors.expense }]}>
+                {formatCurrency(forecast.predicted_balance || 0)}
+              </Text>
 
-            <View style={styles.forecastDetails}>
-              <View style={styles.forecastRow}>
-                <Text style={styles.forecastLabel}>Saldo atual:</Text>
-                <Text style={styles.forecastAmount}>{formatCurrency(forecast.current_balance || 0)}</Text>
+              <View style={styles.forecastDetails}>
+                <View style={styles.forecastRow}>
+                  <Text style={styles.forecastLabel}>Saldo atual:</Text>
+                  <Text style={styles.forecastAmount}>{formatCurrency(forecast.current_balance || 0)}</Text>
+                </View>
+                <View style={styles.forecastRow}>
+                  <Text style={styles.forecastLabel}>Receitas pendentes:</Text>
+                  <Text style={[styles.forecastAmount, { color: colors.income }]}>+{formatCurrency(forecast.pending_income || 0)}</Text>
+                </View>
+                <View style={styles.forecastRow}>
+                  <Text style={styles.forecastLabel}>Despesas pendentes:</Text>
+                  <Text style={[styles.forecastAmount, { color: colors.expense }]}>-{formatCurrency(forecast.pending_expenses || 0)}</Text>
+                </View>
               </View>
-              <View style={styles.forecastRow}>
-                <Text style={styles.forecastLabel}>Receitas pendentes:</Text>
-                <Text style={[styles.forecastAmount, { color: colors.income }]}>+{formatCurrency(forecast.pending_income || 0)}</Text>
-              </View>
-              <View style={styles.forecastRow}>
-                <Text style={styles.forecastLabel}>Despesas pendentes:</Text>
-                <Text style={[styles.forecastAmount, { color: colors.expense }]}>-{formatCurrency(forecast.pending_expenses || 0)}</Text>
-              </View>
-            </View>
-
-            {forecast.next_months && forecast.next_months.length > 0 && (
-              <>
-                <View style={styles.forecastDivider} />
-                <Text style={styles.forecastSubtitle}>Próximos 3 meses (baseado em média)</Text>
-                {forecast.next_months.map((m, i) => (
-                  <View key={i} style={styles.forecastRow}>
-                    <Text style={styles.forecastLabel}>{m.month}/{m.year}:</Text>
-                    <Text style={[styles.forecastAmount, { color: colors.primary }]}>{formatCurrency(m.predicted || 0)}</Text>
-                  </View>
-                ))}
-              </>
-            )}
+            </LinearGradient>
           </View>
         )}
 
@@ -367,11 +393,10 @@ export default function DashboardScreen() {
         {comparison && (
           <View style={styles.comparisonCard}>
             <View style={styles.comparisonHeader}>
-              <Ionicons name="swap-horizontal" size={18} color={colors.secondary} />
+              <Ionicons name="swap-horizontal" size={18} color={colors.gold} />
               <Text style={styles.comparisonTitle}>Comparativo</Text>
             </View>
 
-            {/* vs Mês Anterior */}
             <Text style={styles.comparisonSubtitle}>vs Mês Anterior</Text>
             <View style={styles.comparisonRow}>
               <Text style={styles.comparisonLabel}>Receitas</Text>
@@ -391,54 +416,6 @@ export default function DashboardScreen() {
                 {(comparison.vs_last_month?.balance_change || 0) >= 0 ? '↗' : '↘'} {formatPercentage(comparison.vs_last_month?.balance_change)}
               </Text>
             </View>
-
-            {/* vs Mesmo Mês Ano Anterior */}
-            <Text style={[styles.comparisonSubtitle, { marginTop: 16 }]}>vs Mesmo Mês Ano Anterior</Text>
-            <View style={styles.comparisonRow}>
-              <Text style={styles.comparisonLabel}>Receitas</Text>
-              <Text style={[styles.comparisonPercent, { color: (comparison.vs_last_year?.income_change || 0) >= 0 ? colors.income : colors.expense }]}>
-                {(comparison.vs_last_year?.income_change || 0) >= 0 ? '↗' : '↘'} {formatPercentage(comparison.vs_last_year?.income_change)}
-              </Text>
-            </View>
-            <View style={styles.comparisonRow}>
-              <Text style={styles.comparisonLabel}>Despesas</Text>
-              <Text style={[styles.comparisonPercent, { color: (comparison.vs_last_year?.expense_change || 0) <= 0 ? colors.income : colors.expense }]}>
-                {(comparison.vs_last_year?.expense_change || 0) >= 0 ? '↗' : '↘'} {formatPercentage(comparison.vs_last_year?.expense_change)}
-              </Text>
-            </View>
-
-            {/* Valores comparativos */}
-            <View style={styles.comparisonValues}>
-              <View style={styles.comparisonValueItem}>
-                <Text style={styles.comparisonValueLabel}>Atual</Text>
-                <Text style={styles.comparisonValueAmount}>{formatCurrency(comparison.current?.balance || 0)}</Text>
-              </View>
-              <View style={styles.comparisonValueItem}>
-                <Text style={styles.comparisonValueLabel}>Mês Ant.</Text>
-                <Text style={styles.comparisonValueAmount}>{formatCurrency(comparison.vs_last_month?.previous_balance || 0)}</Text>
-              </View>
-              <View style={styles.comparisonValueItem}>
-                <Text style={styles.comparisonValueLabel}>Ano Ant.</Text>
-                <Text style={styles.comparisonValueAmount}>{formatCurrency(comparison.vs_last_year?.previous_balance || 0)}</Text>
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* Chart */}
-        {yearlyData && yearlyData.months && yearlyData.months.length > 0 && (
-          <View style={styles.chartContainer}>
-            <Text style={styles.chartTitle}>Evolução Anual</Text>
-            <LineChart
-              data={getChartData()}
-              width={screenWidth - 48}
-              height={220}
-              chartConfig={chartConfig}
-              bezier
-              style={styles.chart}
-              withInnerLines={false}
-              withOuterLines={false}
-            />
           </View>
         )}
 
@@ -493,28 +470,31 @@ export default function DashboardScreen() {
   );
 }
 
-const createStyles = (colors) => StyleSheet.create({
+const createStyles = (colors, isDark) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
   },
   header: {
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 16,
-    backgroundColor: colors.surface,
   },
   greeting: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text,
+    color: '#ffffff',
   },
   headerSubtitle: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: colors.gold,
     marginTop: 2,
   },
   headerActions: {
@@ -522,9 +502,9 @@ const createStyles = (colors) => StyleSheet.create({
     gap: 8,
   },
   iconButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: colors.background,
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   monthSelector: {
     flexDirection: 'row',
@@ -534,16 +514,17 @@ const createStyles = (colors) => StyleSheet.create({
     paddingVertical: 16,
   },
   monthButton: {
-    padding: 8,
-    borderRadius: 8,
+    padding: 10,
+    borderRadius: 12,
     backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.borderGold,
   },
   monthText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.text,
   },
-  // Alerts
   alertsContainer: {
     marginHorizontal: 20,
     marginBottom: 16,
@@ -597,71 +578,69 @@ const createStyles = (colors) => StyleSheet.create({
   alertDismiss: {
     padding: 4,
   },
-  // Balance Card
-  balanceCard: {
+  balanceCardContainer: {
     marginHorizontal: 20,
+    marginBottom: 16,
+  },
+  balanceCard: {
     padding: 24,
     borderRadius: 20,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(201,166,107,0.3)',
   },
   balanceLabel: {
     fontSize: 16,
-    color: 'rgba(255,255,255,0.8)',
+    color: colors.gold,
     marginBottom: 8,
   },
   balanceValue: {
-    fontSize: 36,
+    fontSize: 40,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#ffffff',
   },
-  // Cards Row
   cardsRow: {
     flexDirection: 'row',
     paddingHorizontal: 20,
-    marginTop: 16,
+    marginBottom: 12,
     gap: 12,
   },
   summaryCard: {
-    backgroundColor: colors.surface,
+    flex: 1,
     borderRadius: 16,
-    padding: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.borderGold,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 3,
   },
-  cardHalf: {
-    flex: 1,
-  },
-  cardIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
+  summaryCardGradient: {
+    padding: 16,
     alignItems: 'center',
-    marginBottom: 12,
+    backgroundColor: colors.surface,
   },
   cardLabel: {
     fontSize: 14,
     color: colors.textSecondary,
-    marginBottom: 4,
+    marginBottom: 8,
   },
   cardValue: {
     fontSize: 18,
     fontWeight: '700',
   },
-  // Section Header
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginTop: 24,
+    marginTop: 20,
     marginBottom: 12,
     gap: 8,
   },
@@ -670,13 +649,14 @@ const createStyles = (colors) => StyleSheet.create({
     fontWeight: '600',
     color: colors.text,
   },
-  // Highlight Cards
   highlightCard: {
     flex: 1,
     backgroundColor: colors.surface,
     borderRadius: 12,
     borderLeftWidth: 4,
     padding: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   highlightHeader: {
     flexDirection: 'row',
@@ -689,7 +669,7 @@ const createStyles = (colors) => StyleSheet.create({
     color: colors.textSecondary,
   },
   highlightValue: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 4,
   },
@@ -698,16 +678,18 @@ const createStyles = (colors) => StyleSheet.create({
     fontWeight: '600',
     color: colors.text,
   },
-  highlightSubDesc: {
-    fontSize: 11,
-    color: colors.textSecondary,
-  },
-  // Forecast Card
   forecastCard: {
-    backgroundColor: colors.surface,
     marginHorizontal: 20,
-    marginTop: 16,
+    marginTop: 12,
     borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  forecastGradient: {
     padding: 16,
   },
   forecastHeader: {
@@ -719,11 +701,11 @@ const createStyles = (colors) => StyleSheet.create({
   forecastTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: '#ffffff',
   },
   forecastSubtitle: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: colors.gold,
     marginBottom: 4,
   },
   forecastValue: {
@@ -740,25 +722,21 @@ const createStyles = (colors) => StyleSheet.create({
   },
   forecastLabel: {
     fontSize: 13,
-    color: colors.textSecondary,
+    color: '#94a3b8',
   },
   forecastAmount: {
     fontSize: 13,
     fontWeight: '600',
-    color: colors.text,
+    color: '#ffffff',
   },
-  forecastDivider: {
-    height: 1,
-    backgroundColor: colors.border,
-    marginVertical: 12,
-  },
-  // Comparison Card
   comparisonCard: {
     backgroundColor: colors.surface,
     marginHorizontal: 20,
     marginTop: 16,
     borderRadius: 16,
     padding: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   comparisonHeader: {
     flexDirection: 'row',
@@ -774,7 +752,7 @@ const createStyles = (colors) => StyleSheet.create({
   comparisonSubtitle: {
     fontSize: 12,
     fontWeight: '600',
-    color: colors.textSecondary,
+    color: colors.gold,
     marginBottom: 8,
   },
   comparisonRow: {
@@ -791,34 +769,14 @@ const createStyles = (colors) => StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
-  comparisonValues: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 16,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  comparisonValueItem: {
-    alignItems: 'center',
-  },
-  comparisonValueLabel: {
-    fontSize: 11,
-    color: colors.textSecondary,
-    marginBottom: 4,
-  },
-  comparisonValueAmount: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  // Chart
   chartContainer: {
-    marginTop: 24,
+    marginTop: 20,
     marginHorizontal: 20,
     backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   chartTitle: {
     fontSize: 18,
@@ -829,13 +787,14 @@ const createStyles = (colors) => StyleSheet.create({
   chart: {
     borderRadius: 16,
   },
-  // Stats
   statsContainer: {
-    marginTop: 24,
+    marginTop: 20,
     marginHorizontal: 20,
     backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   statsTitle: {
     fontSize: 18,
