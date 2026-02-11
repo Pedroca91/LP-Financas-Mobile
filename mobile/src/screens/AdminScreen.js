@@ -8,6 +8,9 @@ import {
   Alert,
   FlatList,
   Switch,
+  Modal,
+  TextInput,
+  ScrollView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,6 +22,13 @@ export default function AdminScreen() {
   const { colors, isDark } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [users, setUsers] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'user',
+  });
 
   const fetchUsers = async () => {
     try {
@@ -38,6 +48,32 @@ export default function AdminScreen() {
     await fetchUsers();
     setRefreshing(false);
   }, []);
+
+  const openAddModal = () => {
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      role: 'user',
+    });
+    setModalVisible(true);
+  };
+
+  const handleCreateUser = async () => {
+    if (!formData.name || !formData.email || !formData.password) {
+      Alert.alert('Erro', 'Preencha todos os campos');
+      return;
+    }
+    try {
+      await api.post('/admin/users', formData);
+      setModalVisible(false);
+      fetchUsers();
+      Alert.alert('Sucesso', 'Usuário criado com sucesso!');
+    } catch (error) {
+      const message = error.response?.data?.detail || 'Erro ao criar usuário';
+      Alert.alert('Erro', message);
+    }
+  };
 
   const toggleActive = async (user) => {
     try {
@@ -149,6 +185,9 @@ export default function AdminScreen() {
       >
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Administração</Text>
+          <TouchableOpacity onPress={openAddModal} style={styles.addButton}>
+            <Ionicons name="person-add" size={22} color={colors.primary} />
+          </TouchableOpacity>
         </View>
         <Text style={styles.headerSubtitle}>{users.length} usuários cadastrados</Text>
       </LinearGradient>
@@ -166,6 +205,91 @@ export default function AdminScreen() {
           </View>
         }
       />
+
+      {/* Modal Criar Usuário */}
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <LinearGradient
+              colors={[colors.primary, colors.primaryLight]}
+              style={styles.modalHeader}
+            >
+              <Text style={styles.modalTitle}>Novo Usuário</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#ffffff" />
+              </TouchableOpacity>
+            </LinearGradient>
+            
+            <ScrollView style={styles.modalBody}>
+              <Text style={styles.inputLabel}>Nome *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Nome completo"
+                placeholderTextColor={colors.textSecondary}
+                value={formData.name}
+                onChangeText={(t) => setFormData({ ...formData, name: t })}
+              />
+
+              <Text style={styles.inputLabel}>E-mail *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="email@exemplo.com"
+                placeholderTextColor={colors.textSecondary}
+                value={formData.email}
+                onChangeText={(t) => setFormData({ ...formData, email: t })}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+
+              <Text style={styles.inputLabel}>Senha *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Mínimo 6 caracteres"
+                placeholderTextColor={colors.textSecondary}
+                value={formData.password}
+                onChangeText={(t) => setFormData({ ...formData, password: t })}
+                secureTextEntry
+              />
+
+              <Text style={styles.inputLabel}>Tipo de Usuário</Text>
+              <View style={styles.roleSelector}>
+                <TouchableOpacity
+                  style={[styles.roleOption, formData.role === 'user' && styles.roleOptionSelected]}
+                  onPress={() => setFormData({ ...formData, role: 'user' })}
+                >
+                  <Ionicons name="person" size={18} color={formData.role === 'user' ? '#fff' : colors.text} />
+                  <Text style={[styles.roleOptionText, formData.role === 'user' && styles.roleOptionTextSelected]}>
+                    Usuário
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.roleOption, formData.role === 'admin' && styles.roleOptionAdminSelected]}
+                  onPress={() => setFormData({ ...formData, role: 'admin' })}
+                >
+                  <Ionicons name="shield-checkmark" size={18} color={formData.role === 'admin' ? '#fff' : colors.text} />
+                  <Text style={[styles.roleOptionText, formData.role === 'admin' && styles.roleOptionTextSelected]}>
+                    Admin
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+            
+            <View style={styles.modalFooter}>
+              <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveButton} onPress={handleCreateUser}>
+                <LinearGradient
+                  colors={[colors.gold, colors.copper]}
+                  style={styles.saveButtonGradient}
+                >
+                  <Text style={styles.saveButtonText}>Criar Usuário</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -191,6 +315,14 @@ const createStyles = (colors, isDark) => StyleSheet.create({
     fontSize: 24, 
     fontWeight: 'bold', 
     color: '#ffffff' 
+  },
+  addButton: {
+    backgroundColor: colors.gold,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerSubtitle: {
     fontSize: 14,
@@ -288,5 +420,115 @@ const createStyles = (colors, isDark) => StyleSheet.create({
     fontSize: 16, 
     color: colors.textSecondary, 
     marginTop: 16 
+  },
+  modalOverlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(0,0,0,0.5)', 
+    justifyContent: 'flex-end' 
+  },
+  modalContent: { 
+    backgroundColor: colors.surface, 
+    borderTopLeftRadius: 24, 
+    borderTopRightRadius: 24,
+    maxHeight: '85%',
+  },
+  modalHeader: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    padding: 20, 
+    borderTopLeftRadius: 24, 
+    borderTopRightRadius: 24 
+  },
+  modalTitle: { 
+    fontSize: 20, 
+    fontWeight: '600', 
+    color: '#ffffff' 
+  },
+  modalBody: { 
+    padding: 20 
+  },
+  inputLabel: { 
+    fontSize: 14, 
+    fontWeight: '600', 
+    color: colors.text, 
+    marginBottom: 8, 
+    marginTop: 12 
+  },
+  input: { 
+    backgroundColor: colors.background, 
+    borderRadius: 12, 
+    padding: 16, 
+    fontSize: 16, 
+    color: colors.text, 
+    borderWidth: 1, 
+    borderColor: colors.border 
+  },
+  roleSelector: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  roleOption: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  roleOptionSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  roleOptionAdminSelected: {
+    backgroundColor: colors.gold,
+    borderColor: colors.gold,
+  },
+  roleOptionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  roleOptionTextSelected: {
+    color: '#ffffff',
+  },
+  modalFooter: { 
+    flexDirection: 'row', 
+    padding: 20, 
+    gap: 12, 
+    borderTopWidth: 1, 
+    borderTopColor: colors.border 
+  },
+  cancelButton: { 
+    flex: 1, 
+    paddingVertical: 16, 
+    borderRadius: 12, 
+    backgroundColor: colors.background, 
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  cancelButtonText: { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    color: colors.text 
+  },
+  saveButton: { 
+    flex: 1, 
+    borderRadius: 12, 
+    overflow: 'hidden' 
+  },
+  saveButtonGradient: { 
+    paddingVertical: 16, 
+    alignItems: 'center' 
+  },
+  saveButtonText: { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    color: '#ffffff' 
   },
 });
