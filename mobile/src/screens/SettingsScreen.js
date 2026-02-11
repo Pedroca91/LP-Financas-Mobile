@@ -13,6 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFinance } from '../contexts/FinanceContext';
@@ -93,92 +94,136 @@ export default function SettingsScreen({ navigation }) {
       case 'income': return colors.income;
       case 'expense': return colors.expense;
       case 'investment': return colors.investment;
-      default: return colors.primary;
+      default: return colors.gold;
     }
   };
 
-  const styles = createStyles(colors);
+  const styles = createStyles(colors, isDark);
 
   const renderCategory = ({ item }) => (
-    <TouchableOpacity style={styles.categoryItem} onPress={() => openEditModal(item)} onLongPress={() => handleDelete(item)}>
-      <View style={[styles.categoryIcon, { backgroundColor: `${getTypeColor(item.type)}20` }]}>
-        <Ionicons name="folder" size={20} color={getTypeColor(item.type)} />
+    <TouchableOpacity style={styles.listItem} onPress={() => openEditModal(item)} onLongPress={() => handleDelete(item)}>
+      <View style={styles.listItemLeft}>
+        <View style={[styles.typeIndicator, { backgroundColor: getTypeColor(item.type) }]} />
+        <Text style={styles.categoryName}>{item.name}</Text>
       </View>
-      <Text style={styles.categoryName}>{item.name}</Text>
       <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Categorias</Text>
-        <TouchableOpacity onPress={openAddModal} style={styles.addButton}>
-          <Ionicons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
+      <StatusBar style="light" />
+      
+      {/* Header */}
+      <LinearGradient
+        colors={[colors.primary, colors.primaryLight]}
+        style={styles.header}
+      >
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Categorias</Text>
+          <TouchableOpacity onPress={openAddModal} style={styles.addButton}>
+            <Ionicons name="add" size={24} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
 
+      {/* Tabs */}
       <View style={styles.tabContainer}>
-        <TouchableOpacity style={[styles.tab, activeTab === 'income' && { backgroundColor: colors.income }]} onPress={() => setActiveTab('income')}>
-          <Text style={[styles.tabText, activeTab === 'income' && styles.tabTextActive]}>Receitas</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.tab, activeTab === 'expense' && { backgroundColor: colors.expense }]} onPress={() => setActiveTab('expense')}>
-          <Text style={[styles.tabText, activeTab === 'expense' && styles.tabTextActive]}>Despesas</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.tab, activeTab === 'investment' && { backgroundColor: colors.investment }]} onPress={() => setActiveTab('investment')}>
-          <Text style={[styles.tabText, activeTab === 'investment' && styles.tabTextActive]}>Investimentos</Text>
-        </TouchableOpacity>
+        {[
+          { id: 'expense', label: 'Despesas', color: colors.expense },
+          { id: 'income', label: 'Receitas', color: colors.income },
+          { id: 'investment', label: 'Investimentos', color: colors.investment },
+        ].map((tab) => (
+          <TouchableOpacity
+            key={tab.id}
+            style={[styles.tab, activeTab === tab.id && { borderBottomColor: tab.color }]}
+            onPress={() => setActiveTab(tab.id)}
+          >
+            <Text style={[styles.tabText, activeTab === tab.id && { color: tab.color }]}>
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
+      {/* List */}
       <FlatList
         data={filteredCategories}
         keyExtractor={(item) => item.id}
         renderItem={renderCategory}
         contentContainerStyle={styles.listContainer}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.gold} />}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="folder-open-outline" size={64} color={colors.textSecondary} />
-            <Text style={styles.emptyText}>Nenhuma categoria</Text>
+            <Ionicons name="folder-outline" size={64} color={colors.gold} />
+            <Text style={styles.emptyText}>Nenhuma categoria cadastrada</Text>
           </View>
         }
       />
 
+      {/* Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.modalOverlay}
         >
           <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{editingCategory ? 'Editar' : 'Nova'} Categoria</Text>
+            <LinearGradient
+              colors={[colors.primary, colors.primaryLight]}
+              style={styles.modalHeader}
+            >
+              <Text style={styles.modalTitle}>
+                {editingCategory ? 'Editar' : 'Nova'} Categoria
+              </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
+                <Ionicons name="close" size={24} color="#ffffff" />
               </TouchableOpacity>
-            </View>
+            </LinearGradient>
+
             <View style={styles.modalBody}>
-              <Text style={styles.inputLabel}>Nome *</Text>
-              <TextInput style={styles.input} placeholder="Nome da categoria" placeholderTextColor={colors.textSecondary} value={formData.name} onChangeText={(t) => setFormData({ ...formData, name: t })} autoFocus />
+              <Text style={styles.inputLabel}>Nome da Categoria *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ex: Alimentação"
+                placeholderTextColor={colors.textSecondary}
+                value={formData.name}
+                onChangeText={(text) => setFormData({ ...formData, name: text })}
+              />
 
               <Text style={styles.inputLabel}>Tipo</Text>
               <View style={styles.typeSelector}>
-                {[{ id: 'income', label: 'Receita' }, { id: 'expense', label: 'Despesa' }, { id: 'investment', label: 'Investimento' }].map((t) => (
-                  <TouchableOpacity key={t.id} style={[styles.typeOption, formData.type === t.id && { backgroundColor: getTypeColor(t.id), borderColor: getTypeColor(t.id) }]} onPress={() => setFormData({ ...formData, type: t.id })}>
-                    <Text style={[styles.typeOptionText, formData.type === t.id && styles.typeOptionTextSelected]}>{t.label}</Text>
+                {[
+                  { id: 'expense', label: 'Despesa', color: colors.expense },
+                  { id: 'income', label: 'Receita', color: colors.income },
+                  { id: 'investment', label: 'Investimento', color: colors.investment },
+                ].map((type) => (
+                  <TouchableOpacity
+                    key={type.id}
+                    style={[
+                      styles.typeOption,
+                      formData.type === type.id && { backgroundColor: type.color, borderColor: type.color },
+                    ]}
+                    onPress={() => setFormData({ ...formData, type: type.id })}
+                  >
+                    <Text style={[styles.typeOptionText, formData.type === type.id && { color: '#fff' }]}>
+                      {type.label}
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
+
             <View style={styles.modalFooter}>
               <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
                 <Text style={styles.cancelButtonText}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                <Text style={styles.saveButtonText}>Salvar</Text>
+                <LinearGradient
+                  colors={[colors.gold, colors.copper]}
+                  style={styles.saveButtonGradient}
+                >
+                  <Text style={styles.saveButtonText}>Salvar</Text>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           </View>
@@ -188,36 +233,190 @@ export default function SettingsScreen({ navigation }) {
   );
 }
 
-const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16, backgroundColor: colors.surface },
-  backButton: { padding: 4 },
-  headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.text },
-  addButton: { backgroundColor: colors.primary, width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
-  tabContainer: { flexDirection: 'row', marginHorizontal: 20, marginTop: 16, backgroundColor: colors.surface, borderRadius: 12, padding: 4 },
-  tab: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
-  tabText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
-  tabTextActive: { color: '#fff' },
-  listContainer: { padding: 20, paddingBottom: 100 },
-  categoryItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: 12, padding: 16, marginBottom: 8 },
-  categoryIcon: { width: 40, height: 40, borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
-  categoryName: { flex: 1, fontSize: 16, fontWeight: '500', color: colors.text },
-  emptyContainer: { alignItems: 'center', paddingTop: 60 },
-  emptyText: { fontSize: 16, color: colors.textSecondary, marginTop: 16 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: colors.border },
-  modalTitle: { fontSize: 20, fontWeight: '600', color: colors.text },
-  modalBody: { padding: 20 },
-  inputLabel: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: 8, marginTop: 16 },
-  input: { backgroundColor: colors.background, borderRadius: 12, padding: 16, fontSize: 16, color: colors.text, borderWidth: 1, borderColor: colors.border },
-  typeSelector: { flexDirection: 'row', gap: 8 },
-  typeOption: { flex: 1, paddingVertical: 12, borderRadius: 12, backgroundColor: colors.background, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
-  typeOptionText: { fontSize: 12, fontWeight: '600', color: colors.text },
-  typeOptionTextSelected: { color: '#fff' },
-  modalFooter: { flexDirection: 'row', padding: 20, gap: 12, borderTopWidth: 1, borderTopColor: colors.border },
-  cancelButton: { flex: 1, paddingVertical: 16, borderRadius: 12, backgroundColor: colors.background, alignItems: 'center' },
-  cancelButtonText: { fontSize: 16, fontWeight: '600', color: colors.text },
-  saveButton: { flex: 1, paddingVertical: 16, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center' },
-  saveButtonText: { fontSize: 16, fontWeight: '600', color: '#fff' },
+const createStyles = (colors, isDark) => StyleSheet.create({
+  container: { 
+    flex: 1, 
+    backgroundColor: colors.background 
+  },
+  header: {
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerTitle: { 
+    fontSize: 24, 
+    fontWeight: 'bold', 
+    color: '#ffffff' 
+  },
+  addButton: { 
+    backgroundColor: colors.gold, 
+    width: 44, 
+    height: 44, 
+    borderRadius: 22, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderRadius: 12,
+    padding: 4,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  listContainer: { 
+    padding: 20, 
+    paddingBottom: 100 
+  },
+  listItem: { 
+    flexDirection: 'row', 
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.surface, 
+    borderRadius: 12, 
+    padding: 16, 
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  listItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  typeIndicator: {
+    width: 4,
+    height: 24,
+    borderRadius: 2,
+    marginRight: 12,
+  },
+  categoryName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.text,
+  },
+  emptyContainer: { 
+    alignItems: 'center', 
+    paddingTop: 60 
+  },
+  emptyText: { 
+    fontSize: 16, 
+    color: colors.textSecondary, 
+    marginTop: 16 
+  },
+  modalOverlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(0,0,0,0.5)', 
+    justifyContent: 'flex-end' 
+  },
+  modalContent: { 
+    backgroundColor: colors.surface, 
+    borderTopLeftRadius: 24, 
+    borderTopRightRadius: 24 
+  },
+  modalHeader: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    padding: 20, 
+    borderTopLeftRadius: 24, 
+    borderTopRightRadius: 24 
+  },
+  modalTitle: { 
+    fontSize: 20, 
+    fontWeight: '600', 
+    color: '#ffffff' 
+  },
+  modalBody: { 
+    padding: 20 
+  },
+  inputLabel: { 
+    fontSize: 14, 
+    fontWeight: '600', 
+    color: colors.text, 
+    marginBottom: 8, 
+    marginTop: 8 
+  },
+  input: { 
+    backgroundColor: colors.background, 
+    borderRadius: 12, 
+    padding: 16, 
+    fontSize: 16, 
+    color: colors.text, 
+    borderWidth: 1, 
+    borderColor: colors.border 
+  },
+  typeSelector: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 4,
+  },
+  typeOption: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  typeOptionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  modalFooter: { 
+    flexDirection: 'row', 
+    padding: 20, 
+    gap: 12, 
+    borderTopWidth: 1, 
+    borderTopColor: colors.border 
+  },
+  cancelButton: { 
+    flex: 1, 
+    paddingVertical: 16, 
+    borderRadius: 12, 
+    backgroundColor: colors.background, 
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  cancelButtonText: { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    color: colors.text 
+  },
+  saveButton: { 
+    flex: 1, 
+    borderRadius: 12, 
+    overflow: 'hidden' 
+  },
+  saveButtonGradient: { 
+    paddingVertical: 16, 
+    alignItems: 'center' 
+  },
+  saveButtonText: { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    color: '#ffffff' 
+  },
 });
