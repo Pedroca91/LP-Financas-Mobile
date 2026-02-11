@@ -98,7 +98,7 @@ A documentação inclui:
 
 ## 🌐 Acesso ao Sistema
 
-**URL**: https://app-review-test.preview.emergentagent.com
+**URL**: https://keyboard-modal-fix.preview.emergentagent.com
 
 **Credenciais:**
 - Email: Pedrohcarvalho1997@gmail.com

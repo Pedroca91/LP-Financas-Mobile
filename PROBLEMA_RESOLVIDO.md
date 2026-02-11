@@ -67,7 +67,7 @@ SyntaxError: .../Dashboard.jsx: Expecting Unicode escape sequence \uXXXX (141:22
 
 ## 🎯 SISTEMA OPERACIONAL
 
-**URL**: https://app-review-test.preview.emergentagent.com
+**URL**: https://keyboard-modal-fix.preview.emergentagent.com
 
 **Credenciais**:
 - Email: Pedrohcarvalho1997@gmail.com
