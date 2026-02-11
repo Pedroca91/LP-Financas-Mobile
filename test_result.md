@@ -320,7 +320,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "API Push Notifications"
+    - "API Push Notifications"  
     - "API Import Bank Statement"
   stuck_tasks: []
   test_all: false
@@ -329,3 +329,5 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "Implementei todas as funcionalidades pendentes: 1) Firebase Push Notifications com hooks e service worker, 2) PWA com modo offline, instalação e atualização, 3) Importação de Extrato Bancário CSV. Testar os novos endpoints de: /api/notifications/token e /api/import/bank-statement, /api/import/parse-csv"
+  - agent: "testing"
+    message: "✅ BACKEND TESTING COMPLETED: All targeted endpoints tested successfully! Push Notifications endpoints (POST/GET/DELETE /api/notifications/token, /api/notifications/status) working perfectly with proper authentication and response structure. Bank Statement Import endpoints (/api/import/parse-csv, /api/import/bank-statement) functioning correctly - CSV parsing detects columns automatically, imports create actual database records (verified in incomes/expenses). All edge cases handled properly. Total: 6/6 tests PASSED. Authentication works with provided credentials. Ready for main agent to summarize and finish."
