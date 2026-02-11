@@ -397,9 +397,14 @@ export default function DashboardScreen() {
                 <Text style={styles.highlightLabel}>Maior Receita</Text>
               </View>
               <Text style={[styles.highlightValue, { color: colors.income }]}>
-                {formatCurrency(highlights.highest_income?.value || 0)}
+                {formatCurrency(highlights.largest_income?.value || 0)}
               </Text>
-              <Text style={styles.highlightDesc}>{highlights.highest_income?.category || 'N/A'}</Text>
+              <Text style={styles.highlightDesc}>
+                {highlights.largest_income?.description || 'N/A'}
+              </Text>
+              <Text style={[styles.highlightDesc, { fontSize: 11, opacity: 0.7 }]}>
+                {highlights.largest_income?.category || ''}
+              </Text>
             </View>
 
             <View style={[styles.highlightCard, { borderLeftColor: colors.expense }]}>
@@ -408,9 +413,14 @@ export default function DashboardScreen() {
                 <Text style={styles.highlightLabel}>Maior Despesa</Text>
               </View>
               <Text style={[styles.highlightValue, { color: colors.expense }]}>
-                {formatCurrency(highlights.highest_expense?.value || 0)}
+                {formatCurrency(highlights.largest_expense?.value || 0)}
               </Text>
-              <Text style={styles.highlightDesc}>{highlights.highest_expense?.category || 'N/A'}</Text>
+              <Text style={styles.highlightDesc}>
+                {highlights.largest_expense?.description || 'N/A'}
+              </Text>
+              <Text style={[styles.highlightDesc, { fontSize: 11, opacity: 0.7 }]}>
+                {highlights.largest_expense?.category || ''}
+              </Text>
             </View>
           </View>
         )}
