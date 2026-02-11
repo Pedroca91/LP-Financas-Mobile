@@ -477,6 +477,19 @@ const createStyles = (colors, isDark) => StyleSheet.create({
     borderRadius: 8,
     backgroundColor: `${colors.expense}15`,
   },
+  approveButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  approveButtonText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '600',
+  },
   emptyContainer: { 
     alignItems: 'center', 
     paddingTop: 60 
