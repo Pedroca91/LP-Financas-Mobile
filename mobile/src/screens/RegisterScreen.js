@@ -12,6 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -59,23 +60,34 @@ export default function RegisterScreen({ navigation }) {
     }
   };
 
-  const styles = createStyles(colors);
+  const styles = createStyles(colors, isDark);
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style="light" />
+      
+      {/* Background Gradient */}
+      <LinearGradient
+        colors={isDark ? ['#0a1628', '#1a2d47', '#243a5e'] : ['#1a2d47', '#243a5e', '#2d4a6a']}
+        style={styles.gradientBackground}
+      />
       
       <ScrollView showsVerticalScrollIndicator={false}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
+          <Ionicons name="arrow-back" size={24} color={colors.gold} />
         </TouchableOpacity>
 
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <Ionicons name="person-add" size={50} color={colors.primary} />
+            <LinearGradient
+              colors={[colors.gold, colors.copper]}
+              style={styles.logoGradient}
+            >
+              <Ionicons name="person-add" size={40} color="#fff" />
+            </LinearGradient>
           </View>
           <Text style={styles.title}>Criar Conta</Text>
           <Text style={styles.subtitle}>Preencha seus dados para se cadastrar</Text>
@@ -83,11 +95,11 @@ export default function RegisterScreen({ navigation }) {
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Ionicons name="person-outline" size={20} color={colors.textSecondary} style={styles.inputIcon} />
+            <Ionicons name="person-outline" size={20} color={colors.gold} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Nome completo"
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={isDark ? '#7a8fa3' : '#94a3b8'}
               value={name}
               onChangeText={setName}
               autoCapitalize="words"
@@ -95,11 +107,11 @@ export default function RegisterScreen({ navigation }) {
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="mail-outline" size={20} color={colors.textSecondary} style={styles.inputIcon} />
+            <Ionicons name="mail-outline" size={20} color={colors.gold} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="E-mail"
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={isDark ? '#7a8fa3' : '#94a3b8'}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -109,11 +121,11 @@ export default function RegisterScreen({ navigation }) {
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} style={styles.inputIcon} />
+            <Ionicons name="lock-closed-outline" size={20} color={colors.gold} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Senha"
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={isDark ? '#7a8fa3' : '#94a3b8'}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -122,17 +134,17 @@ export default function RegisterScreen({ navigation }) {
               <Ionicons
                 name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                 size={20}
-                color={colors.textSecondary}
+                color={colors.gold}
               />
             </TouchableOpacity>
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} style={styles.inputIcon} />
+            <Ionicons name="lock-closed-outline" size={20} color={colors.gold} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Confirmar senha"
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={isDark ? '#7a8fa3' : '#94a3b8'}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry={!showPassword}
@@ -144,11 +156,18 @@ export default function RegisterScreen({ navigation }) {
             onPress={handleRegister}
             disabled={loading}
           >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.registerButtonText}>Cadastrar</Text>
-            )}
+            <LinearGradient
+              colors={[colors.gold, colors.copper]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.registerButtonGradient}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.registerButtonText}>Cadastrar</Text>
+              )}
+            </LinearGradient>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -164,56 +183,71 @@ export default function RegisterScreen({ navigation }) {
   );
 }
 
-const createStyles = (colors) => StyleSheet.create({
+const createStyles = (colors, isDark) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
-    padding: 24,
+    backgroundColor: colors.primary,
+  },
+  gradientBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   backButton: {
-    marginTop: 20,
+    marginTop: 50,
+    marginLeft: 20,
     marginBottom: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     alignItems: 'center',
     marginBottom: 30,
   },
   logoContainer: {
+    marginBottom: 16,
+  },
+  logoGradient: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: colors.gold,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: colors.text,
+    color: '#ffffff',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: colors.gold,
     textAlign: 'center',
   },
   form: {
     flex: 1,
+    paddingHorizontal: 24,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)',
+    borderRadius: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: isDark ? 'rgba(201,166,107,0.3)' : 'rgba(201,166,107,0.4)',
   },
   inputIcon: {
     padding: 16,
@@ -223,22 +257,24 @@ const createStyles = (colors) => StyleSheet.create({
     paddingVertical: 16,
     paddingRight: 16,
     fontSize: 16,
-    color: colors.text,
+    color: '#ffffff',
   },
   eyeButton: {
     padding: 16,
   },
   registerButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
+    borderRadius: 16,
     marginTop: 8,
-    shadowColor: colors.primary,
+    overflow: 'hidden',
+    shadowColor: colors.gold,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.4,
     shadowRadius: 8,
     elevation: 5,
+  },
+  registerButtonGradient: {
+    paddingVertical: 18,
+    alignItems: 'center',
   },
   registerButtonDisabled: {
     opacity: 0.7,
@@ -246,7 +282,7 @@ const createStyles = (colors) => StyleSheet.create({
   registerButtonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   loginLink: {
     flexDirection: 'row',
@@ -255,11 +291,11 @@ const createStyles = (colors) => StyleSheet.create({
     marginBottom: 40,
   },
   loginText: {
-    color: colors.textSecondary,
+    color: '#94a3b8',
     fontSize: 16,
   },
   loginTextBold: {
-    color: colors.primary,
+    color: colors.gold,
     fontSize: 16,
     fontWeight: '600',
   },
