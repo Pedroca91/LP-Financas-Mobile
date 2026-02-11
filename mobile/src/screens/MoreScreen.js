@@ -28,6 +28,10 @@ export default function MoreScreen({ navigation }) {
     );
   };
 
+  const navigateTo = (screen) => {
+    navigation.navigate(screen);
+  };
+
   const styles = createStyles(colors);
 
   const MenuItem = ({ icon, title, subtitle, onPress, rightComponent }) => (
@@ -51,7 +55,11 @@ export default function MoreScreen({ navigation }) {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Mais</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Perfil</Text>
+        <View style={{ width: 32 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -100,21 +108,21 @@ export default function MoreScreen({ navigation }) {
             icon="folder-outline"
             title="Categorias"
             subtitle="Gerenciar categorias"
-            onPress={() => Alert.alert('Em breve', 'Funcionalidade em desenvolvimento')}
+            onPress={() => navigateTo('Categorias')}
           />
           
           <MenuItem
             icon="card-outline"
             title="Cartões de Crédito"
             subtitle="Gerenciar cartões"
-            onPress={() => Alert.alert('Em breve', 'Funcionalidade em desenvolvimento')}
+            onPress={() => navigation.navigate('Cartões')}
           />
           
           <MenuItem
             icon="repeat-outline"
             title="Lançamentos Recorrentes"
             subtitle="Gerenciar recorrências"
-            onPress={() => Alert.alert('Em breve', 'Funcionalidade em desenvolvimento')}
+            onPress={() => navigateTo('Recorrentes')}
           />
         </View>
 
@@ -126,7 +134,7 @@ export default function MoreScreen({ navigation }) {
               icon="people-outline"
               title="Gerenciar Usuários"
               subtitle="Aprovar e bloquear usuários"
-              onPress={() => Alert.alert('Em breve', 'Funcionalidade em desenvolvimento')}
+              onPress={() => navigateTo('Admin')}
             />
           </View>
         )}
@@ -165,13 +173,19 @@ const createStyles = (colors) => StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 16,
     backgroundColor: colors.surface,
   },
+  backButton: {
+    padding: 4,
+  },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: colors.text,
   },
