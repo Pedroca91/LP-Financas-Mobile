@@ -62,7 +62,19 @@ class UserResponse(BaseModel):
     name: str
     role: str
     status: str
+    is_active: bool = True
     created_at: str
+
+class AdminCreateUser(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    role: str = "user"
+
+class AdminUpdateUser(BaseModel):
+    is_active: Optional[bool] = None
+    role: Optional[str] = None
+    status: Optional[str] = None
 
 class CategoryBase(BaseModel):
     name: str
