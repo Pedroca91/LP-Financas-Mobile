@@ -524,6 +524,51 @@ export default function DashboardScreen() {
 
         <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Floating AI Assistant Button */}
+      <TouchableOpacity
+        style={styles.floatingButtonContainer}
+        onPress={navigateToChat}
+        activeOpacity={0.8}
+      >
+        <Animated.View
+          style={[
+            styles.floatingButtonGlow,
+            {
+              opacity: glowAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.3, 0.8],
+              }),
+              transform: [
+                {
+                  scale: glowAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [1, 1.3],
+                  }),
+                },
+              ],
+            },
+          ]}
+        />
+        <Animated.View
+          style={[
+            styles.floatingButton,
+            {
+              transform: [{ scale: pulseAnim }],
+            },
+          ]}
+        >
+          <LinearGradient
+            colors={['#8b5cf6', '#6366f1']}
+            style={styles.floatingButtonGradient}
+          >
+            <Ionicons name="chatbubbles" size={28} color="#fff" />
+          </LinearGradient>
+        </Animated.View>
+        <View style={styles.floatingButtonBadge}>
+          <Text style={styles.floatingButtonBadgeText}>IA</Text>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 }
