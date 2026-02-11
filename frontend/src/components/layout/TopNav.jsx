@@ -26,7 +26,9 @@ import {
   Menu,
   X,
   CreditCard,
-  RefreshCw
+  RefreshCw,
+  Target,
+  Bot
 } from 'lucide-react';
 
 const navItems = [
@@ -37,6 +39,8 @@ const navItems = [
   { path: '/recorrentes', label: 'Recorrentes', icon: RefreshCw },
   { path: '/cartoes', label: 'Cartões', icon: CreditCard },
   { path: '/investimentos', label: 'Investimentos', icon: TrendingUp },
+  { path: '/metas', label: 'Metas', icon: Target },
+  { path: '/assistente', label: 'Assistente', icon: Bot },
   { path: '/relatorios', label: 'Relatórios', icon: FileText },
   { path: '/ajustes', label: 'Ajustes', icon: Settings },
 ];
