@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,10 @@ import {
   Modal,
   TextInput,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -33,6 +37,8 @@ export default function IncomesScreen() {
     date: new Date().toISOString().split('T')[0],
     status: 'pending',
   });
+  
+  const scrollViewRef = useRef(null);
 
   useEffect(() => {
     fetchIncomes();
@@ -270,124 +276,145 @@ export default function IncomesScreen() {
 
       {/* Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <LinearGradient
-              colors={[colors.primary, colors.primaryLight]}
-              style={styles.modalHeader}
-            >
-              <Text style={styles.modalTitle}>
-                {editingIncome ? 'Editar Receita' : 'Nova Receita'}
-              </Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#ffffff" />
-              </TouchableOpacity>
-            </LinearGradient>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+          keyboardVerticalOffset={0}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.modalContent}>
+              <LinearGradient
+                colors={[colors.primary, colors.primaryLight]}
+                style={styles.modalHeader}
+              >
+                <Text style={styles.modalTitle}>
+                  {editingIncome ? 'Editar Receita' : 'Nova Receita'}
+                </Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Ionicons name="close" size={24} color="#ffffff" />
+                </TouchableOpacity>
+              </LinearGradient>
 
-            <ScrollView style={styles.modalBody}>
-              <Text style={styles.inputLabel}>Categoria *</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
-                {incomeCategories.map((cat) => (
+              <ScrollView 
+                ref={scrollViewRef}
+                style={styles.modalBody}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 40 }}
+              >
+                <Text style={styles.inputLabel}>Categoria *</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
+                  {incomeCategories.map((cat) => (
+                    <TouchableOpacity
+                      key={cat.id}
+                      style={[
+                        styles.categoryChip,
+                        formData.category_id === cat.id && styles.categoryChipSelected,
+                      ]}
+                      onPress={() => setFormData({ ...formData, category_id: cat.id })}
+                    >
+                      <Text
+                        style={[
+                          styles.categoryChipText,
+                          formData.category_id === cat.id && styles.categoryChipTextSelected,
+                        ]}
+                      >
+                        {cat.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
+                <Text style={styles.inputLabel}>Descrição</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Descrição (opcional)"
+                  placeholderTextColor={colors.textSecondary}
+                  value={formData.description}
+                  onChangeText={(text) => setFormData({ ...formData, description: text })}
+                  onFocus={() => {
+                    setTimeout(() => scrollViewRef.current?.scrollTo({ y: 50, animated: true }), 100);
+                  }}
+                />
+
+                <Text style={styles.inputLabel}>Valor *</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="0,00"
+                  placeholderTextColor={colors.textSecondary}
+                  value={formData.value}
+                  onChangeText={(text) => setFormData({ ...formData, value: text })}
+                  keyboardType="decimal-pad"
+                  onFocus={() => {
+                    setTimeout(() => scrollViewRef.current?.scrollTo({ y: 120, animated: true }), 100);
+                  }}
+                />
+
+                <Text style={styles.inputLabel}>Data</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor={colors.textSecondary}
+                  value={formData.date}
+                  onChangeText={(text) => setFormData({ ...formData, date: text })}
+                  onFocus={() => {
+                    setTimeout(() => scrollViewRef.current?.scrollTo({ y: 180, animated: true }), 100);
+                  }}
+                />
+
+                <Text style={styles.inputLabel}>Status</Text>
+                <View style={styles.statusToggle}>
                   <TouchableOpacity
-                    key={cat.id}
                     style={[
-                      styles.categoryChip,
-                      formData.category_id === cat.id && styles.categoryChipSelected,
+                      styles.statusOption,
+                      formData.status === 'pending' && styles.statusOptionSelected,
                     ]}
-                    onPress={() => setFormData({ ...formData, category_id: cat.id })}
+                    onPress={() => setFormData({ ...formData, status: 'pending' })}
                   >
                     <Text
                       style={[
-                        styles.categoryChipText,
-                        formData.category_id === cat.id && styles.categoryChipTextSelected,
+                        styles.statusOptionText,
+                        formData.status === 'pending' && styles.statusOptionTextSelected,
                       ]}
                     >
-                      {cat.name}
+                      Pendente
                     </Text>
                   </TouchableOpacity>
-                ))}
+                  <TouchableOpacity
+                    style={[
+                      styles.statusOption,
+                      formData.status === 'received' && styles.statusOptionSelectedGreen,
+                    ]}
+                    onPress={() => setFormData({ ...formData, status: 'received' })}
+                  >
+                    <Text
+                      style={[
+                        styles.statusOptionText,
+                        formData.status === 'received' && styles.statusOptionTextSelected,
+                      ]}
+                    >
+                      Recebido
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </ScrollView>
 
-              <Text style={styles.inputLabel}>Descrição</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Descrição (opcional)"
-                placeholderTextColor={colors.textSecondary}
-                value={formData.description}
-                onChangeText={(text) => setFormData({ ...formData, description: text })}
-              />
-
-              <Text style={styles.inputLabel}>Valor *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="0,00"
-                placeholderTextColor={colors.textSecondary}
-                value={formData.value}
-                onChangeText={(text) => setFormData({ ...formData, value: text })}
-                keyboardType="decimal-pad"
-              />
-
-              <Text style={styles.inputLabel}>Data</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={colors.textSecondary}
-                value={formData.date}
-                onChangeText={(text) => setFormData({ ...formData, date: text })}
-              />
-
-              <Text style={styles.inputLabel}>Status</Text>
-              <View style={styles.statusToggle}>
-                <TouchableOpacity
-                  style={[
-                    styles.statusOption,
-                    formData.status === 'pending' && styles.statusOptionSelected,
-                  ]}
-                  onPress={() => setFormData({ ...formData, status: 'pending' })}
-                >
-                  <Text
-                    style={[
-                      styles.statusOptionText,
-                      formData.status === 'pending' && styles.statusOptionTextSelected,
-                    ]}
-                  >
-                    Pendente
-                  </Text>
+              <View style={styles.modalFooter}>
+                <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                  <Text style={styles.cancelButtonText}>Cancelar</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.statusOption,
-                    formData.status === 'received' && styles.statusOptionSelectedGreen,
-                  ]}
-                  onPress={() => setFormData({ ...formData, status: 'received' })}
-                >
-                  <Text
-                    style={[
-                      styles.statusOptionText,
-                      formData.status === 'received' && styles.statusOptionTextSelected,
-                    ]}
+                <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                  <LinearGradient
+                    colors={[colors.gold, colors.copper]}
+                    style={styles.saveButtonGradient}
                   >
-                    Recebido
-                  </Text>
+                    <Text style={styles.saveButtonText}>Salvar</Text>
+                  </LinearGradient>
                 </TouchableOpacity>
               </View>
-            </ScrollView>
-
-            <View style={styles.modalFooter}>
-              <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                <LinearGradient
-                  colors={[colors.gold, colors.copper]}
-                  style={styles.saveButtonGradient}
-                >
-                  <Text style={styles.saveButtonText}>Salvar</Text>
-                </LinearGradient>
-              </TouchableOpacity>
             </View>
-          </View>
-        </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -536,7 +563,7 @@ const createStyles = (colors, isDark) => StyleSheet.create({
     backgroundColor: colors.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    maxHeight: '85%',
+    maxHeight: '80%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -553,6 +580,7 @@ const createStyles = (colors, isDark) => StyleSheet.create({
   },
   modalBody: {
     padding: 20,
+    maxHeight: 400,
   },
   inputLabel: {
     fontSize: 14,
