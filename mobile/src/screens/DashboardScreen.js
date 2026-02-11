@@ -268,34 +268,39 @@ export default function DashboardScreen() {
               <Ionicons name={showAlerts ? 'chevron-up' : 'chevron-down'} size={20} color={colors.textSecondary} />
             </TouchableOpacity>
             
-            {alerts.slice(0, 5).map((alert, index) => (
-              <View 
-                key={index} 
-                style={[
-                  styles.alertItem, 
-                  { borderLeftColor: alert.days_until <= 1 ? colors.expense : colors.warning }
-                ]}
-              >
-                <View style={styles.alertContent}>
-                  <View style={styles.alertIconContainer}>
-                    <Ionicons 
-                      name={alert.days_until <= 1 ? 'alert-circle' : 'time'} 
-                      size={18} 
-                      color={alert.days_until <= 1 ? colors.expense : colors.warning} 
-                    />
+            {alerts.slice(0, 5).map((alert, index) => {
+              const daysUntil = alert.days !== undefined ? alert.days : alert.days_until;
+              const isUrgent = daysUntil <= 1;
+              
+              return (
+                <View 
+                  key={index} 
+                  style={[
+                    styles.alertItem, 
+                    { borderLeftColor: isUrgent ? colors.expense : colors.warning }
+                  ]}
+                >
+                  <View style={styles.alertContent}>
+                    <View style={styles.alertIconContainer}>
+                      <Ionicons 
+                        name={isUrgent ? 'alert-circle' : 'time'} 
+                        size={18} 
+                        color={isUrgent ? colors.expense : colors.warning} 
+                      />
+                    </View>
+                    <View style={styles.alertInfo}>
+                      <Text style={[styles.alertText, { color: isUrgent ? colors.expense : colors.warning }]}>
+                        {alert.message || `${alert.description || alert.category} vence em ${daysUntil} dia(s)`}
+                      </Text>
+                      <Text style={styles.alertValue}>Valor: {formatCurrency(alert.value)}</Text>
+                    </View>
                   </View>
-                  <View style={styles.alertInfo}>
-                    <Text style={[styles.alertText, { color: alert.days_until <= 1 ? colors.expense : colors.warning }]}>
-                      {alert.description || alert.category} vence em {alert.days_until} dia(s)
-                    </Text>
-                    <Text style={styles.alertValue}>Valor: {formatCurrency(alert.value)}</Text>
-                  </View>
+                  <TouchableOpacity onPress={() => dismissAlert(index)} style={styles.alertDismiss}>
+                    <Ionicons name="close" size={18} color={colors.textSecondary} />
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity onPress={() => dismissAlert(index)} style={styles.alertDismiss}>
-                  <Ionicons name="close" size={18} color={colors.textSecondary} />
-                </TouchableOpacity>
-              </View>
-            ))}
+              );
+            })}
           </View>
         )}
 
