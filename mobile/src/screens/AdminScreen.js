@@ -319,12 +319,17 @@ const createStyles = (colors, isDark) => StyleSheet.create({
     color: '#ffffff' 
   },
   addButton: {
-    backgroundColor: colors.gold,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    backgroundColor: '#c9a66b',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#c9a66b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 5,
   },
   headerSubtitle: {
     fontSize: 14,
