@@ -243,8 +243,9 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Alerts and Trends */}
+      {/* Personalized Tips and Trends */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PersonalizedTips />
         <TrendsPanel month={selectedMonth} year={selectedYear} />
       </div>
     </div>
