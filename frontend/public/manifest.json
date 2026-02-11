@@ -1,0 +1,59 @@
+{
+  "name": "LP Finanças",
+  "short_name": "LP Finanças",
+  "description": "Gerencie suas finanças pessoais de forma inteligente",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#14b8a6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/logo192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Nova Despesa",
+      "short_name": "Despesa",
+      "description": "Adicionar nova despesa",
+      "url": "/saidas?action=new",
+      "icons": [{ "src": "/logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Nova Receita",
+      "short_name": "Receita",
+      "description": "Adicionar nova receita",
+      "url": "/entradas?action=new",
+      "icons": [{ "src": "/logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Assistente",
+      "short_name": "Chat",
+      "description": "Falar com o assistente",
+      "url": "/assistente",
+      "icons": [{ "src": "/logo192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
+}
