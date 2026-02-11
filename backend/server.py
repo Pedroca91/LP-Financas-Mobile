@@ -2278,6 +2278,48 @@ async def get_personalized_tips(user: dict = Depends(get_current_user)):
 
 # ==================== HEALTH CHECK ====================
 
+# ==================== PUSH NOTIFICATIONS ROUTES ====================
+
+class NotificationToken(BaseModel):
+    token: str
+
+@api_router.post("/notifications/token")
+async def save_notification_token(data: NotificationToken, user: dict = Depends(get_current_user)):
+    """Save FCM token for push notifications"""
+    await db.notification_tokens.update_one(
+        {"user_id": user["id"]},
+        {
+            "$set": {
+                "user_id": user["id"],
+                "token": data.token,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            },
+            "$setOnInsert": {
+                "id": str(uuid.uuid4()),
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+        },
+        upsert=True
+    )
+    return {"success": True}
+
+@api_router.get("/notifications/status")
+async def get_notification_status(user: dict = Depends(get_current_user)):
+    """Get notification status for user"""
+    token_doc = await db.notification_tokens.find_one({"user_id": user["id"]})
+    return {
+        "enabled": token_doc is not None,
+        "updated_at": token_doc.get("updated_at") if token_doc else None
+    }
+
+@api_router.delete("/notifications/token")
+async def remove_notification_token(user: dict = Depends(get_current_user)):
+    """Remove FCM token to disable notifications"""
+    await db.notification_tokens.delete_one({"user_id": user["id"]})
+    return {"success": True}
+
+# ==================== ROOT ROUTES ====================
+
 @api_router.get("/")
 async def root():
     return {"message": "CarFinanças API is running", "version": "1.0.0"}
