@@ -220,6 +220,12 @@ export default function ExpensesScreen() {
               </Text>
             )}
           </View>
+          {item.status === 'paid' && item.payment_date && (
+            <View style={styles.paidDateContainer}>
+              <Ionicons name="checkmark-circle" size={12} color={colors.income} />
+              <Text style={styles.paidDateText}>Pago em: {formatDate(item.payment_date)}</Text>
+            </View>
+          )}
         </View>
       </View>
       <Text style={[styles.listItemValue, { color: colors.expense }]}>
