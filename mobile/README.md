@@ -88,7 +88,7 @@ npx eas-cli submit --platform ios
 
 O app se conecta ao backend em:
 ```
-https://mobile-migration-11.preview.emergentagent.com/api
+https://app-review-test.preview.emergentagent.com/api
 ```
 
 Para mudar a URL do backend, edite o arquivo:

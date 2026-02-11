@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // URL do backend - ajuste conforme necessário
-const API_URL = 'https://mobile-migration-11.preview.emergentagent.com/api';
+const API_URL = 'https://app-review-test.preview.emergentagent.com/api';
 
 const api = axios.create({
   baseURL: API_URL,
