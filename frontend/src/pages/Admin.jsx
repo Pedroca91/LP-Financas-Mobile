@@ -266,54 +266,66 @@ export function Admin() {
                   <TableCell>{getRoleBadge(user.role)}</TableCell>
                   <TableCell>{getStatusBadge(user.status)}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    {new Date(user.created_at).toLocaleDateString('pt-BR')}
+                    {user.created_at ? new Date(user.created_at).toLocaleDateString('pt-BR') : '-'}
                   </TableCell>
                   <TableCell>
-                    {user.id !== currentUser?.id && (
-                      <div className="flex items-center gap-1">
-                        {user.status === 'pending' && (
+                    <div className="flex items-center gap-1">
+                      {/* Botão Editar - sempre visível */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(user)}
+                        title="Editar"
+                        data-testid={`edit-user-${user.id}`}
+                      >
+                        <Pencil className="h-4 w-4 text-blue-500" />
+                      </Button>
+                      {user.id !== currentUser?.id && (
+                        <>
+                          {user.status === 'pending' && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleApprove(user.id)}
+                              title="Aprovar"
+                              data-testid={`approve-user-${user.id}`}
+                            >
+                              <UserCheck className="h-4 w-4 text-emerald-500" />
+                            </Button>
+                          )}
+                          {user.status === 'approved' && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleBlock(user.id)}
+                              title="Bloquear"
+                              data-testid={`block-user-${user.id}`}
+                            >
+                              <UserX className="h-4 w-4 text-yellow-500" />
+                            </Button>
+                          )}
+                          {user.status === 'blocked' && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleApprove(user.id)}
+                              title="Desbloquear"
+                            >
+                              <UserCheck className="h-4 w-4 text-emerald-500" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleApprove(user.id)}
-                            title="Aprovar"
-                            data-testid={`approve-user-${user.id}`}
+                            onClick={() => handleDelete(user.id)}
+                            title="Excluir"
+                            data-testid={`delete-user-${user.id}`}
                           >
-                            <UserCheck className="h-4 w-4 text-emerald-500" />
+                            <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
-                        )}
-                        {user.status === 'approved' && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleBlock(user.id)}
-                            title="Bloquear"
-                            data-testid={`block-user-${user.id}`}
-                          >
-                            <UserX className="h-4 w-4 text-yellow-500" />
-                          </Button>
-                        )}
-                        {user.status === 'blocked' && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleApprove(user.id)}
-                            title="Desbloquear"
-                          >
-                            <UserCheck className="h-4 w-4 text-emerald-500" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(user.id)}
-                          title="Excluir"
-                          data-testid={`delete-user-${user.id}`}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    )}
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
