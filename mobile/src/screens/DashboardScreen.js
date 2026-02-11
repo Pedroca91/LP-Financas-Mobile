@@ -159,7 +159,8 @@ export default function DashboardScreen() {
     setAlerts(prev => prev.filter((_, i) => i !== index));
   };
 
-  const balance = (summary?.total_income || 0) - ((summary?.total_expense || 0) + (summary?.total_expense_pending || 0));
+  // Saldo = Receitas Recebidas - Despesas Pagas (não inclui pendentes)
+  const balance = (summary?.total_income || 0) - (summary?.total_expense || 0);
 
   const styles = createStyles(colors, isDark);
 
