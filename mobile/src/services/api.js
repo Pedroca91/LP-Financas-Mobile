@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// URL do backend - ajuste conforme necessário
+// URL do backend
 const API_URL = 'https://finance-offline-4.preview.emergentagent.com/api';
 
 const api = axios.create({
@@ -102,4 +102,40 @@ export const investmentService = {
 export const alertService = {
   getBudgetAlerts: (month, year) => api.get(`/alerts/budget?month=${month}&year=${year}`),
   getDueDateAlerts: () => api.get('/alerts/due-dates'),
+};
+
+// Goals (Metas)
+export const goalService = {
+  getAll: () => api.get('/goals'),
+  create: (data) => api.post('/goals', data),
+  update: (id, data) => api.put(`/goals/${id}`, data),
+  delete: (id) => api.delete(`/goals/${id}`),
+  addContribution: (goalId, data) => api.post(`/goals/${goalId}/contributions`, data),
+  getContributions: (goalId) => api.get(`/goals/${goalId}/contributions`),
+};
+
+// Chat (Assistente IA)
+export const chatService = {
+  sendMessage: (message, sessionId) => api.post('/chat', { message, session_id: sessionId }),
+  getHistory: (sessionId) => api.get(`/chat/history${sessionId ? `?session_id=${sessionId}` : ''}`),
+  getSessions: () => api.get('/chat/sessions'),
+  deleteSession: (sessionId) => api.delete(`/chat/sessions/${sessionId}`),
+};
+
+// Import (Extrato Bancário)
+export const importService = {
+  parseCSV: (content) => api.post('/import/parse-csv', content, {
+    headers: { 'Content-Type': 'text/plain' }
+  }),
+  importTransactions: (transactions, defaultCategoryId) => api.post('/import/bank-statement', {
+    transactions,
+    default_category_id: defaultCategoryId
+  }),
+};
+
+// Notifications
+export const notificationService = {
+  saveToken: (token) => api.post('/notifications/token', { token }),
+  getStatus: () => api.get('/notifications/status'),
+  removeToken: () => api.delete('/notifications/token'),
 };
