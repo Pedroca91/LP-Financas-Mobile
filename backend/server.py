@@ -63,7 +63,7 @@ class UserResponse(BaseModel):
     role: str
     status: str
     is_active: bool = True
-    created_at: str
+    created_at: Optional[str] = None
 
 class AdminCreateUser(BaseModel):
     name: str
