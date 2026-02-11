@@ -125,6 +125,7 @@ export default function DashboardScreen() {
       }
     } catch (error) {
       console.error('Error fetching dashboard:', error);
+      console.error('Error details:', error.response?.status, error.response?.data, error.config?.url);
     }
   }, [month, year]);
 
