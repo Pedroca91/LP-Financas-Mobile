@@ -420,6 +420,120 @@ async def login(credentials: UserLogin):
 async def get_me(user: dict = Depends(get_current_user)):
     return user
 
+# ==================== GOOGLE AUTH ROUTES ====================
+
+@api_router.post("/auth/google/session")
+async def google_auth_session(data: GoogleAuthSession, response: Response):
+    """Process Google OAuth session_id from Emergent Auth"""
+    try:
+        # Call Emergent Auth to get session data
+        async with httpx.AsyncClient() as client:
+            result = await client.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": data.session_id},
+                timeout=30.0
+            )
+            
+            if result.status_code != 200:
+                raise HTTPException(status_code=401, detail="Invalid session")
+            
+            session_data = result.json()
+        
+        # Check if user already exists
+        existing_user = await db.users.find_one({"email": session_data["email"]})
+        
+        if existing_user:
+            # Update existing user with Google data
+            await db.users.update_one(
+                {"email": session_data["email"]},
+                {"$set": {
+                    "name": session_data.get("name", existing_user["name"]),
+                    "picture": session_data.get("picture"),
+                    "google_id": session_data.get("id")
+                }}
+            )
+            user_id = existing_user["id"]
+            role = existing_user["role"]
+            status = existing_user["status"]
+        else:
+            # Create new user
+            user_id = str(uuid.uuid4())
+            new_user = {
+                "id": user_id,
+                "email": session_data["email"],
+                "name": session_data.get("name", session_data["email"].split("@")[0]),
+                "picture": session_data.get("picture"),
+                "google_id": session_data.get("id"),
+                "role": "user",
+                "status": "approved",  # Auto-approve Google users
+                "is_active": True,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.users.insert_one(new_user)
+            
+            # Create default categories for new user
+            await create_default_categories(user_id)
+            
+            role = "user"
+            status = "approved"
+        
+        # Check if blocked
+        if status == "blocked":
+            raise HTTPException(status_code=403, detail="Account blocked")
+        
+        # Create JWT token
+        token = create_token(user_id, role)
+        
+        # Store session
+        session_token = session_data.get("session_token", str(uuid.uuid4()))
+        await db.user_sessions.update_one(
+            {"user_id": user_id},
+            {"$set": {
+                "user_id": user_id,
+                "session_token": session_token,
+                "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+                "created_at": datetime.now(timezone.utc)
+            }},
+            upsert=True
+        )
+        
+        # Set httpOnly cookie
+        response.set_cookie(
+            key="session_token",
+            value=token,
+            httponly=True,
+            secure=True,
+            samesite="none",
+            max_age=7 * 24 * 60 * 60,  # 7 days
+            path="/"
+        )
+        
+        # Get updated user data
+        user = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+        
+        return {
+            "token": token,
+            "user": {
+                "id": user["id"],
+                "email": user["email"],
+                "name": user["name"],
+                "role": user["role"],
+                "status": user["status"],
+                "picture": user.get("picture")
+            }
+        }
+        
+    except httpx.RequestError as e:
+        logging.error(f"Google auth error: {e}")
+        raise HTTPException(status_code=500, detail="Authentication service unavailable")
+
+@api_router.post("/auth/logout")
+async def logout(response: Response, user: dict = Depends(get_current_user)):
+    """Logout user and clear session"""
+    await db.user_sessions.delete_one({"user_id": user["id"]})
+    response.delete_cookie("session_token", path="/")
+    return {"message": "Logged out successfully"}
+
 # ==================== ADMIN ROUTES ====================
 
 @api_router.get("/admin/users", response_model=List[UserResponse])
