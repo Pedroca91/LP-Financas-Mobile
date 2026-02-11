@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-import { LineChart, PieChart } from 'react-native-chart-kit';
+import { LineChart } from 'react-native-chart-kit';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useFinance } from '../contexts/FinanceContext';
@@ -22,31 +22,35 @@ const screenWidth = Dimensions.get('window').width;
 export default function DashboardScreen() {
   const { colors, isDark, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
-  const { month, year, changeMonth, summary, fetchSummary, loading } = useFinance();
+  const { month, year, changeMonth, refreshAll } = useFinance();
   
   const [refreshing, setRefreshing] = useState(false);
+  const [summary, setSummary] = useState(null);
   const [yearlyData, setYearlyData] = useState(null);
 
-  useEffect(() => {
-    fetchSummary();
-    fetchYearlyData();
+  const fetchData = useCallback(async () => {
+    try {
+      const [summaryRes, yearlyRes] = await Promise.all([
+        dashboardService.getSummary(month, year),
+        dashboardService.getYearly(year),
+      ]);
+      setSummary(summaryRes.data);
+      setYearlyData(yearlyRes.data);
+    } catch (error) {
+      console.error('Error fetching dashboard:', error);
+    }
   }, [month, year]);
 
-  const fetchYearlyData = async () => {
-    try {
-      const response = await dashboardService.getYearly(year);
-      setYearlyData(response.data);
-    } catch (error) {
-      console.error('Error fetching yearly data:', error);
-    }
-  };
+  useEffect(() => {
+    fetchData();
+  }, [month, year, fetchData]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchSummary();
-    await fetchYearlyData();
+    await fetchData();
+    await refreshAll();
     setRefreshing(false);
-  }, [month, year]);
+  }, [fetchData, refreshAll]);
 
   const navigateMonth = (direction) => {
     let newMonth = month + direction;
@@ -85,7 +89,7 @@ export default function DashboardScreen() {
   };
 
   const getChartData = () => {
-    if (!yearlyData?.months) {
+    if (!yearlyData?.months || yearlyData.months.length === 0) {
       return {
         labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
         datasets: [{ data: [0, 0, 0, 0, 0, 0] }],
@@ -100,12 +104,12 @@ export default function DashboardScreen() {
       labels: labels.slice(-6),
       datasets: [
         {
-          data: incomeData.slice(-6),
+          data: incomeData.slice(-6).map(v => v || 0),
           color: (opacity = 1) => colors.income,
           strokeWidth: 2,
         },
         {
-          data: expenseData.slice(-6),
+          data: expenseData.slice(-6).map(v => v || 0),
           color: (opacity = 1) => colors.expense,
           strokeWidth: 2,
         },
@@ -203,7 +207,7 @@ export default function DashboardScreen() {
         </View>
 
         {/* Chart */}
-        {yearlyData && (
+        {yearlyData && yearlyData.months && yearlyData.months.length > 0 && (
           <View style={styles.chartContainer}>
             <Text style={styles.chartTitle}>Evolução Anual</Text>
             <LineChart

@@ -9,7 +9,8 @@ import {
   Modal,
   TextInput,
   FlatList,
-  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,7 +18,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useFinance } from '../contexts/FinanceContext';
 import { categoryService } from '../services/api';
 
-export default function SettingsScreen() {
+export default function SettingsScreen({ navigation }) {
   const { colors, isDark } = useTheme();
   const { categories, fetchCategories } = useFinance();
   
@@ -112,6 +113,9 @@ export default function SettingsScreen() {
     <View style={styles.container}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Categorias</Text>
         <TouchableOpacity onPress={openAddModal} style={styles.addButton}>
           <Ionicons name="add" size={24} color="#fff" />
@@ -145,7 +149,10 @@ export default function SettingsScreen() {
       />
 
       <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{editingCategory ? 'Editar' : 'Nova'} Categoria</Text>
@@ -175,7 +182,7 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -184,7 +191,8 @@ export default function SettingsScreen() {
 const createStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16, backgroundColor: colors.surface },
-  headerTitle: { fontSize: 24, fontWeight: 'bold', color: colors.text },
+  backButton: { padding: 4 },
+  headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.text },
   addButton: { backgroundColor: colors.primary, width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
   tabContainer: { flexDirection: 'row', marginHorizontal: 20, marginTop: 16, backgroundColor: colors.surface, borderRadius: 12, padding: 4 },
   tab: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },

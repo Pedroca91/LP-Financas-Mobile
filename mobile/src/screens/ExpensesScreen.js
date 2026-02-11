@@ -10,6 +10,8 @@ import {
   TextInput,
   FlatList,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,6 +32,7 @@ export default function ExpensesScreen() {
     description: '',
     value: '',
     date: new Date().toISOString().split('T')[0],
+    due_date: new Date().toISOString().split('T')[0],
     payment_method: 'cash',
     credit_card_id: null,
     installments: 1,
@@ -65,11 +68,13 @@ export default function ExpensesScreen() {
 
   const openAddModal = () => {
     setEditingExpense(null);
+    const today = new Date().toISOString().split('T')[0];
     setFormData({
       category_id: expenseCategories[0]?.id || '',
       description: '',
       value: '',
-      date: new Date().toISOString().split('T')[0],
+      date: today,
+      due_date: today,
       payment_method: 'cash',
       credit_card_id: null,
       installments: 1,
@@ -85,6 +90,7 @@ export default function ExpensesScreen() {
       description: expense.description || '',
       value: expense.value.toString(),
       date: expense.date,
+      due_date: expense.due_date || expense.date,
       payment_method: expense.payment_method,
       credit_card_id: expense.credit_card_id,
       installments: expense.installments,
@@ -100,6 +106,7 @@ export default function ExpensesScreen() {
     }
 
     try {
+      const today = new Date().toISOString().split('T')[0];
       const data = {
         ...formData,
         value: parseFloat(formData.value.replace(',', '.')),
@@ -107,6 +114,7 @@ export default function ExpensesScreen() {
         current_installment: 1,
         month,
         year,
+        payment_date: formData.status === 'paid' ? today : null,
       };
 
       if (editingExpense) {
@@ -147,10 +155,11 @@ export default function ExpensesScreen() {
   const toggleStatus = async (expense) => {
     try {
       const newStatus = expense.status === 'paid' ? 'pending' : 'paid';
+      const today = new Date().toISOString().split('T')[0];
       await expenseService.update(expense.id, {
         ...expense,
         status: newStatus,
-        payment_date: newStatus === 'paid' ? new Date().toISOString().split('T')[0] : null,
+        payment_date: newStatus === 'paid' ? today : null,
       });
       fetchExpenses();
     } catch (error) {
@@ -204,7 +213,7 @@ export default function ExpensesScreen() {
           ) : null}
           <View style={styles.listItemMeta}>
             <Ionicons name={getPaymentMethodIcon(item.payment_method)} size={14} color={colors.textSecondary} />
-            <Text style={styles.listItemDate}>{formatDate(item.date)}</Text>
+            <Text style={styles.listItemDate}>Venc: {formatDate(item.due_date || item.date)}</Text>
             {item.installments > 1 && (
               <Text style={styles.installmentBadge}>
                 {item.current_installment}/{item.installments}x
@@ -279,7 +288,10 @@ export default function ExpensesScreen() {
 
       {/* Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
@@ -290,7 +302,7 @@ export default function ExpensesScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalBody}>
+            <ScrollView style={styles.modalBody} keyboardShouldPersistTaps="handled">
               <Text style={styles.inputLabel}>Categoria *</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
                 {expenseCategories.map((cat) => (
@@ -333,13 +345,13 @@ export default function ExpensesScreen() {
                 keyboardType="decimal-pad"
               />
 
-              <Text style={styles.inputLabel}>Data</Text>
+              <Text style={styles.inputLabel}>Data de Vencimento</Text>
               <TextInput
                 style={styles.input}
                 placeholder="YYYY-MM-DD"
                 placeholderTextColor={colors.textSecondary}
-                value={formData.date}
-                onChangeText={(text) => setFormData({ ...formData, date: text })}
+                value={formData.due_date}
+                onChangeText={(text) => setFormData({ ...formData, due_date: text })}
               />
 
               <Text style={styles.inputLabel}>Forma de Pagamento</Text>
@@ -444,6 +456,7 @@ export default function ExpensesScreen() {
                   </Text>
                 </TouchableOpacity>
               </View>
+              <View style={{ height: 40 }} />
             </ScrollView>
 
             <View style={styles.modalFooter}>
@@ -455,7 +468,7 @@ export default function ExpensesScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
