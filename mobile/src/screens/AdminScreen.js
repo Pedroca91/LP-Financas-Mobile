@@ -75,6 +75,34 @@ export default function AdminScreen() {
     }
   };
 
+  const approveUser = async (user) => {
+    Alert.alert('Aprovar', `Deseja aprovar o usuário ${user.name}?`, [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Aprovar',
+        onPress: async () => {
+          try {
+            await api.put(`/admin/users/${user.id}`, { status: 'approved' });
+            fetchUsers();
+            Alert.alert('Sucesso', 'Usuário aprovado!');
+          } catch (error) {
+            Alert.alert('Erro', 'Não foi possível aprovar');
+          }
+        },
+      },
+    ]);
+  };
+
+  const toggleBlock = async (user) => {
+    try {
+      const newStatus = user.status === 'blocked' ? 'approved' : 'blocked';
+      await api.put(`/admin/users/${user.id}`, { status: newStatus });
+      fetchUsers();
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível atualizar');
+    }
+  };
+
   const toggleActive = async (user) => {
     try {
       await api.put(`/admin/users/${user.id}`, { is_active: !user.is_active });
