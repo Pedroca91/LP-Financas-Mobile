@@ -36,6 +36,7 @@ export default function DashboardScreen() {
   const [highlights, setHighlights] = useState(null);
   const [forecast, setForecast] = useState(null);
   const [comparison, setComparison] = useState(null);
+  const [tips, setTips] = useState([]);
   const [showAlerts, setShowAlerts] = useState(true);
 
   // Animation for the floating button
