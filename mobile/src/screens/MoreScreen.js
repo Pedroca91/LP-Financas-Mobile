@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,21 +6,26 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  Switch,
+  TextInput,
+  Modal,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 
-export default function MoreScreen({ navigation }) {
+export default function MoreScreen() {
   const { colors, isDark, toggleTheme } = useTheme();
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout } = useAuth();
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const styles = createStyles(colors, isDark);
 
   const handleLogout = () => {
     Alert.alert(
       'Sair',
-      'Deseja realmente sair da sua conta?',
+      'Deseja realmente sair do aplicativo?',
       [
         { text: 'Cancelar', style: 'cancel' },
         { text: 'Sair', style: 'destructive', onPress: logout },
@@ -28,137 +33,106 @@ export default function MoreScreen({ navigation }) {
     );
   };
 
-  const navigateTo = (screen) => {
-    navigation.navigate(screen);
-  };
-
-  const styles = createStyles(colors);
-
-  const MenuItem = ({ icon, title, subtitle, onPress, rightComponent }) => (
-    <TouchableOpacity style={styles.menuItem} onPress={onPress} disabled={!onPress}>
-      <View style={[styles.menuIcon, { backgroundColor: `${colors.primary}15` }]}>
-        <Ionicons name={icon} size={22} color={colors.primary} />
-      </View>
-      <View style={styles.menuContent}>
-        <Text style={styles.menuTitle}>{title}</Text>
-        {subtitle && <Text style={styles.menuSubtitle}>{subtitle}</Text>}
-      </View>
-      {rightComponent || (
-        onPress && <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-      )}
-    </TouchableOpacity>
-  );
-
   return (
     <View style={styles.container}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style="light" />
       
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Perfil</Text>
-        <View style={{ width: 32 }} />
-      </View>
+      <LinearGradient
+        colors={[colors.primary, colors.primaryLight]}
+        style={styles.header}
+      >
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Perfil</Text>
+        </View>
+      </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Profile Card */}
-        <View style={styles.profileCard}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
-            </Text>
-          </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{user?.name}</Text>
-            <Text style={styles.profileEmail}>{user?.email}</Text>
-            {isAdmin && (
+      <ScrollView style={styles.content}>
+        {/* User Card */}
+        <View style={styles.userCard}>
+          <LinearGradient
+            colors={[colors.cardDark, colors.primaryLight]}
+            style={styles.userCardGradient}
+          >
+            <View style={styles.avatarContainer}>
+              <LinearGradient
+                colors={[colors.gold, colors.copper]}
+                style={styles.avatar}
+              >
+                <Text style={styles.avatarText}>
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </Text>
+              </LinearGradient>
+            </View>
+            <Text style={styles.userName}>{user?.name || 'Usuário'}</Text>
+            <Text style={styles.userEmail}>{user?.email || ''}</Text>
+            {user?.role === 'admin' && (
               <View style={styles.adminBadge}>
-                <Ionicons name="shield-checkmark" size={12} color="#fff" />
-                <Text style={styles.adminBadgeText}>Administrador</Text>
+                <Ionicons name="shield-checkmark" size={14} color={colors.gold} />
+                <Text style={styles.adminText}>Administrador</Text>
               </View>
             )}
+          </LinearGradient>
+        </View>
+
+        {/* Settings */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Configurações</Text>
+          
+          <TouchableOpacity style={styles.settingItem} onPress={toggleTheme}>
+            <View style={styles.settingLeft}>
+              <View style={[styles.settingIcon, { backgroundColor: `${colors.gold}20` }]}>
+                <Ionicons name={isDark ? 'sunny' : 'moon'} size={20} color={colors.gold} />
+              </View>
+              <View>
+                <Text style={styles.settingLabel}>Modo Escuro</Text>
+                <Text style={styles.settingDescription}>
+                  {isDark ? 'Ativado' : 'Desativado'}
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Info */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Informações</Text>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingLeft}>
+              <View style={[styles.settingIcon, { backgroundColor: `${colors.investment}20` }]}>
+                <Ionicons name="information-circle" size={20} color={colors.investment} />
+              </View>
+              <View>
+                <Text style={styles.settingLabel}>Versão do App</Text>
+                <Text style={styles.settingDescription}>1.0.0</Text>
+              </View>
+            </View>
           </View>
-        </View>
 
-        {/* Menu Sections */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferências</Text>
-          
-          <MenuItem
-            icon={isDark ? 'moon' : 'sunny'}
-            title="Modo Escuro"
-            subtitle={isDark ? 'Ativado' : 'Desativado'}
-            rightComponent={
-              <Switch
-                value={isDark}
-                onValueChange={toggleTheme}
-                trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor="#fff"
-              />
-            }
-          />
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Gestão</Text>
-          
-          <MenuItem
-            icon="folder-outline"
-            title="Categorias"
-            subtitle="Gerenciar categorias"
-            onPress={() => navigateTo('Categorias')}
-          />
-          
-          <MenuItem
-            icon="card-outline"
-            title="Cartões de Crédito"
-            subtitle="Gerenciar cartões"
-            onPress={() => navigation.navigate('Cartões')}
-          />
-          
-          <MenuItem
-            icon="repeat-outline"
-            title="Lançamentos Recorrentes"
-            subtitle="Gerenciar recorrências"
-            onPress={() => navigateTo('Recorrentes')}
-          />
-        </View>
-
-        {isAdmin && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Administração</Text>
-            
-            <MenuItem
-              icon="people-outline"
-              title="Gerenciar Usuários"
-              subtitle="Aprovar e bloquear usuários"
-              onPress={() => navigateTo('Admin')}
-            />
+          <View style={styles.settingItem}>
+            <View style={styles.settingLeft}>
+              <View style={[styles.settingIcon, { backgroundColor: `${colors.income}20` }]}>
+                <Ionicons name="code-slash" size={20} color={colors.income} />
+              </View>
+              <View>
+                <Text style={styles.settingLabel}>Desenvolvido por</Text>
+                <Text style={styles.settingDescription}>Pedro Carvalho</Text>
+              </View>
+            </View>
           </View>
-        )}
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Sobre</Text>
-          
-          <MenuItem
-            icon="information-circle-outline"
-            title="Versão do App"
-            subtitle="1.0.0"
-          />
-          
-          <MenuItem
-            icon="heart-outline"
-            title="Desenvolvido por"
-            subtitle="Pedro Carvalho"
-          />
         </View>
 
         {/* Logout */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={22} color={colors.expense} />
-          <Text style={[styles.logoutText, { color: colors.expense }]}>Sair da Conta</Text>
+          <LinearGradient
+            colors={[colors.expense, '#dc2626']}
+            style={styles.logoutGradient}
+          >
+            <Ionicons name="log-out-outline" size={20} color="#ffffff" />
+            <Text style={styles.logoutText}>Sair do Aplicativo</Text>
+          </LinearGradient>
         </TouchableOpacity>
 
         <View style={{ height: 100 }} />
@@ -167,134 +141,150 @@ export default function MoreScreen({ navigation }) {
   );
 }
 
-const createStyles = (colors) => StyleSheet.create({
+const createStyles = (colors, isDark) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
   },
   header: {
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 16,
-    backgroundColor: colors.surface,
-  },
-  backButton: {
-    padding: 4,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text,
-  },
-  profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    marginHorizontal: 20,
-    marginTop: 20,
-    padding: 20,
-    borderRadius: 16,
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#ffffff',
   },
-  profileInfo: {
-    marginLeft: 16,
+  content: {
     flex: 1,
+    padding: 20,
   },
-  profileName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
+  userCard: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  profileEmail: {
+  userCardGradient: {
+    padding: 24,
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    marginBottom: 16,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: colors.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  avatarText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  userName: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  userEmail: {
     fontSize: 14,
-    color: colors.textSecondary,
-    marginTop: 2,
+    color: colors.gold,
   },
   adminBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.primary,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    marginTop: 8,
     gap: 4,
+    marginTop: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(201,166,107,0.2)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(201,166,107,0.4)',
   },
-  adminBadgeText: {
-    fontSize: 11,
+  adminText: {
+    fontSize: 12,
     fontWeight: '600',
-    color: '#fff',
+    color: colors.gold,
   },
   section: {
-    marginTop: 24,
-    marginHorizontal: 20,
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
-    color: colors.textSecondary,
+    color: colors.gold,
     marginBottom: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
-  menuItem: {
+  settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: colors.surface,
-    padding: 16,
     borderRadius: 12,
+    padding: 16,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  menuIcon: {
+  settingLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  settingIcon: {
     width: 40,
     height: 40,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  menuContent: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  menuTitle: {
+  settingLabel: {
     fontSize: 16,
     fontWeight: '500',
     color: colors.text,
   },
-  menuSubtitle: {
+  settingDescription: {
     fontSize: 13,
     color: colors.textSecondary,
     marginTop: 2,
   },
   logoutButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginTop: 8,
+  },
+  logoutGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surface,
-    marginHorizontal: 20,
-    marginTop: 32,
-    padding: 16,
-    borderRadius: 12,
     gap: 8,
+    paddingVertical: 16,
   },
   logoutText: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#ffffff',
   },
 });
