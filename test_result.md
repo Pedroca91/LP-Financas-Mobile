@@ -203,27 +203,33 @@ backend:
 
   - task: "API Push Notifications"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoints /api/notifications/token - salvar e remover FCM token"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: All notification endpoints working correctly - POST /api/notifications/token (save FCM token), GET /api/notifications/status (check status), DELETE /api/notifications/token (remove token). Authentication required correctly, all responses have proper success flags. Edge cases handled: unauthenticated requests properly rejected."
 
   - task: "API Import Bank Statement"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoints /api/import/bank-statement e /api/import/parse-csv - importar CSV"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Both import endpoints working perfectly - POST /api/import/parse-csv correctly parses CSV content with semicolon delimiter, detects columns (date/description/value), returns structured data with headers and sample. POST /api/import/bank-statement successfully imports transactions (tested with income +100, expense -50), creates proper database records verified in incomes/expenses collections. Edge cases handled: empty CSV rejected, invalid data handled gracefully, large CSV limited to 10 sample rows."
 
 frontend:
   - task: "Página de Recorrentes"
