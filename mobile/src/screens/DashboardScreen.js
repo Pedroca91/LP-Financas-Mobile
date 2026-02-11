@@ -613,9 +613,63 @@ export default function DashboardScreen() {
                   </View>
                 </View>
               );
-            })}
+            })
+          ) : (
+            <View style={[styles.tipItem, { backgroundColor: colors.primary + '20', borderLeftColor: colors.primary }]}>
+              <View style={styles.tipIconContainer}>
+                <Ionicons name="information-circle" size={24} color={colors.primary} />
+              </View>
+              <View style={styles.tipContent}>
+                <Text style={styles.tipItemTitle}>Sem dicas no momento</Text>
+                <Text style={styles.tipItemMessage}>Adicione receitas e despesas para receber dicas personalizadas!</Text>
+              </View>
+            </View>
+          )}
+        </View>
+
+        {/* Análise de Tendências */}
+        <View style={styles.trendsContainer}>
+          <View style={styles.trendsHeader}>
+            <Ionicons name="trending-up" size={20} color={colors.gold} />
+            <Text style={styles.trendsTitle}>Análise de Tendências</Text>
           </View>
-        )}
+          
+          <View style={styles.trendsCards}>
+            <View style={styles.trendCard}>
+              <Text style={styles.trendLabel}>Receitas vs Média</Text>
+              <View style={styles.trendValueRow}>
+                <Ionicons 
+                  name={(summary?.total_income || 0) >= (yearlyData?.avg_income || 0) ? 'checkmark-circle' : 'alert-circle'} 
+                  size={18} 
+                  color={(summary?.total_income || 0) >= (yearlyData?.avg_income || 0) ? colors.income : colors.warning} 
+                />
+                <Text style={[styles.trendValue, { color: (summary?.total_income || 0) >= (yearlyData?.avg_income || 0) ? colors.income : colors.warning }]}>
+                  {yearlyData?.avg_income > 0 ? (((summary?.total_income || 0) / yearlyData.avg_income - 1) * 100).toFixed(1) : '0.0'}%
+                </Text>
+              </View>
+            </View>
+            
+            <View style={styles.trendCard}>
+              <Text style={styles.trendLabel}>Despesas vs Média</Text>
+              <View style={styles.trendValueRow}>
+                <Ionicons 
+                  name={(summary?.total_expense || 0) <= (yearlyData?.avg_expense || 0) ? 'checkmark-circle' : 'alert-circle'} 
+                  size={18} 
+                  color={(summary?.total_expense || 0) <= (yearlyData?.avg_expense || 0) ? colors.income : colors.expense} 
+                />
+                <Text style={[styles.trendValue, { color: (summary?.total_expense || 0) <= (yearlyData?.avg_expense || 0) ? colors.income : colors.expense }]}>
+                  {yearlyData?.avg_expense > 0 ? (((summary?.total_expense || 0) / yearlyData.avg_expense - 1) * 100).toFixed(1) : '0.0'}%
+                </Text>
+              </View>
+            </View>
+          </View>
+          
+          <Text style={styles.trendsMessage}>
+            {(summary?.total_income || 0) >= (summary?.total_expense || 0) 
+              ? 'Seus gastos estão estáveis comparado aos meses anteriores' 
+              : 'Atenção: suas despesas estão acima das receitas este mês'}
+          </Text>
+        </View>
 
         <View style={{ height: 100 }} />
       </ScrollView>
