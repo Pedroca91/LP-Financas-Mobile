@@ -29,8 +29,11 @@ import {
 } from '../components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Badge } from '../components/ui/badge';
+import { Switch } from '../components/ui/switch';
 import { toast } from '../components/ui/toast-provider';
-import { Settings, Plus, Pencil, Trash2, CreditCard, Tags } from 'lucide-react';
+import { Settings, Plus, Pencil, Trash2, CreditCard, Tags, Bell, Smartphone, Download, Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { useNotifications } from '../hooks/useNotifications';
+import { usePWA } from '../hooks/usePWA';
 
 export function Ajustes() {
   const {
@@ -43,6 +46,24 @@ export function Ajustes() {
     updateCreditCard,
     deleteCreditCard
   } = useFinance();
+
+  const { 
+    permission, 
+    loading: notifLoading, 
+    supported: notifSupported, 
+    enableNotifications,
+    isEnabled: notificationsEnabled
+  } = useNotifications();
+
+  const {
+    isInstallable,
+    isInstalled,
+    isOnline,
+    updateAvailable,
+    installApp,
+    updateApp,
+    clearCache
+  } = usePWA();
 
   const [activeTab, setActiveTab] = useState('categories');
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -142,6 +163,33 @@ export function Ajustes() {
     }
   };
 
+  const handleEnableNotifications = async () => {
+    const result = await enableNotifications();
+    if (result.success) {
+      toast.success('Notificações ativadas com sucesso!');
+    } else {
+      toast.error(result.error || 'Erro ao ativar notificações');
+    }
+  };
+
+  const handleInstallApp = async () => {
+    const result = await installApp();
+    if (result.success) {
+      toast.success('App instalado com sucesso!');
+    } else {
+      toast.error(result.error || 'Erro ao instalar app');
+    }
+  };
+
+  const handleClearCache = async () => {
+    try {
+      await clearCache();
+      toast.success('Cache limpo com sucesso!');
+    } catch (error) {
+      toast.error('Erro ao limpar cache');
+    }
+  };
+
   const getTypeLabel = (type) => {
     const labels = { income: 'Receita', expense: 'Despesa', investment: 'Investimento' };
     return labels[type] || type;
@@ -165,19 +213,42 @@ export function Ajustes() {
           Ajustes
         </h1>
         <p className="text-muted-foreground mt-1">
-          Configure categorias e cartões de crédito
+          Configure categorias, cartões de crédito e preferências do app
         </p>
       </div>
 
+      {/* Online/Offline Status */}
+      <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${isOnline ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-amber-100 dark:bg-amber-900/30'}`}>
+        {isOnline ? (
+          <>
+            <Wifi className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-sm text-emerald-700 dark:text-emerald-300">Você está online</span>
+          </>
+        ) : (
+          <>
+            <WifiOff className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <span className="text-sm text-amber-700 dark:text-amber-300">Você está offline - Alguns recursos podem não funcionar</span>
+          </>
+        )}
+      </div>
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
+        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
           <TabsTrigger value="categories" data-testid="tab-categories">
             <Tags className="h-4 w-4 mr-2" />
             Categorias
           </TabsTrigger>
           <TabsTrigger value="cards" data-testid="tab-cards">
             <CreditCard className="h-4 w-4 mr-2" />
-            Cartões de Crédito
+            Cartões
+          </TabsTrigger>
+          <TabsTrigger value="notifications" data-testid="tab-notifications">
+            <Bell className="h-4 w-4 mr-2" />
+            Notificações
+          </TabsTrigger>
+          <TabsTrigger value="app" data-testid="tab-app">
+            <Smartphone className="h-4 w-4 mr-2" />
+            App
           </TabsTrigger>
         </TabsList>
 
@@ -419,6 +490,209 @@ export function Ajustes() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Notifications Tab */}
+        <TabsContent value="notifications" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Notificações Push
+              </CardTitle>
+              <CardDescription>
+                Receba alertas sobre vencimentos, metas e dicas financeiras
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {!notifSupported ? (
+                <div className="bg-amber-100 dark:bg-amber-900/30 p-4 rounded-lg">
+                  <p className="text-amber-700 dark:text-amber-300 text-sm">
+                    Seu navegador não suporta notificações push. Tente usar Chrome, Firefox ou Edge.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="font-medium">Ativar Notificações</p>
+                      <p className="text-sm text-muted-foreground">
+                        Receba alertas mesmo quando o app estiver fechado
+                      </p>
+                    </div>
+                    {notificationsEnabled ? (
+                      <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                        Ativado
+                      </Badge>
+                    ) : (
+                      <Button 
+                        onClick={handleEnableNotifications} 
+                        disabled={notifLoading}
+                        size="sm"
+                      >
+                        {notifLoading ? 'Ativando...' : 'Ativar'}
+                      </Button>
+                    )}
+                  </div>
+
+                  {notificationsEnabled && (
+                    <div className="space-y-4 pt-4 border-t">
+                      <p className="text-sm font-medium text-muted-foreground">Você receberá notificações sobre:</p>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                          <span className="text-sm">Contas próximas do vencimento</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                          <span className="text-sm">Alertas de orçamento (80% e 100%)</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                          <span className="text-sm">Dicas personalizadas</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                          <span className="text-sm">Resumo semanal</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {permission === 'denied' && (
+                    <div className="bg-red-100 dark:bg-red-900/30 p-4 rounded-lg">
+                      <p className="text-red-700 dark:text-red-300 text-sm">
+                        As notificações foram bloqueadas. Para ativá-las, vá nas configurações do seu navegador e permita notificações para este site.
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* App Tab */}
+        <TabsContent value="app" className="mt-6">
+          <div className="space-y-6">
+            {/* Install Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Download className="h-5 w-5" />
+                  Instalar App
+                </CardTitle>
+                <CardDescription>
+                  Instale o LP Finanças na tela inicial do seu dispositivo
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isInstalled ? (
+                  <div className="flex items-center gap-3 bg-emerald-100 dark:bg-emerald-900/30 p-4 rounded-lg">
+                    <Smartphone className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                    <div>
+                      <p className="font-medium text-emerald-700 dark:text-emerald-300">App instalado!</p>
+                      <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                        Você está usando a versão instalada do app
+                      </p>
+                    </div>
+                  </div>
+                ) : isInstallable ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Instale o app para acesso rápido e uso offline. O app funciona como um aplicativo nativo sem ocupar muito espaço.
+                    </p>
+                    <Button onClick={handleInstallApp} className="w-full sm:w-auto">
+                      <Download className="h-4 w-4 mr-2" />
+                      Instalar App
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="bg-muted p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      A instalação não está disponível no momento. No celular, use o menu do navegador e selecione "Adicionar à tela inicial".
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Update Card */}
+            {updateAvailable && (
+              <Card className="border-amber-200 dark:border-amber-800">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                    <RefreshCw className="h-5 w-5" />
+                    Atualização Disponível
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Uma nova versão do app está disponível com melhorias e correções.
+                    </p>
+                    <Button onClick={updateApp} variant="outline">
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Atualizar Agora
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Offline Mode Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  {isOnline ? <Wifi className="h-5 w-5" /> : <WifiOff className="h-5 w-5" />}
+                  Modo Offline
+                </CardTitle>
+                <CardDescription>
+                  Acesse seus dados mesmo sem internet
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="font-medium">Status da Conexão</p>
+                    <p className="text-sm text-muted-foreground">
+                      {isOnline ? 'Conectado à internet' : 'Sem conexão'}
+                    </p>
+                  </div>
+                  <Badge className={isOnline ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'}>
+                    {isOnline ? 'Online' : 'Offline'}
+                  </Badge>
+                </div>
+
+                <div className="pt-4 border-t space-y-3">
+                  <p className="text-sm font-medium text-muted-foreground">Recursos offline:</p>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                      <span>Visualizar dashboard e transações</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                      <span>Acessar categorias e configurações</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                      <span>Criar/editar transações (sincroniza ao voltar online)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <Button variant="outline" onClick={handleClearCache} size="sm">
+                    Limpar Cache
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Limpe o cache se estiver com problemas de carregamento
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
