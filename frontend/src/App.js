@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { FinanceProvider } from './contexts/FinanceContext';
@@ -7,6 +7,7 @@ import { ToastProvider, useToast, setGlobalToast } from './components/ui/toast-p
 import { Layout } from './components/layout/Layout';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { AuthCallback } from './pages/AuthCallback';
 import { Dashboard } from './pages/Dashboard';
 import { Entradas } from './pages/Entradas';
 import { Saidas } from './pages/Saidas';
@@ -17,6 +18,8 @@ import { Ajustes } from './pages/Ajustes';
 import { Admin } from './pages/Admin';
 import { Recorrentes } from './pages/Recorrentes';
 import { Cartoes } from './pages/Cartoes';
+import { Goals } from './pages/Goals';
+import { ChatAssistant } from './pages/ChatAssistant';
 
 // Component to setup global toast
 function ToastSetup() {
