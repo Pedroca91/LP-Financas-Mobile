@@ -597,6 +597,17 @@ const createStyles = (colors) => StyleSheet.create({
     fontSize: 12,
     color: colors.textSecondary,
   },
+  paidDateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  paidDateText: {
+    fontSize: 11,
+    color: colors.income,
+    fontWeight: '500',
+  },
   installmentBadge: {
     fontSize: 11,
     color: colors.primary,
