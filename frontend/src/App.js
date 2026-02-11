@@ -76,6 +76,14 @@ function PublicRoute({ children }) {
 }
 
 function AppRoutes() {
+  const location = useLocation();
+  
+  // Check URL fragment for session_id (Google Auth callback)
+  // This must be synchronous during render to prevent race conditions
+  if (location.hash?.includes('session_id=')) {
+    return <AuthCallback />;
+  }
+  
   return (
     <Routes>
       {/* Public Routes */}
@@ -95,6 +103,7 @@ function AppRoutes() {
           </PublicRoute>
         }
       />
+      <Route path="/auth/callback" element={<AuthCallback />} />
 
       {/* Protected Routes */}
       <Route
@@ -113,6 +122,8 @@ function AppRoutes() {
         <Route path="/recorrentes" element={<Recorrentes />} />
         <Route path="/cartoes" element={<Cartoes />} />
         <Route path="/investimentos" element={<Investimentos />} />
+        <Route path="/metas" element={<Goals />} />
+        <Route path="/assistente" element={<ChatAssistant />} />
         <Route path="/relatorios" element={<Relatorios />} />
         <Route path="/ajustes" element={<Ajustes />} />
         <Route
