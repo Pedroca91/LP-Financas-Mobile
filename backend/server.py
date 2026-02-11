@@ -27,7 +27,7 @@ JWT_SECRET = os.environ.get('JWT_SECRET')
 if not JWT_SECRET:
     JWT_SECRET = 'dev_secret_key_change_in_production'  # Only for development
 JWT_ALGORITHM = "HS256"
-JWT_EXPIRATION_HOURS = 24
+JWT_EXPIRATION_HOURS = 24 * 30  # 30 days for mobile app persistence
 
 # Create the main app
 app = FastAPI(
