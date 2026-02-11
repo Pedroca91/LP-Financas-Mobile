@@ -2278,6 +2278,145 @@ async def get_personalized_tips(user: dict = Depends(get_current_user)):
 
 # ==================== HEALTH CHECK ====================
 
+# ==================== BANK STATEMENT IMPORT ROUTES ====================
+
+class ImportedTransaction(BaseModel):
+    date: str
+    description: str
+    value: float
+    type: str  # income or expense
+
+class BankStatementImport(BaseModel):
+    transactions: List[ImportedTransaction]
+    default_category_id: Optional[str] = None
+
+@api_router.post("/import/bank-statement")
+async def import_bank_statement(data: BankStatementImport, user: dict = Depends(get_current_user)):
+    """Import transactions from bank statement"""
+    imported_incomes = 0
+    imported_expenses = 0
+    errors = []
+    
+    # Get categories for user
+    categories = await db.categories.find({"user_id": user["id"]}).to_list(100)
+    default_income_cat = next((c for c in categories if c["type"] == "income" and c.get("is_default")), None)
+    default_expense_cat = next((c for c in categories if c["type"] == "expense" and c.get("is_default")), None)
+    
+    # If no default, get first available
+    if not default_income_cat:
+        default_income_cat = next((c for c in categories if c["type"] == "income"), None)
+    if not default_expense_cat:
+        default_expense_cat = next((c for c in categories if c["type"] == "expense"), None)
+    
+    for i, trans in enumerate(data.transactions):
+        try:
+            # Parse date
+            try:
+                trans_date = datetime.strptime(trans.date, "%Y-%m-%d")
+            except:
+                try:
+                    trans_date = datetime.strptime(trans.date, "%d/%m/%Y")
+                except:
+                    trans_date = datetime.now()
+            
+            month = trans_date.month
+            year = trans_date.year
+            
+            if trans.type == "income" and trans.value > 0:
+                if not default_income_cat:
+                    errors.append(f"Linha {i+1}: Sem categoria de receita disponível")
+                    continue
+                
+                income = Income(
+                    user_id=user["id"],
+                    category_id=data.default_category_id if data.default_category_id else default_income_cat["id"],
+                    description=trans.description[:200],
+                    value=abs(trans.value),
+                    date=trans_date.strftime("%Y-%m-%d"),
+                    status="received",
+                    month=month,
+                    year=year
+                )
+                await db.incomes.insert_one(income.model_dump())
+                imported_incomes += 1
+                
+            elif trans.type == "expense" or trans.value < 0:
+                if not default_expense_cat:
+                    errors.append(f"Linha {i+1}: Sem categoria de despesa disponível")
+                    continue
+                
+                expense = Expense(
+                    user_id=user["id"],
+                    category_id=data.default_category_id if data.default_category_id else default_expense_cat["id"],
+                    description=trans.description[:200],
+                    value=abs(trans.value),
+                    date=trans_date.strftime("%Y-%m-%d"),
+                    status="paid",
+                    month=month,
+                    year=year
+                )
+                await db.expenses.insert_one(expense.model_dump())
+                imported_expenses += 1
+                
+        except Exception as e:
+            errors.append(f"Linha {i+1}: {str(e)}")
+    
+    return {
+        "success": True,
+        "imported_incomes": imported_incomes,
+        "imported_expenses": imported_expenses,
+        "total_imported": imported_incomes + imported_expenses,
+        "errors": errors[:10] if errors else []  # Return max 10 errors
+    }
+
+@api_router.post("/import/parse-csv")
+async def parse_csv_content(request: Request, user: dict = Depends(get_current_user)):
+    """Parse CSV content and return structured data for review"""
+    import io
+    import csv
+    
+    body = await request.body()
+    content = body.decode('utf-8')
+    
+    # Try to detect delimiter
+    sample = content[:2000]
+    delimiter = ';' if sample.count(';') > sample.count(',') else ','
+    
+    reader = csv.reader(io.StringIO(content), delimiter=delimiter)
+    rows = list(reader)
+    
+    if len(rows) < 2:
+        raise HTTPException(status_code=400, detail="CSV vazio ou inválido")
+    
+    headers = rows[0]
+    data_rows = rows[1:100]  # Max 100 rows for preview
+    
+    # Try to auto-detect columns
+    date_col = None
+    desc_col = None
+    value_col = None
+    
+    for i, header in enumerate(headers):
+        h_lower = header.lower().strip()
+        if any(x in h_lower for x in ['data', 'date', 'dia']):
+            date_col = i
+        elif any(x in h_lower for x in ['descri', 'hist', 'memo', 'observ']):
+            desc_col = i
+        elif any(x in h_lower for x in ['valor', 'value', 'amount', 'quantia', 'vl']):
+            value_col = i
+    
+    return {
+        "headers": headers,
+        "sample_data": data_rows[:10],
+        "total_rows": len(data_rows),
+        "detected_columns": {
+            "date": date_col,
+            "description": desc_col,
+            "value": value_col
+        },
+        "delimiter": delimiter
+    }
+
 # ==================== PUSH NOTIFICATIONS ROUTES ====================
 
 class NotificationToken(BaseModel):
