@@ -12,6 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFinance } from '../contexts/FinanceContext';
@@ -135,58 +136,79 @@ export default function InvestmentsScreen() {
 
   const totalInvested = investments.reduce((sum, i) => sum + calculateFinalBalance(i), 0);
 
-  const styles = createStyles(colors);
+  const styles = createStyles(colors, isDark);
 
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.listItem} onPress={() => openEditModal(item)} onLongPress={() => handleDelete(item)}>
-      <View style={styles.listItemHeader}>
-        <Text style={styles.listItemCategory}>{getCategoryName(item.category_id)}</Text>
-        <Text style={[styles.listItemValue, { color: colors.investment }]}>{formatCurrency(calculateFinalBalance(item))}</Text>
-      </View>
-      <View style={styles.listItemDetails}>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Saldo Inicial:</Text>
-          <Text style={styles.detailValue}>{formatCurrency(item.initial_balance || 0)}</Text>
+      <LinearGradient
+        colors={[colors.surface, colors.surface]}
+        style={styles.listItemGradient}
+      >
+        <View style={styles.listItemHeader}>
+          <Text style={styles.listItemCategory}>{getCategoryName(item.category_id)}</Text>
+          <Text style={[styles.listItemValue, { color: colors.investment }]}>{formatCurrency(calculateFinalBalance(item))}</Text>
         </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Aportes:</Text>
-          <Text style={[styles.detailValue, { color: colors.income }]}>+{formatCurrency(item.contribution || 0)}</Text>
+        <View style={styles.listItemDetails}>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Saldo Inicial:</Text>
+            <Text style={styles.detailValue}>{formatCurrency(item.initial_balance || 0)}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Aportes:</Text>
+            <Text style={[styles.detailValue, { color: colors.income }]}>+{formatCurrency(item.contribution || 0)}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Dividendos:</Text>
+            <Text style={[styles.detailValue, { color: colors.income }]}>+{formatCurrency(item.dividends || 0)}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Retiradas:</Text>
+            <Text style={[styles.detailValue, { color: colors.expense }]}>-{formatCurrency(item.withdrawal || 0)}</Text>
+          </View>
         </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Dividendos:</Text>
-          <Text style={[styles.detailValue, { color: colors.income }]}>+{formatCurrency(item.dividends || 0)}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Retiradas:</Text>
-          <Text style={[styles.detailValue, { color: colors.expense }]}>-{formatCurrency(item.withdrawal || 0)}</Text>
-        </View>
-      </View>
+      </LinearGradient>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Investimentos</Text>
-        <TouchableOpacity onPress={openAddModal} style={styles.addButton}>
-          <Ionicons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
+      <StatusBar style="light" />
+      
+      {/* Header */}
+      <LinearGradient
+        colors={[colors.primary, colors.primaryLight]}
+        style={styles.header}
+      >
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Investimentos</Text>
+          <TouchableOpacity onPress={openAddModal} style={styles.addButton}>
+            <Ionicons name="add" size={24} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
 
+      {/* Month Selector */}
       <View style={styles.monthSelector}>
         <TouchableOpacity onPress={() => navigateMonth(-1)} style={styles.monthButton}>
-          <Ionicons name="chevron-back" size={24} color={colors.primary} />
+          <Ionicons name="chevron-back" size={24} color={colors.gold} />
         </TouchableOpacity>
         <Text style={styles.monthText}>{formatMonth(month, year)}</Text>
         <TouchableOpacity onPress={() => navigateMonth(1)} style={styles.monthButton}>
-          <Ionicons name="chevron-forward" size={24} color={colors.primary} />
+          <Ionicons name="chevron-forward" size={24} color={colors.gold} />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.totalCard}>
-        <Text style={styles.totalLabel}>Total Investido</Text>
-        <Text style={[styles.totalValue, { color: colors.investment }]}>{formatCurrency(totalInvested)}</Text>
+      {/* Total Card */}
+      <View style={styles.totalCardContainer}>
+        <LinearGradient
+          colors={[colors.investment, '#2563eb']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.totalCard}
+        >
+          <Text style={styles.totalLabel}>Total Investido</Text>
+          <Text style={styles.totalValue}>{formatCurrency(totalInvested)}</Text>
+        </LinearGradient>
       </View>
 
       <FlatList
@@ -194,10 +216,10 @@ export default function InvestmentsScreen() {
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={styles.listContainer}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.gold} />}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="bar-chart-outline" size={64} color={colors.textSecondary} />
+            <Ionicons name="bar-chart-outline" size={64} color={colors.gold} />
             <Text style={styles.emptyText}>Nenhum investimento cadastrado</Text>
           </View>
         }
@@ -206,12 +228,16 @@ export default function InvestmentsScreen() {
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
+            <LinearGradient
+              colors={[colors.primary, colors.primaryLight]}
+              style={styles.modalHeader}
+            >
               <Text style={styles.modalTitle}>{editingItem ? 'Editar' : 'Novo'} Investimento</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
+                <Ionicons name="close" size={24} color="#ffffff" />
               </TouchableOpacity>
-            </View>
+            </LinearGradient>
+            
             <ScrollView style={styles.modalBody}>
               <Text style={styles.inputLabel}>Categoria *</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -227,26 +253,66 @@ export default function InvestmentsScreen() {
               </ScrollView>
 
               <Text style={styles.inputLabel}>Descrição</Text>
-              <TextInput style={styles.input} placeholder="Descrição" placeholderTextColor={colors.textSecondary} value={formData.description} onChangeText={(t) => setFormData({ ...formData, description: t })} />
+              <TextInput 
+                style={styles.input} 
+                placeholder="Descrição" 
+                placeholderTextColor={colors.textSecondary} 
+                value={formData.description} 
+                onChangeText={(t) => setFormData({ ...formData, description: t })} 
+              />
 
               <Text style={styles.inputLabel}>Saldo Inicial</Text>
-              <TextInput style={styles.input} placeholder="0,00" placeholderTextColor={colors.textSecondary} value={formData.initial_balance} onChangeText={(t) => setFormData({ ...formData, initial_balance: t })} keyboardType="decimal-pad" />
+              <TextInput 
+                style={styles.input} 
+                placeholder="0,00" 
+                placeholderTextColor={colors.textSecondary} 
+                value={formData.initial_balance} 
+                onChangeText={(t) => setFormData({ ...formData, initial_balance: t })} 
+                keyboardType="decimal-pad" 
+              />
 
               <Text style={styles.inputLabel}>Aportes</Text>
-              <TextInput style={styles.input} placeholder="0,00" placeholderTextColor={colors.textSecondary} value={formData.contribution} onChangeText={(t) => setFormData({ ...formData, contribution: t })} keyboardType="decimal-pad" />
+              <TextInput 
+                style={styles.input} 
+                placeholder="0,00" 
+                placeholderTextColor={colors.textSecondary} 
+                value={formData.contribution} 
+                onChangeText={(t) => setFormData({ ...formData, contribution: t })} 
+                keyboardType="decimal-pad" 
+              />
 
               <Text style={styles.inputLabel}>Dividendos</Text>
-              <TextInput style={styles.input} placeholder="0,00" placeholderTextColor={colors.textSecondary} value={formData.dividends} onChangeText={(t) => setFormData({ ...formData, dividends: t })} keyboardType="decimal-pad" />
+              <TextInput 
+                style={styles.input} 
+                placeholder="0,00" 
+                placeholderTextColor={colors.textSecondary} 
+                value={formData.dividends} 
+                onChangeText={(t) => setFormData({ ...formData, dividends: t })} 
+                keyboardType="decimal-pad" 
+              />
 
               <Text style={styles.inputLabel}>Retiradas</Text>
-              <TextInput style={styles.input} placeholder="0,00" placeholderTextColor={colors.textSecondary} value={formData.withdrawal} onChangeText={(t) => setFormData({ ...formData, withdrawal: t })} keyboardType="decimal-pad" />
+              <TextInput 
+                style={styles.input} 
+                placeholder="0,00" 
+                placeholderTextColor={colors.textSecondary} 
+                value={formData.withdrawal} 
+                onChangeText={(t) => setFormData({ ...formData, withdrawal: t })} 
+                keyboardType="decimal-pad" 
+              />
             </ScrollView>
+            
             <View style={styles.modalFooter}>
               <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
                 <Text style={styles.cancelButtonText}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                <Text style={styles.saveButtonText}>Salvar</Text>
+                <LinearGradient
+                  colors={[colors.gold, colors.copper]}
+                  style={styles.saveButtonGradient}
+                >
+                  <Text style={styles.saveButtonText}>Salvar</Text>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           </View>
@@ -256,42 +322,232 @@ export default function InvestmentsScreen() {
   );
 }
 
-const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16, backgroundColor: colors.surface },
-  headerTitle: { fontSize: 24, fontWeight: 'bold', color: colors.text },
-  addButton: { backgroundColor: colors.investment, width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
-  monthSelector: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 12, backgroundColor: colors.surface },
-  monthButton: { padding: 8 },
-  monthText: { fontSize: 16, fontWeight: '600', color: colors.text },
-  totalCard: { backgroundColor: colors.surface, marginHorizontal: 20, marginTop: 16, padding: 20, borderRadius: 16, alignItems: 'center' },
-  totalLabel: { fontSize: 14, color: colors.textSecondary },
-  totalValue: { fontSize: 28, fontWeight: 'bold', marginTop: 4 },
-  listContainer: { padding: 20, paddingBottom: 100 },
-  listItem: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, marginBottom: 12 },
-  listItemHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  listItemCategory: { fontSize: 16, fontWeight: '600', color: colors.text },
-  listItemValue: { fontSize: 18, fontWeight: '700' },
-  listItemDetails: { borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 12 },
-  detailRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  detailLabel: { fontSize: 13, color: colors.textSecondary },
-  detailValue: { fontSize: 13, fontWeight: '500', color: colors.text },
-  emptyContainer: { alignItems: 'center', paddingTop: 60 },
-  emptyText: { fontSize: 16, color: colors.textSecondary, marginTop: 16 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '85%' },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: colors.border },
-  modalTitle: { fontSize: 20, fontWeight: '600', color: colors.text },
-  modalBody: { padding: 20 },
-  inputLabel: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: 8, marginTop: 16 },
-  input: { backgroundColor: colors.background, borderRadius: 12, padding: 16, fontSize: 16, color: colors.text, borderWidth: 1, borderColor: colors.border },
-  categoryChip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: colors.background, marginRight: 8, borderWidth: 1, borderColor: colors.border },
-  categoryChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
-  categoryChipText: { fontSize: 14, color: colors.text },
-  categoryChipTextSelected: { color: '#fff' },
-  modalFooter: { flexDirection: 'row', padding: 20, gap: 12, borderTopWidth: 1, borderTopColor: colors.border },
-  cancelButton: { flex: 1, paddingVertical: 16, borderRadius: 12, backgroundColor: colors.background, alignItems: 'center' },
-  cancelButtonText: { fontSize: 16, fontWeight: '600', color: colors.text },
-  saveButton: { flex: 1, paddingVertical: 16, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center' },
-  saveButtonText: { fontSize: 16, fontWeight: '600', color: '#fff' },
+const createStyles = (colors, isDark) => StyleSheet.create({
+  container: { 
+    flex: 1, 
+    backgroundColor: colors.background 
+  },
+  header: {
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerTitle: { 
+    fontSize: 24, 
+    fontWeight: 'bold', 
+    color: '#ffffff' 
+  },
+  addButton: { 
+    backgroundColor: colors.gold, 
+    width: 44, 
+    height: 44, 
+    borderRadius: 22, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  monthSelector: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingHorizontal: 20, 
+    paddingVertical: 16 
+  },
+  monthButton: { 
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.borderGold,
+  },
+  monthText: { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    color: colors.text 
+  },
+  totalCardContainer: { 
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  totalCard: { 
+    padding: 20, 
+    borderRadius: 16, 
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  totalLabel: { 
+    fontSize: 14, 
+    color: 'rgba(255,255,255,0.8)' 
+  },
+  totalValue: { 
+    fontSize: 28, 
+    fontWeight: 'bold', 
+    marginTop: 4,
+    color: '#ffffff',
+  },
+  listContainer: { 
+    padding: 20, 
+    paddingBottom: 100 
+  },
+  listItem: { 
+    borderRadius: 12, 
+    marginBottom: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  listItemGradient: {
+    padding: 16,
+  },
+  listItemHeader: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: 12 
+  },
+  listItemCategory: { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    color: colors.text 
+  },
+  listItemValue: { 
+    fontSize: 18, 
+    fontWeight: '700' 
+  },
+  listItemDetails: { 
+    borderTopWidth: 1, 
+    borderTopColor: colors.border, 
+    paddingTop: 12 
+  },
+  detailRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    marginBottom: 6 
+  },
+  detailLabel: { 
+    fontSize: 13, 
+    color: colors.textSecondary 
+  },
+  detailValue: { 
+    fontSize: 13, 
+    fontWeight: '500', 
+    color: colors.text 
+  },
+  emptyContainer: { 
+    alignItems: 'center', 
+    paddingTop: 60 
+  },
+  emptyText: { 
+    fontSize: 16, 
+    color: colors.textSecondary, 
+    marginTop: 16 
+  },
+  modalOverlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(0,0,0,0.5)', 
+    justifyContent: 'flex-end' 
+  },
+  modalContent: { 
+    backgroundColor: colors.surface, 
+    borderTopLeftRadius: 24, 
+    borderTopRightRadius: 24, 
+    maxHeight: '85%' 
+  },
+  modalHeader: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    padding: 20, 
+    borderTopLeftRadius: 24, 
+    borderTopRightRadius: 24 
+  },
+  modalTitle: { 
+    fontSize: 20, 
+    fontWeight: '600', 
+    color: '#ffffff' 
+  },
+  modalBody: { 
+    padding: 20 
+  },
+  inputLabel: { 
+    fontSize: 14, 
+    fontWeight: '600', 
+    color: colors.text, 
+    marginBottom: 8, 
+    marginTop: 16 
+  },
+  input: { 
+    backgroundColor: colors.background, 
+    borderRadius: 12, 
+    padding: 16, 
+    fontSize: 16, 
+    color: colors.text, 
+    borderWidth: 1, 
+    borderColor: colors.border 
+  },
+  categoryChip: { 
+    paddingHorizontal: 16, 
+    paddingVertical: 10, 
+    borderRadius: 20, 
+    backgroundColor: colors.background, 
+    marginRight: 8, 
+    borderWidth: 1, 
+    borderColor: colors.borderGold 
+  },
+  categoryChipSelected: { 
+    backgroundColor: colors.gold, 
+    borderColor: colors.gold 
+  },
+  categoryChipText: { 
+    fontSize: 14, 
+    color: colors.text 
+  },
+  categoryChipTextSelected: { 
+    color: '#fff' 
+  },
+  modalFooter: { 
+    flexDirection: 'row', 
+    padding: 20, 
+    gap: 12, 
+    borderTopWidth: 1, 
+    borderTopColor: colors.border 
+  },
+  cancelButton: { 
+    flex: 1, 
+    paddingVertical: 16, 
+    borderRadius: 12, 
+    backgroundColor: colors.background, 
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  cancelButtonText: { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    color: colors.text 
+  },
+  saveButton: { 
+    flex: 1, 
+    borderRadius: 12, 
+    overflow: 'hidden' 
+  },
+  saveButtonGradient: { 
+    paddingVertical: 16, 
+    alignItems: 'center' 
+  },
+  saveButtonText: { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    color: '#ffffff' 
+  },
 });
