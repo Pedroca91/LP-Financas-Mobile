@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useFinance } from '../contexts/FinanceContext';
 import { MonthSelector } from '../components/layout/MonthSelector';
 import { AdvancedFilters, filterTransactions } from '../components/AdvancedFilters';
+import { ImportExtrato } from '../components/ImportExtrato';
 import { formatCurrency, formatDate, getMonthName } from '../lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -31,7 +32,7 @@ import {
 } from '../components/ui/dialog';
 import { Badge } from '../components/ui/badge';
 import { toast } from '../components/ui/toast-provider';
-import { Plus, Pencil, Trash2, ArrowUpCircle, CreditCard, Check, Clock } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowUpCircle, CreditCard, Check, Clock, Upload } from 'lucide-react';
 
 export function Saidas() {
   const {
