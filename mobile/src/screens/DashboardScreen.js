@@ -333,7 +333,7 @@ export default function DashboardScreen() {
             >
               <Text style={styles.cardLabel}>Despesas</Text>
               <Text style={[styles.cardValue, { color: colors.expense }]}>
-                {formatCurrency(summary?.total_expenses || 0)}
+                {formatCurrency((summary?.total_expense || 0) + (summary?.total_expense_pending || 0))}
               </Text>
             </LinearGradient>
           </View>
