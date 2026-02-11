@@ -553,6 +553,9 @@ export function Saidas() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Import Extrato Modal */}
+      <ImportExtrato open={isImportOpen} onOpenChange={setIsImportOpen} />
     </div>
   );
 }
