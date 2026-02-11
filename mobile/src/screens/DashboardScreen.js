@@ -1170,4 +1170,92 @@ const createStyles = (colors, isDark) => StyleSheet.create({
     color: colors.textSecondary,
     lineHeight: 18,
   },
+  // Comparison styles
+  comparisonAbsolute: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  comparisonAbsoluteItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  comparisonAbsoluteLabel: {
+    fontSize: 11,
+    color: colors.textSecondary,
+    marginBottom: 4,
+  },
+  comparisonAbsoluteValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  // Forecast next months
+  forecastNextMonths: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+  },
+  forecastNextTitle: {
+    fontSize: 12,
+    color: '#94a3b8',
+    marginBottom: 8,
+  },
+  // Trends styles
+  trendsContainer: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  trendsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  trendsTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  trendsCards: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  trendCard: {
+    flex: 1,
+    backgroundColor: colors.primary + '20',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+  },
+  trendLabel: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginBottom: 8,
+  },
+  trendValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  trendValue: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  trendsMessage: {
+    marginTop: 16,
+    fontSize: 13,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
 });
