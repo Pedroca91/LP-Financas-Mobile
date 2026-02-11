@@ -219,6 +219,65 @@ class RecurringTransaction(RecurringTransactionBase):
     last_generated: Optional[str] = None
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
+# ==================== GOALS (METAS) MODELS ====================
+
+class GoalBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    target_value: float
+    current_value: float = 0
+    deadline: Optional[str] = None
+    category: str = "general"  # general, travel, emergency, car, house, education, other
+    color: str = "#3B82F6"
+    icon: str = "target"
+
+class Goal(GoalBase):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    is_completed: bool = False
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    completed_at: Optional[str] = None
+
+class GoalContribution(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    goal_id: str
+    user_id: str
+    value: float
+    date: str
+    note: Optional[str] = None
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+# ==================== CHAT (ASSISTENTE) MODELS ====================
+
+class ChatMessage(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    session_id: str
+    role: str  # user, assistant
+    content: str
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class ChatRequest(BaseModel):
+    message: str
+    session_id: Optional[str] = None
+
+class ChatResponse(BaseModel):
+    response: str
+    session_id: str
+
+# ==================== GOOGLE AUTH MODELS ====================
+
+class GoogleAuthSession(BaseModel):
+    session_id: str
+
+class GoogleSessionData(BaseModel):
+    id: str
+    email: str
+    name: str
+    picture: Optional[str] = None
+    session_token: str
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
