@@ -21,6 +21,9 @@ import ReportsScreen from '../screens/ReportsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import AdminScreen from '../screens/AdminScreen';
 import MoreScreen from '../screens/MoreScreen';
+import GoalsScreen from '../screens/GoalsScreen';
+import ChatScreen from '../screens/ChatScreen';
+import ImportScreen from '../screens/ImportScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -131,6 +134,9 @@ function MoreStackNavigator() {
       <Stack.Screen name="Investimentos" component={InvestmentsScreen} />
       <Stack.Screen name="Beneficios" component={BenefitsScreen} />
       <Stack.Screen name="Recorrentes" component={RecurringScreen} />
+      <Stack.Screen name="Metas" component={GoalsScreen} />
+      <Stack.Screen name="Assistente" component={ChatScreen} />
+      <Stack.Screen name="Importar" component={ImportScreen} />
       <Stack.Screen name="Relatorios" component={ReportsScreen} />
       <Stack.Screen name="Categorias" component={SettingsScreen} />
       <Stack.Screen name="Admin" component={AdminScreen} />
@@ -144,12 +150,15 @@ function MoreMenuScreen({ navigation }) {
   const { isAdmin } = useAuth();
   
   const menuItems = [
+    { id: 'Metas', label: 'Metas', icon: 'flag', color: colors.gold },
+    { id: 'Assistente', label: 'Assistente IA', icon: 'chatbubbles', color: '#8b5cf6' },
+    { id: 'Importar', label: 'Importar Extrato', icon: 'cloud-upload', color: '#06b6d4' },
     { id: 'Investimentos', label: 'Investimentos', icon: 'bar-chart', color: colors.investment },
-    { id: 'Beneficios', label: 'VR/VA', icon: 'card', color: colors.gold },
-    { id: 'Recorrentes', label: 'Recorrentes', icon: 'repeat', color: colors.gold },
-    { id: 'Relatorios', label: 'Relatórios', icon: 'pie-chart', color: colors.gold },
-    { id: 'Categorias', label: 'Categorias', icon: 'folder', color: colors.gold },
-    { id: 'Perfil', label: 'Perfil', icon: 'person', color: colors.gold },
+    { id: 'Beneficios', label: 'VR/VA', icon: 'card', color: '#f59e0b' },
+    { id: 'Recorrentes', label: 'Recorrentes', icon: 'repeat', color: '#10b981' },
+    { id: 'Relatorios', label: 'Relatórios', icon: 'pie-chart', color: '#ec4899' },
+    { id: 'Categorias', label: 'Categorias', icon: 'folder', color: '#6366f1' },
+    { id: 'Perfil', label: 'Perfil', icon: 'person', color: '#64748b' },
   ];
 
   if (isAdmin) {
@@ -167,6 +176,9 @@ function MoreMenuScreen({ navigation }) {
         borderBottomRightRadius: 24,
       }}>
         <Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.textLight }}>Mais</Text>
+        <Text style={{ fontSize: 14, color: colors.textLight, opacity: 0.8, marginTop: 4 }}>
+          Acesse todas as funcionalidades
+        </Text>
       </View>
       <ScrollView style={{ flex: 1, padding: 20 }}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
