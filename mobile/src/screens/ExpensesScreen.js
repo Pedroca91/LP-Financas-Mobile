@@ -197,14 +197,14 @@ export default function ExpensesScreen() {
         <TouchableOpacity
           style={[
             styles.statusBadge,
-            { backgroundColor: item.status === 'paid' ? `${colors.expense}20` : `${colors.gold}20` },
+            { backgroundColor: item.status === 'paid' ? `${colors.income}20` : `${colors.warning}20` },
           ]}
           onPress={() => toggleStatus(item)}
         >
           <Ionicons
             name={item.status === 'paid' ? 'checkmark-circle' : 'time'}
             size={20}
-            color={item.status === 'paid' ? colors.expense : colors.gold}
+            color={item.status === 'paid' ? colors.income : colors.warning}
           />
         </TouchableOpacity>
         <View style={styles.listItemInfo}>
