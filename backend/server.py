@@ -424,6 +424,16 @@ async def admin_create_user(data: AdminCreateUser, admin: dict = Depends(get_adm
 @api_router.put("/admin/users/{user_id}", response_model=dict)
 async def admin_update_user(user_id: str, data: AdminUpdateUser, admin: dict = Depends(get_admin_user)):
     update_data = {}
+    if data.name is not None:
+        update_data["name"] = data.name
+    if data.email is not None:
+        # Verificar se email já existe em outro usuário
+        existing = await db.users.find_one({"email": data.email, "id": {"$ne": user_id}})
+        if existing:
+            raise HTTPException(status_code=400, detail="Email já está em uso")
+        update_data["email"] = data.email
+    if data.password is not None:
+        update_data["password"] = hash_password(data.password)
     if data.is_active is not None:
         update_data["is_active"] = data.is_active
     if data.role is not None:
