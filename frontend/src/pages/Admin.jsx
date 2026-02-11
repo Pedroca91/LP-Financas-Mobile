@@ -62,6 +62,82 @@ export function Admin() {
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      role: 'user',
+      status: 'approved'
+    });
+    setEditingUser(null);
+  };
+
+  const handleEdit = (user) => {
+    setEditingUser(user);
+    setFormData({
+      name: user.name,
+      email: user.email,
+      password: '',
+      role: user.role,
+      status: user.status
+    });
+    setIsEditOpen(true);
+  };
+
+  const handleCreate = () => {
+    resetForm();
+    setIsCreateOpen(true);
+  };
+
+  const handleSubmitEdit = async (e) => {
+    e.preventDefault();
+    try {
+      const updateData = {
+        name: formData.name,
+        email: formData.email,
+        role: formData.role,
+        status: formData.status
+      };
+      
+      // Só envia senha se foi preenchida
+      if (formData.password) {
+        updateData.password = formData.password;
+      }
+
+      await axios.put(`${API}/admin/users/${editingUser.id}`, updateData);
+      toast.success('Usuário atualizado com sucesso!');
+      setIsEditOpen(false);
+      resetForm();
+      fetchUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erro ao atualizar usuário');
+    }
+  };
+
+  const handleSubmitCreate = async (e) => {
+    e.preventDefault();
+    try {
+      if (!formData.password) {
+        toast.error('Senha é obrigatória para novos usuários');
+        return;
+      }
+
+      await axios.post(`${API}/admin/users`, {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role
+      });
+      toast.success('Usuário criado com sucesso!');
+      setIsCreateOpen(false);
+      resetForm();
+      fetchUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erro ao criar usuário');
+    }
+  };
+
   const handleApprove = async (userId) => {
     try {
       await axios.patch(`${API}/admin/users/${userId}/approve`);
