@@ -55,7 +55,7 @@ export const analyticsService = {
   getHighlights: (month, year) => api.get(`/analytics/highlights?month=${month}&year=${year}`),
   getForecast: (month, year) => api.get(`/analytics/forecast?month=${month}&year=${year}`),
   getComparison: (month, year) => api.get(`/analytics/comparison?month=${month}&year=${year}`),
-  getTips: (month, year) => api.get(`/analytics/tips?month=${month}&year=${year}`),
+  getTips: (month, year) => api.get(`/tips/personalized?month=${month}&year=${year}`),
 };
 
 // Incomes
