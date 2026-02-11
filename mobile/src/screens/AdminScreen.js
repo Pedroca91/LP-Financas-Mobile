@@ -184,12 +184,14 @@ export default function AdminScreen() {
         style={styles.header}
       >
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Administração</Text>
+          <View>
+            <Text style={styles.headerTitle}>Administração</Text>
+            <Text style={styles.headerSubtitle}>{users.length} usuários cadastrados</Text>
+          </View>
           <TouchableOpacity onPress={openAddModal} style={styles.addButton}>
-            <Ionicons name="person-add" size={22} color={colors.primary} />
+            <Ionicons name="person-add" size={24} color="#1a2d47" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.headerSubtitle}>{users.length} usuários cadastrados</Text>
       </LinearGradient>
 
       <FlatList
