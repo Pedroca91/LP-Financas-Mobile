@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // URL do backend
-const API_URL = 'https://finance-offline-4.preview.emergentagent.com/api';
+const API_URL = 'https://app-view-expo.preview.emergentagent.com/api';
 
 const api = axios.create({
   baseURL: API_URL,

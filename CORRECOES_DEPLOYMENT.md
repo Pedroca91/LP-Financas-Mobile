@@ -127,7 +127,7 @@ ADMIN_PASSWORD="S@muka91"
 ### Frontend (`.env`)
 Já configurado corretamente:
 ```env
-REACT_APP_BACKEND_URL=https://finance-offline-4.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://app-view-expo.preview.emergentagent.com
 WDS_SOCKET_PORT=443
 ENABLE_HEALTH_CHECK=false
 ```

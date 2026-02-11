@@ -6,7 +6,7 @@ Edge case testing for the new endpoints
 import requests
 import json
 
-BASE_URL = "https://finance-offline-4.preview.emergentagent.com/api"
+BASE_URL = "https://app-view-expo.preview.emergentagent.com/api"
 TEST_EMAIL = "Pedrohcarvalho1997@gmail.com"
 TEST_PASSWORD = "S@muka91"
 

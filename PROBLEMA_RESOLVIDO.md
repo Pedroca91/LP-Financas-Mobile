@@ -67,7 +67,7 @@ SyntaxError: .../Dashboard.jsx: Expecting Unicode escape sequence \uXXXX (141:22
 
 ## 🎯 SISTEMA OPERACIONAL
 
-**URL**: https://finance-offline-4.preview.emergentagent.com
+**URL**: https://app-view-expo.preview.emergentagent.com
 
 **Credenciais**:
 - Email: Pedrohcarvalho1997@gmail.com

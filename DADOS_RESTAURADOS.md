@@ -7,7 +7,7 @@
 - ✅ Nginx: RUNNING
 
 ## 🌐 URL de Acesso
-**https://finance-offline-4.preview.emergentagent.com**
+**https://app-view-expo.preview.emergentagent.com**
 
 ## 🔐 Credenciais
 - **Email**: Pedrohcarvalho1997@gmail.com

@@ -98,7 +98,7 @@ A documentação inclui:
 
 ## 🌐 Acesso ao Sistema
 
-**URL**: https://finance-offline-4.preview.emergentagent.com
+**URL**: https://app-view-expo.preview.emergentagent.com
 
 **Credenciais:**
 - Email: Pedrohcarvalho1997@gmail.com

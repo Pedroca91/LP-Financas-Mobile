@@ -7,7 +7,7 @@ import requests
 import json
 from datetime import datetime
 
-BASE_URL = "https://finance-offline-4.preview.emergentagent.com/api"
+BASE_URL = "https://app-view-expo.preview.emergentagent.com/api"
 TEST_EMAIL = "Pedrohcarvalho1997@gmail.com"
 TEST_PASSWORD = "S@muka91"
 

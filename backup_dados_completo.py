@@ -378,7 +378,7 @@ doc_content += f"""
 ## 📝 INFORMAÇÕES ADICIONAIS
 
 ### Credenciais de Acesso
-- **URL**: https://finance-offline-4.preview.emergentagent.com
+- **URL**: https://app-view-expo.preview.emergentagent.com
 - **Email Admin**: Pedrohcarvalho1997@gmail.com
 - **Senha Admin**: (armazenada em hash bcrypt no banco)
 
