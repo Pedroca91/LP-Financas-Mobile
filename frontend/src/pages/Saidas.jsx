@@ -218,6 +218,10 @@ export function Saidas() {
         </div>
         <div className="flex items-center gap-3">
           <MonthSelector />
+          <Button variant="outline" onClick={() => setIsImportOpen(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Importar Extrato
+          </Button>
           <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
               <Button className="rounded-sm" data-testid="add-expense-btn">
