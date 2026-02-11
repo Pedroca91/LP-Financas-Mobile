@@ -19,12 +19,20 @@ export const AuthProvider = ({ children }) => {
       const storedToken = await AsyncStorage.getItem('token');
       if (storedToken) {
         setToken(storedToken);
-        const response = await authService.getMe();
-        setUser(response.data);
+        try {
+          const response = await authService.getMe();
+          setUser(response.data);
+        } catch (authError) {
+          // Token inválido ou expirado - limpar e ir para login
+          // Não mostrar erro, apenas redirecionar para login
+          await AsyncStorage.removeItem('token');
+          setToken(null);
+          setUser(null);
+        }
       }
     } catch (error) {
-      console.error('Error loading auth:', error);
-      await AsyncStorage.removeItem('token');
+      // Erro ao acessar AsyncStorage - ignorar silenciosamente
+      console.log('Auth check completed');
     } finally {
       setLoading(false);
     }
