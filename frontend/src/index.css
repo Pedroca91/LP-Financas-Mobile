@@ -181,3 +181,29 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 .dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   filter: invert(1) brightness(0.8);
 }
+
+/* Mobile keyboard handling for dialogs/modals */
+@media (max-width: 640px) {
+  /* Quando o teclado virtual está ativo, ajusta o layout */
+  .dialog-scroll-area {
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Garante que inputs fiquem visíveis quando focados */
+  input:focus,
+  select:focus,
+  textarea:focus {
+    scroll-margin-bottom: 100px;
+  }
+}
+
+/* Melhor suporte para visual viewport (teclado virtual) */
+@supports (height: 100dvh) {
+  @media (max-width: 640px) {
+    [data-radix-dialog-content] {
+      max-height: 90dvh;
+    }
+  }
+}
