@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: lpfinancas-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: MONGO_URL
+        sync: false
+      - key: DB_NAME
+        value: lpfinancas_prod
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRICE_MONTHLY
+        sync: false
+      - key: STRIPE_PRICE_ANNUAL
+        sync: false
+      - key: FRONTEND_URL
+        value: https://app.lpfinancass.com.br
+      - key: CORS_ORIGINS
+        value: https://app.lpfinancass.com.br,https://lpfinancass.com.br
