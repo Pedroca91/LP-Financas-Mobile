@@ -13,6 +13,7 @@ from datetime import datetime, timezone, timedelta
 import bcrypt
 import jwt
 import httpx
+import stripe
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -28,6 +29,14 @@ if not JWT_SECRET:
     JWT_SECRET = 'dev_secret_key_change_in_production'  # Only for development
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24 * 30  # 30 days for mobile app persistence
+
+# Stripe Configuration
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+STRIPE_PRICE_MONTHLY = os.environ.get('STRIPE_PRICE_MONTHLY', '')  # Price ID for R$29.90/month
+STRIPE_PRICE_ANNUAL = os.environ.get('STRIPE_PRICE_ANNUAL', '')    # Price ID for R$97.90/year
+if STRIPE_SECRET_KEY:
+    stripe.api_key = STRIPE_SECRET_KEY
 
 # Create the main app
 app = FastAPI(
@@ -821,7 +830,7 @@ async def delete_investment(investment_id: str, user: dict = Depends(get_current
 
 # ==================== BUDGET ROUTES ====================
 
-@api_router.get("/budgets", response_model=List[Budget])
+@api_router.get("/budgets")
 async def get_budgets(month: Optional[int] = None, year: Optional[int] = None, user: dict = Depends(get_current_user)):
     query = {"user_id": user["id"]}
     if month:
@@ -829,6 +838,11 @@ async def get_budgets(month: Optional[int] = None, year: Optional[int] = None, u
     if year:
         query["year"] = year
     budgets = await db.budgets.find(query, {"_id": 0}).to_list(1000)
+    # Enrich with category_name
+    categories = await db.categories.find({"user_id": user["id"]}, {"_id": 0}).to_list(200)
+    cat_map = {c["id"]: c["name"] for c in categories}
+    for b in budgets:
+        b["category_name"] = cat_map.get(b.get("category_id"), b.get("category_id", ""))
     return budgets
 
 @api_router.post("/budgets", response_model=Budget)
@@ -2456,6 +2470,160 @@ async def remove_notification_token(user: dict = Depends(get_current_user)):
     """Remove FCM token to disable notifications"""
     await db.notification_tokens.delete_one({"user_id": user["id"]})
     return {"success": True}
+
+# ==================== SUBSCRIPTION (STRIPE) ROUTES ====================
+
+class CheckoutRequest(BaseModel):
+    plan: str  # 'monthly' or 'annual'
+
+class PortalRequest(BaseModel):
+    pass
+
+@api_router.get("/subscription/status")
+async def get_subscription_status(user: dict = Depends(get_current_user)):
+    """Get current subscription status for the user"""
+    sub_doc = await db.subscriptions.find_one({"user_id": user["id"]}, {"_id": 0})
+    if not sub_doc:
+        return {"plan": "free", "status": "inactive", "current_period_end": None}
+    return {
+        "plan": sub_doc.get("plan", "free"),
+        "status": sub_doc.get("status", "inactive"),
+        "current_period_end": sub_doc.get("current_period_end"),
+        "stripe_subscription_id": sub_doc.get("stripe_subscription_id"),
+        "cancel_at_period_end": sub_doc.get("cancel_at_period_end", False)
+    }
+
+@api_router.post("/subscription/checkout")
+async def create_checkout_session(data: CheckoutRequest, user: dict = Depends(get_current_user)):
+    """Create a Stripe Checkout session"""
+    if not STRIPE_SECRET_KEY:
+        raise HTTPException(status_code=503, detail="Payment system not configured")
+    
+    price_id = STRIPE_PRICE_MONTHLY if data.plan == 'monthly' else STRIPE_PRICE_ANNUAL
+    if not price_id:
+        raise HTTPException(status_code=503, detail="Price not configured for this plan")
+    
+    frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+    
+    try:
+        # Get or create Stripe customer
+        sub_doc = await db.subscriptions.find_one({"user_id": user["id"]})
+        customer_id = sub_doc.get("stripe_customer_id") if sub_doc else None
+        
+        if not customer_id:
+            customer = stripe.Customer.create(
+                email=user["email"],
+                name=user["name"],
+                metadata={"user_id": user["id"]}
+            )
+            customer_id = customer.id
+        
+        session = stripe.checkout.Session.create(
+            customer=customer_id,
+            payment_method_types=['card'],
+            line_items=[{"price": price_id, "quantity": 1}],
+            mode='subscription',
+            success_url=f"{frontend_url}/assinatura?success=true&session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{frontend_url}/assinatura?canceled=true",
+            metadata={"user_id": user["id"], "plan": data.plan},
+            locale='pt-BR',
+            allow_promotion_codes=True
+        )
+        
+        # Save customer_id
+        await db.subscriptions.update_one(
+            {"user_id": user["id"]},
+            {"$set": {"user_id": user["id"], "stripe_customer_id": customer_id}},
+            upsert=True
+        )
+        
+        return {"checkout_url": session.url, "session_id": session.id}
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.post("/subscription/portal")
+async def create_billing_portal(user: dict = Depends(get_current_user)):
+    """Create a Stripe Billing Portal session for managing subscription"""
+    if not STRIPE_SECRET_KEY:
+        raise HTTPException(status_code=503, detail="Payment system not configured")
+    
+    sub_doc = await db.subscriptions.find_one({"user_id": user["id"]})
+    if not sub_doc or not sub_doc.get("stripe_customer_id"):
+        raise HTTPException(status_code=404, detail="No subscription found")
+    
+    frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+    
+    try:
+        session = stripe.billing_portal.Session.create(
+            customer=sub_doc["stripe_customer_id"],
+            return_url=f"{frontend_url}/assinatura"
+        )
+        return {"portal_url": session.url}
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/stripe/webhook")
+async def stripe_webhook(request: Request):
+    """Handle Stripe webhook events"""
+    payload = await request.body()
+    sig_header = request.headers.get('stripe-signature')
+    
+    if not STRIPE_WEBHOOK_SECRET:
+        return {"received": True}
+    
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid payload")
+    except stripe.error.SignatureVerificationError:
+        raise HTTPException(status_code=400, detail="Invalid signature")
+    
+    event_type = event['type']
+    data = event['data']['object']
+    
+    if event_type == 'checkout.session.completed':
+        user_id = data.get('metadata', {}).get('user_id')
+        plan = data.get('metadata', {}).get('plan', 'monthly')
+        subscription_id = data.get('subscription')
+        customer_id = data.get('customer')
+        if user_id and subscription_id:
+            sub = stripe.Subscription.retrieve(subscription_id)
+            await db.subscriptions.update_one(
+                {"user_id": user_id},
+                {"$set": {
+                    "user_id": user_id,
+                    "plan": plan,
+                    "status": "active",
+                    "stripe_subscription_id": subscription_id,
+                    "stripe_customer_id": customer_id,
+                    "current_period_end": datetime.fromtimestamp(sub['current_period_end'], tz=timezone.utc).isoformat(),
+                    "cancel_at_period_end": sub.get('cancel_at_period_end', False),
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }},
+                upsert=True
+            )
+            # Approve user if pending
+            await db.users.update_one(
+                {"id": user_id, "status": "pending"},
+                {"$set": {"status": "approved"}}
+            )
+    
+    elif event_type in ('customer.subscription.updated', 'customer.subscription.deleted'):
+        subscription_id = data.get('id')
+        status = 'active' if data.get('status') == 'active' else 'inactive'
+        sub_doc = await db.subscriptions.find_one({"stripe_subscription_id": subscription_id})
+        if sub_doc:
+            await db.subscriptions.update_one(
+                {"stripe_subscription_id": subscription_id},
+                {"$set": {
+                    "status": status,
+                    "current_period_end": datetime.fromtimestamp(data.get('current_period_end', 0), tz=timezone.utc).isoformat(),
+                    "cancel_at_period_end": data.get('cancel_at_period_end', False),
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+    
+    return {"received": True}
 
 # ==================== ROOT ROUTES ====================
 

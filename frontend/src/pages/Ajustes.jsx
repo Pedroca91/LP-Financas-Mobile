@@ -31,7 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Badge } from '../components/ui/badge';
 import { Switch } from '../components/ui/switch';
 import { toast } from '../components/ui/toast-provider';
-import { Settings, Plus, Pencil, Trash2, CreditCard, Tags, Bell, Smartphone, Download, Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { Settings, Plus, Pencil, Trash2, CreditCard, Tags, Bell, Smartphone, Download, Wifi, WifiOff, RefreshCw, Target, DollarSign } from 'lucide-react';
 import { useNotifications } from '../hooks/useNotifications';
 import { usePWA } from '../hooks/usePWA';
 
@@ -39,12 +39,18 @@ export function Ajustes() {
   const {
     categories,
     creditCards,
+    budgets,
+    incomeCategories,
+    expenseCategories,
+    selectedMonth,
+    selectedYear,
     createCategory,
     updateCategory,
     deleteCategory,
     createCreditCard,
     updateCreditCard,
-    deleteCreditCard
+    deleteCreditCard,
+    createBudget
   } = useFinance();
 
   const { 
@@ -73,6 +79,33 @@ export function Ajustes() {
 
   const [categoryForm, setCategoryForm] = useState({ name: '', type: 'expense' });
   const [cardForm, setCardForm] = useState({ name: '', limit: '', closing_day: '', due_day: '' });
+  const [isBudgetOpen, setIsBudgetOpen] = useState(false);
+  const [budgetForm, setBudgetForm] = useState({ category_id: '', type: 'expense', planned_value: '' });
+
+  const resetBudgetForm = () => {
+    setBudgetForm({ category_id: '', type: 'expense', planned_value: '' });
+  };
+
+  const handleSaveBudget = async () => {
+    if (!budgetForm.category_id || !budgetForm.planned_value) {
+      toast.error('Preencha a categoria e o valor planejado');
+      return;
+    }
+    try {
+      await createBudget({
+        category_id: budgetForm.category_id,
+        type: budgetForm.type,
+        planned_value: parseFloat(budgetForm.planned_value),
+        month: selectedMonth,
+        year: selectedYear
+      });
+      toast.success('Orçamento salvo com sucesso!');
+      setIsBudgetOpen(false);
+      resetBudgetForm();
+    } catch (error) {
+      toast.error('Erro ao salvar orçamento');
+    }
+  };
 
   const resetCategoryForm = () => {
     setCategoryForm({ name: '', type: 'expense' });
@@ -233,10 +266,14 @@ export function Ajustes() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+        <TabsList className="grid w-full grid-cols-5 max-w-3xl">
           <TabsTrigger value="categories" data-testid="tab-categories">
             <Tags className="h-4 w-4 mr-2" />
             Categorias
+          </TabsTrigger>
+          <TabsTrigger value="budgets" data-testid="tab-budgets">
+            <Target className="h-4 w-4 mr-2" />
+            Orçamentos
           </TabsTrigger>
           <TabsTrigger value="cards" data-testid="tab-cards">
             <CreditCard className="h-4 w-4 mr-2" />
@@ -354,6 +391,121 @@ export function Ajustes() {
                   ))}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Budgets Tab */}
+        <TabsContent value="budgets" className="mt-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Orçamentos por Categoria</CardTitle>
+                <CardDescription>
+                  Defina metas de receitas e despesas para {selectedMonth}/{selectedYear}.
+                  Os orçamentos alimentam o gráfico "Meta vs Realizado" nos Relatórios.
+                </CardDescription>
+              </div>
+              <Dialog open={isBudgetOpen} onOpenChange={(open) => { setIsBudgetOpen(open); if (!open) resetBudgetForm(); }}>
+                <DialogTrigger asChild>
+                  <Button className="rounded-sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Orçamento
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Novo Orçamento</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Tipo</Label>
+                      <Select
+                        value={budgetForm.type}
+                        onValueChange={(v) => setBudgetForm({ ...budgetForm, type: v, category_id: '' })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="income">Receita</SelectItem>
+                          <SelectItem value="expense">Despesa</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Categoria</Label>
+                      <Select
+                        value={budgetForm.category_id}
+                        onValueChange={(v) => setBudgetForm({ ...budgetForm, category_id: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(budgetForm.type === 'income' ? incomeCategories : expenseCategories).map(cat => (
+                            <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Valor Planejado (R$)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0,00"
+                        value={budgetForm.planned_value}
+                        onChange={(e) => setBudgetForm({ ...budgetForm, planned_value: e.target.value })}
+                      />
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Button type="button" onClick={handleSaveBudget} className="flex-1">
+                        Salvar Orçamento
+                      </Button>
+                      <Button type="button" variant="outline" onClick={() => setIsBudgetOpen(false)} className="flex-1">
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </CardHeader>
+            <CardContent>
+              {budgets.length === 0 ? (
+                <div className="text-center py-10 text-muted-foreground">
+                  <Target className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                  <p className="font-medium">Nenhum orçamento definido</p>
+                  <p className="text-sm mt-1">Crie orçamentos para acompanhar suas metas no mês atual.</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead className="text-right">Valor Planejado</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {budgets.map((b, idx) => (
+                      <TableRow key={b.id || idx}>
+                        <TableCell className="font-medium">{b.category_name || b.category_id}</TableCell>
+                        <TableCell>
+                          <Badge variant={b.type === 'income' ? 'default' : 'destructive'}>
+                            {b.type === 'income' ? 'Receita' : 'Despesa'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right font-mono">
+                          <DollarSign className="inline h-3 w-3 mr-1 text-muted-foreground" />
+                          {b.planned_value?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

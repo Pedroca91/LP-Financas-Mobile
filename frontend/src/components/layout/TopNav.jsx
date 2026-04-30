@@ -28,7 +28,8 @@ import {
   CreditCard,
   RefreshCw,
   Target,
-  Bot
+  Bot,
+  Crown
 } from 'lucide-react';
 
 const navItems = [
@@ -135,6 +136,11 @@ export function TopNav() {
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem className="text-muted-foreground">
                   {user?.email}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/assinatura')}>
+                  <Crown className="h-4 w-4 mr-2 text-yellow-500" />
+                  Minha Assinatura
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} data-testid="logout-btn">

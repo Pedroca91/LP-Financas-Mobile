@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LP Finanças — Controle Financeiro Inteligente</title>
+  <meta name="description" content="Organize suas finanças pessoais com o LP Finanças. Dashboard completo, controle de gastos, investimentos, cartões e assistente IA. A partir de R$ 8,16/mês." />
+  <meta property="og:title" content="LP Finanças — Controle Financeiro Inteligente" />
+  <meta property="og:description" content="Organize suas finanças pessoais com o LP Finanças. Dashboard completo, controle de gastos, investimentos, cartões e assistente IA." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://lpfinancass.com.br" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #16a34a;
+      --green-dark: #15803d;
+      --green-light: #dcfce7;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 12px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+    .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 1.25rem; font-weight: 700; color: var(--text); text-decoration: none; }
+    .logo-icon { width: 36px; height: 36px; background: var(--green); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--green); }
+    .nav-cta { display: flex; gap: 0.75rem; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 0.6rem 1.4rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: none; border: none; transition: all 0.2s; }
+    .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--green); color: var(--green); }
+    .btn-primary { background: var(--green); color: white; }
+    .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(22,163,74,0.3); }
+    .btn-yellow { background: var(--yellow); color: white; }
+    .btn-yellow:hover { background: #d97706; transform: translateY(-1px); }
+    .btn-lg { padding: 0.9rem 2rem; font-size: 1rem; }
+
+    /* HERO */
+    .hero { padding: 6rem 2rem 4rem; text-align: center; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f0fdf4 100%); }
+    .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--green-light); color: var(--green); border: 1px solid #bbf7d0; border-radius: 999px; padding: 0.35rem 1rem; font-size: 0.8rem; font-weight: 600; margin-bottom: 1.5rem; }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.15; max-width: 800px; margin: 0 auto 1.5rem; }
+    .hero h1 span { color: var(--green); }
+    .hero p { font-size: 1.15rem; color: var(--muted); max-width: 600px; margin: 0 auto 2.5rem; }
+    .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+    .hero-proof { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+    .proof-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--muted); }
+    .proof-item svg { color: var(--green); }
+
+    /* DASHBOARD PREVIEW */
+    .preview-section { padding: 4rem 2rem; background: white; }
+    .preview-inner { max-width: 1100px; margin: 0 auto; }
+    .section-label { text-align: center; font-size: 0.85rem; font-weight: 600; color: var(--green); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem; }
+    .section-title { text-align: center; font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 700; margin-bottom: 1rem; }
+    .section-desc { text-align: center; color: var(--muted); max-width: 600px; margin: 0 auto 3rem; }
+    .dashboard-mock { background: #0f172a; border-radius: 16px; padding: 1.5rem; box-shadow: 0 25px 60px rgba(0,0,0,0.2); }
+    .mock-topbar { display: flex; gap: 6px; margin-bottom: 1.5rem; }
+    .mock-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .mock-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .mock-card { background: #1e293b; border-radius: 10px; padding: 1rem; }
+    .mock-card-label { font-size: 0.7rem; color: #94a3b8; margin-bottom: 0.5rem; }
+    .mock-card-value { font-size: 1.1rem; font-weight: 700; font-family: monospace; }
+    .mock-chart { background: #1e293b; border-radius: 10px; padding: 1.25rem; height: 140px; display: flex; align-items: flex-end; gap: 8px; }
+    .mock-bar { flex: 1; border-radius: 4px 4px 0 0; }
+
+    /* FEATURES */
+    .features { padding: 5rem 2rem; background: var(--bg); }
+    .features-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .feature-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem; transition: all 0.2s; }
+    .feature-card:hover { border-color: var(--green); box-shadow: 0 8px 24px rgba(22,163,74,0.1); transform: translateY(-2px); }
+    .feature-icon { width: 48px; height: 48px; background: var(--green-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; }
+    .feature-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .feature-card p { font-size: 0.9rem; color: var(--muted); }
+
+    /* PRICING */
+    .pricing { padding: 5rem 2rem; background: white; }
+    .pricing-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; align-items: start; }
+    .price-card { background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius); padding: 2rem; position: relative; }
+    .price-card.featured { background: white; border-color: var(--green); box-shadow: 0 12px 40px rgba(22,163,74,0.15); }
+    .price-card.best { background: white; border-color: var(--yellow); box-shadow: 0 12px 40px rgba(245,158,11,0.15); }
+    .price-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--green); color: white; font-size: 0.75rem; font-weight: 700; padding: 0.3rem 1rem; border-radius: 999px; white-space: nowrap; }
+    .price-badge.yellow { background: var(--yellow); }
+    .price-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .price-desc { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .price-amount { font-size: 2.75rem; font-weight: 800; line-height: 1; }
+    .price-amount span { font-size: 1rem; font-weight: 500; color: var(--muted); }
+    .price-sub { font-size: 0.8rem; color: var(--green); font-weight: 600; margin: 0.25rem 0 1.5rem; }
+    .price-features { list-style: none; space-y: 0.5rem; margin-bottom: 2rem; }
+    .price-features li { display: flex; align-items: flex-start; gap: 8px; font-size: 0.875rem; padding: 0.35rem 0; }
+    .check { color: var(--green); font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+    .price-cta { width: 100%; padding: 0.85rem; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; text-align: center; text-decoration: none; display: block; }
+    .price-cta.green { background: var(--green); color: white; }
+    .price-cta.green:hover { background: var(--green-dark); }
+    .price-cta.yellow { background: var(--yellow); color: white; }
+    .price-cta.yellow:hover { background: #d97706; }
+    .price-cta.outline { background: transparent; border: 2px solid var(--border); color: var(--muted); cursor: default; }
+
+    /* TESTIMONIALS */
+    .testimonials { padding: 5rem 2rem; background: var(--bg); }
+    .testimonials-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .testimonial-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem; }
+    .stars { color: var(--yellow); font-size: 1rem; margin-bottom: 1rem; }
+    .testimonial-text { font-size: 0.9rem; color: var(--text); font-style: italic; margin-bottom: 1.25rem; line-height: 1.7; }
+    .testimonial-author { display: flex; align-items: center; gap: 10px; }
+    .author-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--green); font-size: 0.9rem; }
+    .author-name { font-weight: 600; font-size: 0.9rem; }
+    .author-role { font-size: 0.8rem; color: var(--muted); }
+
+    /* FAQ */
+    .faq { padding: 5rem 2rem; background: white; }
+    .faq-inner { max-width: 700px; margin: 0 auto; }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-question { width: 100%; text-align: left; padding: 1.25rem 0; font-size: 1rem; font-weight: 600; background: none; border: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--text); }
+    .faq-answer { padding: 0 0 1.25rem; font-size: 0.9rem; color: var(--muted); line-height: 1.7; display: none; }
+    .faq-answer.open { display: block; }
+
+    /* CTA FINAL */
+    .cta-final { padding: 5rem 2rem; background: linear-gradient(135deg, #16a34a, #15803d); text-align: center; color: white; }
+    .cta-final h2 { font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 800; margin-bottom: 1rem; }
+    .cta-final p { font-size: 1.1rem; opacity: 0.9; max-width: 500px; margin: 0 auto 2.5rem; }
+    .cta-final .btn-white { background: white; color: var(--green); }
+    .cta-final .btn-white:hover { background: #f0fdf4; }
+
+    /* FOOTER */
+    footer { background: #0f172a; color: #94a3b8; padding: 3rem 2rem 2rem; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; }
+    .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 3rem; margin-bottom: 2.5rem; }
+    .footer-brand p { font-size: 0.875rem; margin-top: 0.75rem; line-height: 1.7; }
+    .footer-col h4 { color: white; font-weight: 600; margin-bottom: 1rem; font-size: 0.9rem; }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 0.5rem; }
+    .footer-col ul li a { color: #94a3b8; text-decoration: none; font-size: 0.875rem; transition: color 0.2s; }
+    .footer-col ul li a:hover { color: white; }
+    .footer-bottom { border-top: 1px solid #1e293b; padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; font-size: 0.8rem; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mock-cards { grid-template-columns: repeat(2, 1fr); }
+      .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+      .footer-bottom { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+    @media (max-width: 480px) {
+      .hero { padding: 4rem 1rem 3rem; }
+      .mock-cards { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVEGAÇÃO -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">💰</div>
+      LP Finanças
+    </a>
+    <ul class="nav-links">
+      <li><a href="#funcionalidades">Funcionalidades</a></li>
+      <li><a href="#precos">Preços</a></li>
+      <li><a href="#depoimentos">Depoimentos</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="https://app.lpfinancass.com.br/login" class="btn btn-outline">Entrar</a>
+      <a href="https://app.lpfinancass.com.br/register" class="btn btn-primary">Começar Grátis</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">
+    <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+    Mais de 500 usuários ativos
+  </div>
+  <h1>Controle suas finanças com <span>inteligência e simplicidade</span></h1>
+  <p>O LP Finanças é o sistema completo para organizar receitas, despesas, investimentos, cartões e muito mais — tudo em um só lugar, com assistente IA incluído.</p>
+  <div class="hero-cta">
+    <a href="https://app.lpfinancass.com.br/register" class="btn btn-primary btn-lg">
+      🚀 Começar Grátis Agora
+    </a>
+    <a href="#precos" class="btn btn-outline btn-lg">Ver Planos</a>
+  </div>
+  <div class="hero-proof">
+    <div class="proof-item">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+      Sem cartão de crédito
+    </div>
+    <div class="proof-item">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+      Garantia de 7 dias
+    </div>
+    <div class="proof-item">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+      Cancele quando quiser
+    </div>
+    <div class="proof-item">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+      Dados 100% seguros
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD PREVIEW -->
+<section class="preview-section">
+  <div class="preview-inner">
+    <p class="section-label">Painel de Controle</p>
+    <h2 class="section-title">Tudo que você precisa em uma tela</h2>
+    <p class="section-desc">Visualize sua saúde financeira em tempo real com gráficos interativos e indicadores inteligentes.</p>
+    <div class="dashboard-mock">
+      <div class="mock-topbar">
+        <div class="mock-dot" style="background:#ef4444"></div>
+        <div class="mock-dot" style="background:#f59e0b"></div>
+        <div class="mock-dot" style="background:#22c55e"></div>
+      </div>
+      <div class="mock-cards">
+        <div class="mock-card">
+          <div class="mock-card-label">Saldo do Mês</div>
+          <div class="mock-card-value" style="color:#22c55e">R$ 3.240,00</div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-card-label">Receitas</div>
+          <div class="mock-card-value" style="color:#60a5fa">R$ 8.500,00</div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-card-label">Despesas</div>
+          <div class="mock-card-value" style="color:#f87171">R$ 5.260,00</div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-card-label">Investimentos</div>
+          <div class="mock-card-value" style="color:#a78bfa">R$ 1.200,00</div>
+        </div>
+      </div>
+      <div class="mock-chart">
+        <div class="mock-bar" style="height:60%;background:#16a34a;opacity:0.8"></div>
+        <div class="mock-bar" style="height:80%;background:#16a34a;opacity:0.8"></div>
+        <div class="mock-bar" style="height:45%;background:#ef4444;opacity:0.8"></div>
+        <div class="mock-bar" style="height:90%;background:#16a34a;opacity:0.8"></div>
+        <div class="mock-bar" style="height:70%;background:#ef4444;opacity:0.8"></div>
+        <div class="mock-bar" style="height:55%;background:#16a34a;opacity:0.8"></div>
+        <div class="mock-bar" style="height:85%;background:#16a34a;opacity:0.8"></div>
+        <div class="mock-bar" style="height:40%;background:#ef4444;opacity:0.8"></div>
+        <div class="mock-bar" style="height:75%;background:#16a34a;opacity:0.8"></div>
+        <div class="mock-bar" style="height:95%;background:#16a34a;opacity:0.8"></div>
+        <div class="mock-bar" style="height:65%;background:#ef4444;opacity:0.8"></div>
+        <div class="mock-bar" style="height:88%;background:#16a34a;opacity:0.8"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FUNCIONALIDADES -->
+<section class="features" id="funcionalidades">
+  <p class="section-label">Funcionalidades</p>
+  <h2 class="section-title">Tudo para dominar suas finanças</h2>
+  <p class="section-desc">Ferramentas poderosas e fáceis de usar para você ter controle total do seu dinheiro.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Dashboard Inteligente</h3>
+      <p>Visão completa das suas finanças com gráficos de evolução anual, comparativo Meta vs Realizado e indicadores de saúde financeira.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💳</div>
+      <h3>Cartões de Crédito</h3>
+      <p>Controle de faturas, parcelamentos automáticos e alertas de vencimento. Saiba exatamente quanto deve em cada cartão.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📈</div>
+      <h3>Investimentos</h3>
+      <p>Acompanhe seus aportes em ações, fundos, renda fixa e criptomoedas. Veja a evolução do seu patrimônio ao longo do tempo.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <h3>Lançamentos Recorrentes</h3>
+      <p>Configure contas fixas como aluguel, internet e academia. O sistema gera os lançamentos automaticamente todo mês.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <h3>Assistente IA</h3>
+      <p>Converse com nosso assistente financeiro inteligente. Receba dicas personalizadas, análises e respostas sobre suas finanças.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🍽️</div>
+      <h3>Benefícios VR/VA</h3>
+      <p>Controle seus saldos de Vale-Refeição e Vale-Alimentação. Saiba quanto tem disponível e evite surpresas.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <h3>Metas Financeiras</h3>
+      <p>Defina objetivos como viagem, carro ou reserva de emergência. Acompanhe o progresso e receba alertas de conquistas.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📄</div>
+      <h3>Relatórios PDF e Excel</h3>
+      <p>Exporte relatórios completos em PDF ou Excel com um clique. Ideal para declaração de IR ou análise detalhada.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <h3>App Mobile (PWA)</h3>
+      <p>Instale no celular como um aplicativo nativo. Funciona offline e recebe notificações de contas a vencer.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PREÇOS -->
+<section class="pricing" id="precos">
+  <p class="section-label">Planos e Preços</p>
+  <h2 class="section-title">Investimento que vale cada centavo</h2>
+  <p class="section-desc">Escolha o plano ideal para você. Sem taxas escondidas, sem surpresas.</p>
+  <div class="pricing-grid">
+
+    <!-- Gratuito -->
+    <div class="price-card">
+      <div class="price-name">Gratuito</div>
+      <div class="price-desc">Para começar a organizar</div>
+      <div class="price-amount">R$ 0<span>/mês</span></div>
+      <div class="price-sub">&nbsp;</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Dashboard financeiro</li>
+        <li><span class="check">✓</span> Controle de receitas e despesas</li>
+        <li><span class="check">✓</span> Relatórios básicos</li>
+        <li><span class="check">✓</span> Até 50 lançamentos/mês</li>
+      </ul>
+      <a href="https://app.lpfinancass.com.br/register" class="price-cta outline">Plano Gratuito</a>
+    </div>
+
+    <!-- Pro Mensal -->
+    <div class="price-card featured">
+      <div class="price-badge">⚡ Mais Popular</div>
+      <div class="price-name">Pro Mensal</div>
+      <div class="price-desc">Acesso completo, sem compromisso</div>
+      <div class="price-amount">R$ 29,90<span>/mês</span></div>
+      <div class="price-sub">&nbsp;</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Lançamentos ilimitados</li>
+        <li><span class="check">✓</span> Exportação PDF e Excel</li>
+        <li><span class="check">✓</span> Análise avançada e previsões</li>
+        <li><span class="check">✓</span> Cartões de crédito com parcelas</li>
+        <li><span class="check">✓</span> Investimentos e metas</li>
+        <li><span class="check">✓</span> Assistente IA financeiro</li>
+        <li><span class="check">✓</span> Lançamentos recorrentes</li>
+        <li><span class="check">✓</span> Importação de extratos CSV</li>
+        <li><span class="check">✓</span> Benefícios VR/VA</li>
+        <li><span class="check">✓</span> Suporte prioritário</li>
+      </ul>
+      <a href="https://app.lpfinancass.com.br/register" class="price-cta green">Assinar Agora</a>
+    </div>
+
+    <!-- Pro Anual -->
+    <div class="price-card best">
+      <div class="price-badge yellow">⭐ Melhor Valor</div>
+      <div class="price-name">Pro Anual</div>
+      <div class="price-desc">Economize 73% vs mensal</div>
+      <div class="price-amount">R$ 97,90<span>/ano</span></div>
+      <div class="price-sub">Equivale a R$ 8,16/mês</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Tudo do plano Pro Mensal</li>
+        <li><span class="check">✓</span> Economia de R$ 261,00/ano</li>
+        <li><span class="check">✓</span> 2 meses grátis incluídos</li>
+        <li><span class="check">✓</span> Suporte VIP</li>
+        <li><span class="check">✓</span> Acesso antecipado a novidades</li>
+      </ul>
+      <a href="https://app.lpfinancass.com.br/register" class="price-cta yellow">Assinar Anual</a>
+    </div>
+
+  </div>
+  <p style="text-align:center;margin-top:2rem;font-size:0.85rem;color:var(--muted)">
+    🔒 Pagamento seguro via Stripe &nbsp;·&nbsp; Cancele quando quiser &nbsp;·&nbsp; Garantia de 7 dias
+  </p>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section class="testimonials" id="depoimentos">
+  <p class="section-label">Depoimentos</p>
+  <h2 class="section-title">O que nossos usuários dizem</h2>
+  <p class="section-desc">Mais de 500 pessoas já transformaram sua relação com o dinheiro usando o LP Finanças.</p>
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <div class="stars">★★★★★</div>
+      <p class="testimonial-text">"Finalmente consegui entender para onde ia meu dinheiro. Em 3 meses já economizei mais de R$ 800 só identificando gastos desnecessários."</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">MA</div>
+        <div>
+          <div class="author-name">Maria Aparecida</div>
+          <div class="author-role">Professora, São Paulo</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="stars">★★★★★</div>
+      <p class="testimonial-text">"O assistente IA é incrível! Me deu dicas personalizadas baseadas nos meus gastos e me ajudou a criar uma reserva de emergência do zero."</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">RC</div>
+        <div>
+          <div class="author-name">Rafael Costa</div>
+          <div class="author-role">Engenheiro, Curitiba</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="stars">★★★★★</div>
+      <p class="testimonial-text">"Uso para controlar as finanças do meu negócio e da minha família. O relatório em Excel facilita muito na hora de fazer a declaração do IR."</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">JS</div>
+        <div>
+          <div class="author-name">Juliana Santos</div>
+          <div class="author-role">Empreendedora, Belo Horizonte</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <p class="section-label">Dúvidas Frequentes</p>
+  <h2 class="section-title">Perguntas e Respostas</h2>
+  <div class="faq-inner" style="margin-top:2.5rem">
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        Como funciona o período gratuito?
+        <span>+</span>
+      </button>
+      <div class="faq-answer">
+        O plano gratuito é permanente e não tem prazo de expiração. Você pode usar o LP Finanças gratuitamente com até 50 lançamentos por mês. Para funcionalidades avançadas como exportação, IA e lançamentos ilimitados, basta assinar um dos planos Pro.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        Posso cancelar a qualquer momento?
+        <span>+</span>
+      </button>
+      <div class="faq-answer">
+        Sim! Não há fidelidade. Você pode cancelar sua assinatura a qualquer momento pelo painel de controle. O acesso Pro continua ativo até o fim do período pago.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        Meus dados financeiros estão seguros?
+        <span>+</span>
+      </button>
+      <div class="faq-answer">
+        Absolutamente. Seus dados são criptografados em trânsito (HTTPS) e em repouso. Cada usuário tem acesso apenas aos seus próprios dados. Nunca compartilhamos informações com terceiros.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        O LP Finanças funciona no celular?
+        <span>+</span>
+      </button>
+      <div class="faq-answer">
+        Sim! O LP Finanças é um PWA (Progressive Web App), ou seja, você pode instalá-lo no celular como um aplicativo nativo, tanto no Android quanto no iOS. Funciona offline e recebe notificações push.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        Como funciona a garantia de 7 dias?
+        <span>+</span>
+      </button>
+      <div class="faq-answer">
+        Se por qualquer motivo você não ficar satisfeito nos primeiros 7 dias após a assinatura, basta entrar em contato e devolvemos 100% do valor pago, sem perguntas e sem burocracia.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        Qual a diferença entre o plano mensal e anual?
+        <span>+</span>
+      </button>
+      <div class="faq-answer">
+        Ambos os planos Pro têm exatamente as mesmas funcionalidades. A diferença é apenas no valor: o plano anual sai por R$ 97,90/ano (equivalente a R$ 8,16/mês), enquanto o mensal custa R$ 29,90/mês. No anual você economiza R$ 261,00 por ano.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-final">
+  <h2>Comece a controlar suas finanças hoje</h2>
+  <p>Junte-se a mais de 500 pessoas que já transformaram sua vida financeira com o LP Finanças.</p>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+    <a href="https://app.lpfinancass.com.br/register" class="btn btn-white btn-lg">🚀 Criar Conta Grátis</a>
+    <a href="#precos" class="btn btn-lg" style="background:rgba(255,255,255,0.15);color:white;border:2px solid rgba(255,255,255,0.4)">Ver Planos</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo" style="color:white">
+          <div class="logo-icon">💰</div>
+          LP Finanças
+        </div>
+        <p>O sistema completo para controle financeiro pessoal. Organize, analise e conquiste sua liberdade financeira.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Produto</h4>
+        <ul>
+          <li><a href="#funcionalidades">Funcionalidades</a></li>
+          <li><a href="#precos">Preços</a></li>
+          <li><a href="https://app.lpfinancass.com.br">Acessar App</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Suporte</h4>
+        <ul>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="mailto:contato@lpfinancass.com.br">Contato</a></li>
+          <li><a href="#">Política de Privacidade</a></li>
+          <li><a href="#">Termos de Uso</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 LP Finanças. Todos os direitos reservados.</span>
+      <span>Desenvolvido com ❤️ no Brasil</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function toggleFaq(btn) {
+    const answer = btn.nextElementSibling;
+    const icon = btn.querySelector('span');
+    const isOpen = answer.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
+    document.querySelectorAll('.faq-question span').forEach(s => s.textContent = '+');
+    // Open clicked if it was closed
+    if (!isOpen) {
+      answer.classList.add('open');
+      icon.textContent = '−';
+    }
+  }
+</script>
+</body>
+</html>

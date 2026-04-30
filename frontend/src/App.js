@@ -20,6 +20,7 @@ import { Recorrentes } from './pages/Recorrentes';
 import { Cartoes } from './pages/Cartoes';
 import { Goals } from './pages/Goals';
 import { ChatAssistant } from './pages/ChatAssistant';
+import { Assinatura } from './pages/Assinatura';
 
 // Component to setup global toast
 function ToastSetup() {
@@ -126,6 +127,7 @@ function AppRoutes() {
         <Route path="/assistente" element={<ChatAssistant />} />
         <Route path="/relatorios" element={<Relatorios />} />
         <Route path="/ajustes" element={<Ajustes />} />
+        <Route path="/assinatura" element={<Assinatura />} />
         <Route
           path="/admin"
           element={

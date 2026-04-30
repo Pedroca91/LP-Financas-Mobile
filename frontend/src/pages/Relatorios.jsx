@@ -4,7 +4,8 @@ import { MonthSelector } from '../components/layout/MonthSelector';
 import { formatCurrency, getMonthName } from '../lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { FileText, PieChart, BarChart3 } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { FileText, PieChart, BarChart3, Download, FileSpreadsheet } from 'lucide-react';
 import {
   BarChart,
   Bar,
@@ -19,13 +20,17 @@ import {
   Cell
 } from 'recharts';
 import axios from 'axios';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const COLORS = ['hsl(176, 61%, 40%)', 'hsl(24, 95%, 53%)', 'hsl(210, 40%, 60%)', 'hsl(145, 60%, 45%)', 'hsl(340, 75%, 55%)', 'hsl(45, 93%, 47%)', 'hsl(280, 65%, 60%)', 'hsl(200, 70%, 50%)'];
+const COLORS_HEX = ['#1a9e8f', '#f97316', '#6b9ac4', '#3cb371', '#e0456e', '#d4a017', '#9b59b6', '#3498db'];
 
 export function Relatorios() {
-  const { selectedMonth, selectedYear, summary } = useFinance();
+  const { selectedMonth, selectedYear, summary, incomes, expenses } = useFinance();
   const [incomeReport, setIncomeReport] = useState([]);
   const [expenseReport, setExpenseReport] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
@@ -75,6 +80,187 @@ export function Relatorios() {
     Realizado: r.realized
   }));
 
+  const mesAno = `${getMonthName(selectedMonth)} ${selectedYear}`;
+
+  // ==================== EXPORTAÇÃO PDF ====================
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Cabeçalho
+    doc.setFillColor(22, 163, 74); // verde
+    doc.rect(0, 0, pageWidth, 28, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('LP Finanças', 14, 12);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Relatório Financeiro — ${mesAno}`, 14, 22);
+
+    // Resumo Geral
+    doc.setTextColor(30, 30, 30);
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Resumo do Mês', 14, 40);
+
+    autoTable(doc, {
+      startY: 44,
+      head: [['Indicador', 'Valor']],
+      body: [
+        ['Total Receitas (Recebido)', formatCurrency(summary?.total_income || 0)],
+        ['Total Receitas (Pendente)', formatCurrency(summary?.total_income_pending || 0)],
+        ['Total Despesas (Pago)', formatCurrency(summary?.total_expense || 0)],
+        ['Total Despesas (Pendente)', formatCurrency(summary?.total_expense_pending || 0)],
+        ['Investimentos', formatCurrency(summary?.total_contributions || 0)],
+        ['Saldo do Mês', formatCurrency(summary?.balance || 0)],
+      ],
+      headStyles: { fillColor: [22, 163, 74], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [240, 253, 244] },
+      styles: { fontSize: 10 },
+      columnStyles: { 1: { halign: 'right', fontStyle: 'bold' } }
+    });
+
+    // Receitas por Categoria
+    const afterSummary = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Receitas por Categoria', 14, afterSummary);
+
+    const incomeRows = incomeReport
+      .filter(r => r.realized > 0 || r.planned > 0)
+      .map(r => [
+        r.category_name,
+        formatCurrency(r.planned),
+        formatCurrency(r.realized),
+        `${r.percentage.toFixed(0)}%`
+      ]);
+
+    autoTable(doc, {
+      startY: afterSummary + 4,
+      head: [['Categoria', 'Planejado', 'Realizado', '%']],
+      body: incomeRows.length > 0 ? incomeRows : [['Sem dados', '-', '-', '-']],
+      headStyles: { fillColor: [22, 163, 74], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [240, 253, 244] },
+      styles: { fontSize: 9 },
+      columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } }
+    });
+
+    // Despesas por Categoria
+    const afterIncome = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Despesas por Categoria', 14, afterIncome);
+
+    const expenseRows = expenseReport
+      .filter(r => r.realized > 0 || r.planned > 0)
+      .map(r => [
+        r.category_name,
+        formatCurrency(r.planned),
+        formatCurrency(r.realized),
+        `${r.percentage.toFixed(0)}%`
+      ]);
+
+    autoTable(doc, {
+      startY: afterIncome + 4,
+      head: [['Categoria', 'Planejado', 'Realizado', '%']],
+      body: expenseRows.length > 0 ? expenseRows : [['Sem dados', '-', '-', '-']],
+      headStyles: { fillColor: [239, 68, 68], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [254, 242, 242] },
+      styles: { fontSize: 9 },
+      columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } }
+    });
+
+    // Rodapé
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text(
+        `LP Finanças — Gerado em ${new Date().toLocaleDateString('pt-BR')} — Página ${i} de ${pageCount}`,
+        pageWidth / 2,
+        doc.internal.pageSize.getHeight() - 8,
+        { align: 'center' }
+      );
+    }
+
+    doc.save(`relatorio-lpfinancas-${selectedYear}-${String(selectedMonth).padStart(2, '0')}.pdf`);
+  };
+
+  // ==================== EXPORTAÇÃO EXCEL ====================
+  const exportExcel = () => {
+    const wb = XLSX.utils.book_new();
+
+    // Aba: Resumo
+    const resumoData = [
+      ['LP Finanças — Relatório Financeiro'],
+      [`Período: ${mesAno}`],
+      [],
+      ['Indicador', 'Valor'],
+      ['Total Receitas (Recebido)', summary?.total_income || 0],
+      ['Total Receitas (Pendente)', summary?.total_income_pending || 0],
+      ['Total Despesas (Pago)', summary?.total_expense || 0],
+      ['Total Despesas (Pendente)', summary?.total_expense_pending || 0],
+      ['Investimentos', summary?.total_contributions || 0],
+      ['Saldo do Mês', summary?.balance || 0],
+    ];
+    const wsResumo = XLSX.utils.aoa_to_sheet(resumoData);
+    wsResumo['!cols'] = [{ wch: 35 }, { wch: 18 }];
+    XLSX.utils.book_append_sheet(wb, wsResumo, 'Resumo');
+
+    // Aba: Receitas por Categoria
+    const incomeData = [
+      ['Categoria', 'Planejado (R$)', 'Realizado (R$)', '% Atingido'],
+      ...incomeReport.map(r => [r.category_name, r.planned, r.realized, `${r.percentage.toFixed(0)}%`])
+    ];
+    const wsIncome = XLSX.utils.aoa_to_sheet(incomeData);
+    wsIncome['!cols'] = [{ wch: 28 }, { wch: 16 }, { wch: 16 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(wb, wsIncome, 'Receitas por Categoria');
+
+    // Aba: Despesas por Categoria
+    const expenseData = [
+      ['Categoria', 'Planejado (R$)', 'Realizado (R$)', '% Atingido'],
+      ...expenseReport.map(r => [r.category_name, r.planned, r.realized, `${r.percentage.toFixed(0)}%`])
+    ];
+    const wsExpense = XLSX.utils.aoa_to_sheet(expenseData);
+    wsExpense['!cols'] = [{ wch: 28 }, { wch: 16 }, { wch: 16 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(wb, wsExpense, 'Despesas por Categoria');
+
+    // Aba: Lançamentos Receitas
+    const incomesData = [
+      ['Descrição', 'Categoria', 'Valor (R$)', 'Data', 'Status'],
+      ...incomes.map(i => [
+        i.description || '-',
+        i.category_name || i.category_id,
+        i.value,
+        i.date,
+        i.status === 'received' ? 'Recebido' : 'Pendente'
+      ])
+    ];
+    const wsIncomes = XLSX.utils.aoa_to_sheet(incomesData);
+    wsIncomes['!cols'] = [{ wch: 30 }, { wch: 22 }, { wch: 14 }, { wch: 12 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(wb, wsIncomes, 'Lançamentos Receitas');
+
+    // Aba: Lançamentos Despesas
+    const expensesData = [
+      ['Descrição', 'Categoria', 'Valor (R$)', 'Data', 'Pagamento', 'Status'],
+      ...expenses.map(e => [
+        e.description || '-',
+        e.category_name || e.category_id,
+        e.value,
+        e.date,
+        e.payment_method || '-',
+        e.status === 'paid' ? 'Pago' : 'Pendente'
+      ])
+    ];
+    const wsExpenses = XLSX.utils.aoa_to_sheet(expensesData);
+    wsExpenses['!cols'] = [{ wch: 30 }, { wch: 22 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(wb, wsExpenses, 'Lançamentos Despesas');
+
+    XLSX.writeFile(wb, `relatorio-lpfinancas-${selectedYear}-${String(selectedMonth).padStart(2, '0')}.xlsx`);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in" data-testid="relatorios-page">
       {/* Header */}
@@ -88,7 +274,27 @@ export function Relatorios() {
             Análise financeira de {getMonthName(selectedMonth)} de {selectedYear}
           </p>
         </div>
-        <MonthSelector />
+        <div className="flex items-center gap-3 flex-wrap">
+          <MonthSelector />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportPDF}
+            className="gap-2 border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+          >
+            <Download className="h-4 w-4" />
+            Exportar PDF
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportExcel}
+            className="gap-2 border-emerald-300 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            Exportar Excel
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
