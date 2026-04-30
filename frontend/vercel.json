@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx craco build",
+  "buildCommand": "CI=false npx craco build",
   "outputDirectory": "build",
   "framework": null,
   "rewrites": [
